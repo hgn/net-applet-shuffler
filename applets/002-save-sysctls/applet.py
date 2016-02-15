@@ -16,6 +16,9 @@ def main(x, conf, args):
     stdout, stderr, exit_code = x.ssh.exec(ip, user, "test -f /etc/sysctl.save")
     if exit_code != 0:
         x.p.msg("file already available, nothing to do here")
-        return
+		# return true because it is not failure
+        return True
     # there should be no failure here
     x.ssh.exec(ip, user, "sysctl -a > /etc/sysctl.save")
+    
+    return True
