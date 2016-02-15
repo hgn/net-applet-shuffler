@@ -5,17 +5,20 @@
 
 			"alpha": {
 				"description": "Data Sender (often local PC)",
-				"ip-address": "127.0.0.1"
+				"user":        "joe",
+				"ip-address":  "127.0.0.1"
 			},
 
 			"beta": {
 				"description": "Data Sink (often remote PC)",
-				"ip-address": "10.0.0.1"
+				"user":        "joe",
+				"ip-address":  "10.0.0.1"
 			},
 
 			"koppa": {
 				"description": "Middle box, running netem, etc",
-				"ip-address": "10.0.0.1"
+				"user":        "joe",
+				"ip-address":  "10.0.0.1"
 			}
 
 		}
