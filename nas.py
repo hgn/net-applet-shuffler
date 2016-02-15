@@ -71,6 +71,12 @@ class Exchange():
     def __init__(self):
         self.ssh = Ssh()
 
+    def ping(self, host):
+        response = os.system("ping -c 1 " + host)
+        if response == 0:
+            return True
+        return False
+
 
 class Executer():
 
@@ -124,7 +130,17 @@ class Executer():
     def run(self):
         xchange = Exchange()
         xchange.p = self.p
-        self.applet.main(xchange, self.conf, self.applet_args)
+		# the status is used later for campaigns:
+		# if the status is false the campaing must be
+		# stopped, if true everything is fine!
+        status = self.applet.main(xchange, self.conf, self.applet_args)
+        if status == True:
+            pass
+        elif status == False:
+            sys.exit(1)
+        else:
+            print("applet defect: MUST return True or False")
+
 
 
 class NetAppletShuffler:
