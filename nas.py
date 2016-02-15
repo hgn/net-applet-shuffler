@@ -1,3 +1,189 @@
-#!/usr/bin/python3
+#!/usr/bin/python
+#
+# Email: Hagen Paul Pfeifer <hagen@jauu.net>
 
 
+import sys
+import os
+import optparse
+import subprocess
+import pprint
+import re
+import ctypes
+import math
+import time
+import importlib.util
+
+
+pp = pprint.PrettyPrinter(indent=4)
+
+__programm__ = "net-applet-shuffler"
+__version__  = "1"
+
+
+class Printer:
+
+    def __init__(self, verbose=False):
+        self.verbose = verbose
+
+    def set_verbose(self):
+        self.verbose = True
+
+    def err(self, msg):
+        sys.stderr.write(msg)
+
+    def verbose(self, msg):
+        if not self.verbose:
+            return
+        sys.stderr.write(msg)
+
+    def msg(self, msg):
+        return sys.stdout.write(msg) - 1
+
+    def line(self, length, char='-'):
+        sys.stdout.write(char * length + "\n")
+
+    def msg_underline(self, msg, pre_news=0, post_news=0):
+        str_len = len(msg)
+        if pre_news:
+            self.msg("\n" * pre_news)
+        self.msg(msg)
+        self.msg("\n" + '=' * str_len)
+        if post_news:
+            self.msg("\n" * post_news)
+
+
+
+
+class Executer():
+
+    def __init__(self):
+        self.p = Printer()
+        self.parse_local_options()
+
+    def applet_path(self, name):
+        hp = os.path.dirname(os.path.realpath(__file__))
+        fp = os.path.join(hp, "applets", name)
+        if not os.path.exists(fp):
+            return None, False
+        ffp = os.path.join(fp, "applet.py")
+        return ffp, True
+
+
+    def parse_local_options(self):
+        parser = optparse.OptionParser()
+        parser.usage = "Executer"
+        parser.add_option( "-v", "--verbose", dest="verbose", default=False,
+                          action="store_true", help="show verbose")
+        self.opts, args = parser.parse_args(sys.argv[0:])
+
+        if len(args) < 3:
+            self.p.err("No <applet> argument given, exiting\n")
+            sys.exit(1)
+
+        if self.opts.verbose:
+            self.p.set_verbose()
+        self.applet_name = args[2]
+        self.applet_args = args[3:]
+        ffp, ok = self.applet_path(self.applet_name)
+        if not ok:
+            self.p.err("Applet ({}) not avaiable, call list\n".format(self.applet_name))
+            sys.exit(1)
+
+        spec = importlib.util.spec_from_file_location("applet", ffp)
+        self.applet = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.applet)
+
+    def run(self):
+        self.applet.main(None, None, self.applet_args)
+
+
+class NetAppletShuffler:
+
+    modes = {
+       "exec": [ "Executer",    "Execute applets" ],
+       "list": [ "Lister",      "List all applets" ]
+            }
+
+    def __init__(self):
+        pass
+
+
+    def which(self, program):
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            full_path = os.path.join(path, program)
+            if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+                return full_path
+        return None
+
+    def print_version(self):
+        sys.stdout.write("%s\n" % (__version__))
+
+    def print_usage(self):
+        sys.stderr.write("Usage: nas [-h | --help]" +
+                         " [--version]" +
+                         " <applet> [<applet-options>]\n")
+
+    def print_modules(self):
+        for i in NetAppletShuffler.modes.keys():
+            sys.stderr.write("   %-15s - %s\n" % (i, NetAppletShuffler.modes[i][1]))
+
+    def args_contains(self, argv, *cmds):
+        for cmd in cmds:
+            for arg in argv:
+                if arg == cmd: return True
+        return False
+
+    def parse_global_otions(self):
+        if len(sys.argv) <= 2:
+            self.print_usage()
+            sys.stderr.write("Available applets:\n")
+            self.print_modules()
+            return None
+
+        self.binary_path = sys.argv[-1]
+
+        # --version can be placed somewhere in the
+        # command line and will evalutated always: it is
+        # a global option
+        if self.args_contains(sys.argv, "--version"):
+            self.print_version()
+            return None
+
+        # -h | --help as first argument is treated special
+        # and has other meaning as a submodule
+        if self.args_contains(sys.argv[1:2], "-h", "--help"):
+            self.print_usage()
+            sys.stderr.write("Available modules:\n")
+            self.print_modules()
+            return None
+
+        submodule = sys.argv[1].lower()
+        if submodule not in NetAppletShuffler.modes:
+            self.print_usage()
+            sys.stderr.write("Modules \"%s\" not known, available modules are:\n" %
+                             (submodule))
+            self.print_modules()
+            return None
+
+        classname = NetAppletShuffler.modes[submodule][0]
+        return classname
+
+
+    def run(self):
+        classtring = self.parse_global_otions()
+        if not classtring:
+            return 1
+
+        classinstance = globals()[classtring]()
+        classinstance.run()
+        return 0
+
+
+if __name__ == "__main__":
+    try:
+        mca = NetAppletShuffler()
+        sys.exit(mca.run())
+    except KeyboardInterrupt:
+        sys.stderr.write("SIGINT received, exiting\n")
