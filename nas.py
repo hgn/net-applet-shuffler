@@ -54,6 +54,7 @@ class Printer:
             self.msg("\n" * post_news)
 
 
+class Exchange(): pass
 
 
 class Executer():
@@ -106,7 +107,9 @@ class Executer():
         spec.loader.exec_module(self.applet)
 
     def run(self):
-        self.applet.main(None, self.conf, self.applet_args)
+        xchange = Exchange()
+        xchange.p = self.p
+        self.applet.main(xchange, self.conf, self.applet_args)
 
 
 class NetAppletShuffler:
