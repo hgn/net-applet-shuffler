@@ -1,13 +1,22 @@
+{
 
 
-	alpha: {
-		ip-address: 10.0.0.1
-	}
+"boxes": {
 
-	beta: {
-		ip-address: 10.0.0.1
-	}
+			"alpha": {
+				"description": "Data Sender (often local PC)",
+				"ip-address": "127.0.0.1"
+			},
 
-	koppa: {
-		ip-address: 10.0.0.1
-	}
+			"beta": {
+				"description": "Data Sink (often remote PC)",
+				"ip-address": "10.0.0.1"
+			},
+
+			"koppa": {
+				"description": "Middle box, running netem, etc",
+				"ip-address": "10.0.0.1"
+			}
+
+		}
+}

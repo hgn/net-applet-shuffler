@@ -13,6 +13,7 @@ import ctypes
 import math
 import time
 import importlib.util
+import json
 
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -60,6 +61,8 @@ class Executer():
     def __init__(self):
         self.p = Printer()
         self.parse_local_options()
+        self.import_applet_module()
+        self.load_conf()
 
     def applet_path(self, name):
         hp = os.path.dirname(os.path.realpath(__file__))
@@ -69,6 +72,12 @@ class Executer():
         ffp = os.path.join(fp, "applet.py")
         return ffp, True
 
+    def load_conf(self):
+        hp = os.path.dirname(os.path.realpath(__file__))
+        fp = os.path.join(hp, "conf.json")
+        with open(fp, 'r') as fd:
+            data = fd.read()
+            self.conf = json.loads(data)
 
     def parse_local_options(self):
         parser = optparse.OptionParser()
@@ -85,6 +94,8 @@ class Executer():
             self.p.set_verbose()
         self.applet_name = args[2]
         self.applet_args = args[3:]
+
+    def import_applet_module(self):
         ffp, ok = self.applet_path(self.applet_name)
         if not ok:
             self.p.err("Applet ({}) not avaiable, call list\n".format(self.applet_name))
@@ -95,7 +106,7 @@ class Executer():
         spec.loader.exec_module(self.applet)
 
     def run(self):
-        self.applet.main(None, None, self.applet_args)
+        self.applet.main(None, self.conf, self.applet_args)
 
 
 class NetAppletShuffler:
