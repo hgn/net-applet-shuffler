@@ -1,0 +1,13 @@
+
+
+	alpha: {
+		ip-address: 10.0.0.1
+	}
+
+	beta: {
+		ip-address: 10.0.0.1
+	}
+
+	koppa: {
+		ip-address: 10.0.0.1
+	}
