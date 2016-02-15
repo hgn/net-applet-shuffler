@@ -14,6 +14,7 @@ import math
 import time
 import importlib.util
 import json
+import subprocess
 
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -53,8 +54,22 @@ class Printer:
         if post_news:
             self.msg("\n" * post_news)
 
+class Ssh():
 
-class Exchange(): pass
+    def __init__(self):
+        pass
+
+    def exec(self, ip, user, cmd):
+        full = "ssh {}@{} sudo {}".format(user, ip, cmd)
+        p = subprocess.Popen(full.split(), stdout=subprocess.PIPE)
+        stderr, stdout = p.communicate()
+        return stdout, stderr, p.returncode
+
+
+class Exchange():
+
+    def __init__(self):
+        self.ssh = Ssh()
 
 
 class Executer():

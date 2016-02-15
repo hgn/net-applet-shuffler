@@ -10,10 +10,12 @@ def main(x, conf, args):
     x.p.msg("use restore to restore values")
 
     ip = conf['boxes'][hostname]['ip-address']
+    user = conf['boxes'][hostname]['user']
     # check if file exist already, if we break here
     # x.ssh.exec execute at ip with sudo
-    #exit_code = x.ssh.exec(ip, "test -f /etc/sysctl.save")
+    stdout, stderr, exit_code = x.ssh.exec(ip, user, "test -f /etc/sysctl.save")
     if exit_code != 0:
         x.p.msg("file already available, nothing to do here")
         return
-    #x.ssh.exec(ip, "sysctl -a > /etc/sysctl.save")
+    # there should be no failure here
+    x.ssh.exec(ip, user, "sysctl -a > /etc/sysctl.save")
