@@ -72,13 +72,14 @@ class Exchange():
         self.ssh = Ssh()
 
     def ping(self, host):
-        response = os.system("ping -c 1 " + host)
+        cmd = "ping -c 1 {} 1>/dev/null 2>&1 ".format(host)
+        response = os.system(cmd)
         if response == 0:
             return True
         return False
 
 
-class Executer():
+class AppletExecuter():
 
     def __init__(self):
         self.p = Printer()
@@ -142,12 +143,30 @@ class Executer():
             print("applet defect: MUST return True or False")
 
 
+class AppletLister():
+
+    def __init__(self):
+        self.p = Printer()
+
+    def subdirs(self, d):
+        return [name for name in os.listdir(d) if os.path.isdir(os.path.join(d, name))]
+
+    def run(self):
+        hp = os.path.dirname(os.path.realpath(__file__))
+        fp = os.path.join(hp, "applets")
+        dirs = self.subdirs(fp)
+        sys.stdout.write("Available applets:\n")
+        for d in dirs:
+            sys.stdout.write("  {}\n".format(d))
+
 
 class NetAppletShuffler:
 
     modes = {
-       "exec": [ "Executer",    "Execute applets" ],
-       "list": [ "Lister",      "List all applets" ]
+       "exec-applet":    [ "AppletExecuter",   "Execute applets" ],
+       "list-applets":   [ "AppletLister",     "List all applets" ],
+       "exec-campaign":  [ "CampaignExecuter", "Execute campaign" ],
+       "list-campaogns": [ "CampaignLister",   "List all campaigns" ]
             }
 
     def __init__(self):
@@ -181,7 +200,7 @@ class NetAppletShuffler:
         return False
 
     def parse_global_otions(self):
-        if len(sys.argv) <= 2:
+        if len(sys.argv) <= 1:
             self.print_usage()
             sys.stderr.write("Available applets:\n")
             self.print_modules()
