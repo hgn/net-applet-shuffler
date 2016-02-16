@@ -141,6 +141,7 @@ class AppletExecuter():
             sys.exit(1)
         else:
             print("applet defect: MUST return True or False")
+            sys.exit(1)
 
 
 class AppletLister():
@@ -171,7 +172,6 @@ class NetAppletShuffler:
 
     def __init__(self):
         pass
-
 
     def which(self, program):
         for path in os.environ["PATH"].split(os.pathsep):
