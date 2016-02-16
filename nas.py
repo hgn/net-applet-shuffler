@@ -161,6 +161,55 @@ class AppletLister():
             sys.stdout.write("  {}\n".format(d))
 
 
+class CampaignExecuter():
+
+    def __init__(self):
+        self.p = Printer()
+        self.parse_local_options()
+
+    def campaign_path(self, name):
+        hp = os.path.dirname(os.path.realpath(__file__))
+        fp = os.path.join(hp, "campaign", name)
+        if not os.path.exists(fp):
+            return None, False
+        ffp = os.path.join(fp, "run.cmd")
+        return ffp, True
+
+
+    def parse_local_options(self):
+        parser = optparse.OptionParser()
+        parser.usage = "Executer"
+        parser.add_option( "-v", "--verbose", dest="verbose", default=False,
+                          action="store_true", help="show verbose")
+        self.opts, args = parser.parse_args(sys.argv[0:])
+
+        if len(args) < 3:
+            self.p.err("No <campaign> argument given, exiting\n")
+            sys.exit(1)
+
+        if self.opts.verbose:
+            self.p.set_verbose()
+        self.campaign_name = args[2]
+
+    def check_campaign(self):
+        """
+        parse every line, ignore comment lines (starting with #)
+        and call AppletExecuter.validate_path() for each exec applet
+        to verify that the applet is at least available.
+        Note that only lines with prefix "exec" must be validated
+        """
+        pass
+
+    def execute_campaign(self):
+        pass
+
+    def run(self):
+        ok = self.check_campaign()
+        if not ok:
+            sys.exit(1)
+        self.execute_campaign()
+
+
 class NetAppletShuffler:
 
     modes = {
