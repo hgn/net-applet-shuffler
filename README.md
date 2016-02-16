@@ -46,4 +46,5 @@ Restore sysctls at PC beta:
 
 # ToDo #
 
-* Ethernet Offloading
+* Ethernet Offloading on/off applet
+* The configuration must be splitted into all interfaces per node (middlebox has two interfaces)
