@@ -8,7 +8,7 @@
 ## Required Software ##
 
 ```
-sudo apt-get install foobar
+sudo apt-get install python3 foobar
 ```
 
 # System Setup #
