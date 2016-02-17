@@ -15,6 +15,20 @@ exec 003-restore-sysctls alpha
 exec 003-restore-sysctls beta
 exec 003-restore-sysctls koppa
 
+# set default /proc/sys/net/* variables just to
+# make sure we have the constant set of knobs
+exec xxx-set-default-net-proc-knobs alpha
+exec xxx-set-default-net-proc-knobs beta
+exec xxx-set-default-net-proc-knobs koppa
+
+# set some specific sysctl values for sender and receiver
+exec xxx-sysctl alpha set net.ipv4.tcp_no_metrics_save:1
+exec xxx-sysctl koppa set net.ipv4.tcp_no_metrics_save:1
+
+# disable offloading capabilities for sender and receiver
+exec xxx-ethtool alpha "-K tso off gso off gro off sg off"
+exec xxx-ethtool beta "-K tso off gso off gro off sg off"
+
 # start netperf as receiver at TCP port
 # 8000 and background process. This applet
 # probably copy a local python helper program
