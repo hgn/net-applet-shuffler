@@ -44,6 +44,12 @@ Restore sysctls at PC beta:
 ./nas.py exec 003-save-sysctls beta
 ```
 
+Set rate to 1000 byte/sec at koppa towards alpha (left interface):
+
+```
+./nas.py exec 005-netem koppa interface:left rate:1000byte
+```
+
 # ToDo #
 
 * Ethernet Offloading on/off applet
