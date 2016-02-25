@@ -6,22 +6,36 @@
 			"alpha": {
 				"description": "Data Sender (often local PC)",
 				"user":        "joe",
-				"ip-address":  "127.0.0.1",
-				"interface":   "eth0"
+				"interfaces": [
+				   {
+						 "name": "eth0",
+						 "ip-address": "10.0.0.1",
+					 }
 			},
 
 			"beta": {
 				"description": "Data Sink (often remote PC)",
 				"user":        "joe",
-				"ip-address":  "10.0.0.1",
-				"interface":   "eth0"
+				"interfaces": [
+				   {
+						 "name": "eth0",
+						 "ip-address": "10.0.0.1",
+					 }
 			},
 
 			"koppa": {
 				"description": "Middle box, running netem, etc",
 				"user":        "joe",
-				"ip-address":  "10.0.0.1",
-				"interface":   "eth0"
+				"interfaces": [
+				   {
+						 "name": "left",
+						 "ip-address": "10.0.0.1",
+					 },
+					 {
+						 "name": "right",
+						 "ip-address": "10.0.1.1",
+					 }
+				]
 			}
 
 		}
