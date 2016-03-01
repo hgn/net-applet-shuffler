@@ -13,12 +13,12 @@ def main(x, conf, args):
     user = conf['boxes'][hostname]['user']
     # check if file exist already, if we break here
     # x.ssh.exec execute at ip with sudo
-    stdout, stderr, exit_code = x.ssh.exec(ip, user, "test -f /etc/sysctl.save")
+    stdout, stderr, exit_code = x.ssh.execute(ip, user, "test -f /etc/sysctl.save")
     if exit_code != 0:
         x.p.msg("file already available, nothing to do here")
 		# return true because it is not failure
         return True
     # there should be no failure here
-    x.ssh.exec(ip, user, "sysctl -a > /etc/sysctl.save")
+    x.ssh.execute(ip, user, "sysctl -a > /etc/sysctl.save")
     
     return True

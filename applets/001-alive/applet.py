@@ -3,8 +3,8 @@ import sys
 
 def main(x, conf, args):
     if not len(args) > 0:
-        x.p.msg("no hostname argument given, like alpha\n")
-        sys.exit(1)
+        x.p.msg("no hostname argument given, like \"alpha\" (can be looked up in conf.json)\n")
+        return False
 
     hostname = args[0]
     ip = conf['boxes'][hostname]['ip-address']
