@@ -59,7 +59,7 @@ class Ssh():
     def __init__(self):
         pass
 
-    def exec(self, ip, user, cmd):
+    def execute(self, ip, user, cmd):
         full = "ssh {}@{} sudo {}".format(user, ip, cmd)
         p = subprocess.Popen(full.split(), stdout=subprocess.PIPE)
         stderr, stdout = p.communicate()
