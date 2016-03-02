@@ -59,7 +59,7 @@ class Ssh():
     def __init__(self):
         pass
 
-    def execute(self, ip, user, cmd):
+    def exec(self, ip, user, cmd):
         full = "ssh {}@{} sudo {}".format(user, ip, cmd)
         p = subprocess.Popen(full.split(), stdout=subprocess.PIPE)
         stderr, stdout = p.communicate()
@@ -172,7 +172,7 @@ class CampaignExecuter():
         fp = os.path.join(hp, "campaign", name)
         if not os.path.exists(fp):
             return None, False
-        ffp = os.path.join(fp, "run.cmd")
+        ffp = os.path.join(fp, "test.cmd")
         return ffp, True
 
 
