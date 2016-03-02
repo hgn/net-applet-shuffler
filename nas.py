@@ -172,7 +172,7 @@ class CampaignExecuter():
         fp = os.path.join(hp, "campaign", name)
         if not os.path.exists(fp):
             return None, False
-        ffp = os.path.join(fp, "test.cmd")
+        ffp = os.path.join(fp, "run.cmd")
         return ffp, True
 
 
