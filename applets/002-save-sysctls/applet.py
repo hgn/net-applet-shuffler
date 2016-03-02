@@ -9,7 +9,7 @@ def main(x, conf, args):
     x.p.msg("save sysctl to /etc/sysctl.save at host {}\n".format(hostname))
     x.p.msg("use restore to restore values")
 
-    ip = conf['boxes'][hostname]['ip-address']
+    ip = conf['boxes'][hostname]["interfaces"][0]['ip-address']
     user = conf['boxes'][hostname]['user']
     # check if file exist already, if we break here
     # x.ssh.exec execute at ip with sudo
