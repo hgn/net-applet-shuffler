@@ -47,24 +47,24 @@ Note: These changes will be lost on a restart.
 
 ```
 alpha:
-[sudo] ifconfig enp4s0 down
+[sudo] ip link set dev enp4s0 down
 [sudo] ip a add 10.0.0.1/16 dev enp4s0
 [sudo] ip r add default via 10.0.0.205
-[sudo] ifconfig enp4s0 up
+[sudo] ip link set dev enp4s0 up
 
 beta:
-[sudo] ifconfig eth0 down
+[sudo] ip link set dev eth0 down
 [sudo] ip a add 10.0.1.1/16 dev eth0
 [sudo] ip r add default via 10.0.1.205
-[sudo] ifconfig eth0 up
+[sudo] ip link set dev eth0 down
 
 koppa:
-[sudo] ifconfig left down
-[sudo] ifconfig right down
+[sudo] ip link set dev left down
+[sudo] ip link set dev right down
 [sudo] ip a add 10.0.0.205/16 dev left
 [sudo] ip a add 10.0.1.205/16 dev right
-[sudo] ifconfig left up
-[sudo] ifconfig right up
+[sudo] ip link set dev left up
+[sudo] ip link set dev right up
 [sudo] echo 1 > /proc/sys/net/ipv4/ip_forward
 
 ```
