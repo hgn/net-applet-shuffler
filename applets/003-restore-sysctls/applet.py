@@ -18,6 +18,6 @@ def main(x, conf, args):
 		# return true because it is not failure
         return False
     # there should be no failure here
-    x.ssh.execute(ip, user, "sysctl -p/etc/sysctl.save")
+    x.ssh.execute(ip, user, "sysctl -p/tmp/sysctl.save")
 
     return True
