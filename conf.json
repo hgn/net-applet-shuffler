@@ -9,8 +9,9 @@
 				"interfaces": [
 				   {
 						 "name": "eth0",
-						 "ip-address": "10.0.0.1",
-					 }
+						 "ip-address": "10.0.0.1"
+				}
+				]
 			},
 
 			"beta": {
@@ -19,8 +20,9 @@
 				"interfaces": [
 				   {
 						 "name": "eth0",
-						 "ip-address": "10.0.0.1",
+						 "ip-address": "10.0.1.1"
 					 }
+				]
 			},
 
 			"koppa": {
@@ -29,13 +31,13 @@
 				"interfaces": [
 				   {
 						 "name": "left",
-						 "ip-address": "10.0.0.1",
+						 "ip-address": "10.0.0.205"
 					 },
 					 {
 						 "name": "right",
-						 "ip-address": "10.0.1.1",
+						 "ip-address": "10.0.1.205"
 					 }
-				]
+					]
 			}
 
 		}
