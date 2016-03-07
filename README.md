@@ -9,6 +9,7 @@
 
 ```
 sudo apt-get install python3 foobar
+sudo apt-get install netperf
 ```
 
 # System Setup #
