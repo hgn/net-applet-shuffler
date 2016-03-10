@@ -63,7 +63,7 @@ class Ssh():
         full = "ssh {}@{} sudo {}".format(user, ip, cmd)
         p = subprocess.Popen(full.split(), stdout=subprocess.PIPE)
         stdout, stderr = p.communicate()
-        return stdout, stderr, p.returncode, p.pid
+        return stdout, stderr, p.returncode
 
 
 class Exchange():
