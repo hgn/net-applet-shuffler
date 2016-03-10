@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # Email: Hagen Paul Pfeifer <hagen@jauu.net>
 
@@ -81,10 +81,11 @@ class Exchange():
 
 class AppletExecuter():
 
-    def __init__(self):
+    def __init__(self, external_controlled=False):
+        self.applet_name = False
         self.p = Printer()
-        self.parse_local_options()
-        self.import_applet_module()
+        if not external_controlled:
+            self.parse_local_options()
         self.load_conf()
 
     def applet_path(self, name):
@@ -118,6 +119,10 @@ class AppletExecuter():
         self.applet_name = args[2]
         self.applet_args = args[3:]
 
+    def set_applet_data(self, applet_name, applet_args):
+        self.applet_name = applet_name
+        self.applet_args = applet_args
+
     def import_applet_module(self):
         ffp, ok = self.applet_path(self.applet_name)
         if not ok:
@@ -129,19 +134,25 @@ class AppletExecuter():
         spec.loader.exec_module(self.applet)
 
     def run(self):
+        if not self.applet_name:
+            print("You want to execute an applet but I don't know what applet!")
+            print("This is an internal error, see self.external_controlled")
+            return False
+        self.import_applet_module()
         xchange = Exchange()
         xchange.p = self.p
 		# the status is used later for campaigns:
 		# if the status is false the campaing must be
 		# stopped, if true everything is fine!
+        print("  execute applet \"{} [{}]\"".format(self.applet_name, self.applet_args))
         status = self.applet.main(xchange, self.conf, self.applet_args)
         if status == True:
-            pass
+            return True
         elif status == False:
-            sys.exit(1)
+            return False
         else:
-            print("applet defect: MUST return True or False")
-            sys.exit(1)
+            print("Applet defect: MUST return True or False")
+            return False
 
 
 class AppletLister():
@@ -163,18 +174,21 @@ class AppletLister():
 
 class CampaignExecuter():
 
+    OPCODE_CMD_EXEC = 1
+    OPCODE_CMD_SLEEP = 2
+
     def __init__(self):
         self.p = Printer()
         self.parse_local_options()
 
     def campaign_path(self, name):
         hp = os.path.dirname(os.path.realpath(__file__))
-        fp = os.path.join(hp, "campaign", name)
+        fp = os.path.join(hp, "campaigns", name)
         if not os.path.exists(fp):
+            print("Campaign path \"{}\" do not exist".format(fp))
             return None, False
         ffp = os.path.join(fp, "run.cmd")
         return ffp, True
-
 
     def parse_local_options(self):
         parser = optparse.OptionParser()
@@ -191,23 +205,88 @@ class CampaignExecuter():
             self.p.set_verbose()
         self.campaign_name = args[2]
 
-    def check_campaign(self):
-        """
-        parse every line, ignore comment lines (starting with #)
-        and call AppletExecuter.validate_path() for each exec applet
-        to verify that the applet is at least available.
-        Note that only lines with prefix "exec" must be validated
-        """
-        pass
+    def execute_applet(self, applet_name, applet_args):
+        app_executer = AppletExecuter(external_controlled=True)
+        app_executer.set_applet_data(applet_name, applet_args)
+        return app_executer.run()
 
-    def execute_campaign(self):
-        pass
+    def read_campaign_file(self, path):
+        data = list()
+        with open(path, "rt") as fd:
+            while True:
+                line = fd.readline()
+                if not line:
+                    break
+                line = line.strip()
+                if not line:
+                    # ignore lines with only withspaces
+                    continue
+                if line.startswith("#"):
+                    # ignore comment lines
+                    continue
+                data.append(line)
+        return data
+
+    def transform_exec_statement(self, chunks, ret):
+        d = dict()
+        if not len(chunks) > 0:
+            # need a second value
+            return
+        d['cmd'] = CampaignExecuter.OPCODE_CMD_EXEC
+        d['name'] = chunks[0]
+        d['args'] = chunks[1:]
+        ret.append(d)
+
+    def transform_sleep_statement(self, chunks, ret):
+        d = dict()
+        if not len(chunks) > 0:
+            # need a second value
+            return
+        d['cmd'] = CampaignExecuter.OPCODE_CMD_SLEEP
+        d['time'] = chunks[0]
+        ret.append(d)
+
+    def transform(self, content):
+        data = list()
+        for c in content:
+            chunks = c.split()
+            if len(chunks) < 1:
+                print("Command ({}) not known, only exec and sleep allowed".format(c))
+                return None, False
+            if chunks[0] == "exec":
+                self.transform_exec_statement(chunks[1:], data)
+            elif chunks[0] == "sleep":
+                self.transform_sleep_statement(chunks[1:], data)
+            else:
+                print("Command \"{}\" not known, only exec and sleep allowed".format(chunks[0]))
+                return None, False
+        return data, True
+
+    def execute_campaign(self, data):
+        for d in data:
+            ret = True
+            if d['cmd'] == CampaignExecuter.OPCODE_CMD_EXEC:
+                ret = self.execute_applet(d['name'], d['args'])
+            if d['cmd'] == CampaignExecuter.OPCODE_CMD_SLEEP:
+                time.sleep(d['time'])
+            if ret == False:
+                print("Applet returned negative return code, stop campaign now")
+                return
+
+    def parse_campaign(self):
+        path, ok = self.campaign_path(self.campaign_name)
+        if not ok:
+            print("Campaign \"{}\" not valid".format(self.campaign_name))
+            return None, False
+        file_data = self.read_campaign_file(path)
+        return self.transform(file_data)
 
     def run(self):
-        ok = self.check_campaign()
+        data, ok = self.parse_campaign()
         if not ok:
             sys.exit(1)
-        self.execute_campaign()
+        print("Execute Campaign \"{}\"".format(self.campaign_name))
+        self.execute_campaign(data)
 
 
 class NetAppletShuffler:
@@ -216,7 +295,7 @@ class NetAppletShuffler:
        "exec-applet":    [ "AppletExecuter",   "Execute applets" ],
        "list-applets":   [ "AppletLister",     "List all applets" ],
        "exec-campaign":  [ "CampaignExecuter", "Execute campaign" ],
-       "list-campaogns": [ "CampaignLister",   "List all campaigns" ]
+       "list-campaigns": [ "CampaignLister",   "List all campaigns" ]
             }
 
     def __init__(self):
@@ -290,7 +369,9 @@ class NetAppletShuffler:
             return 1
 
         classinstance = globals()[classtring]()
-        classinstance.run()
+        ok = classinstance.run()
+        if not ok:
+            return 1
         return 0
 
 
