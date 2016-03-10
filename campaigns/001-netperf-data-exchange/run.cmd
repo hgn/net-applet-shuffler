@@ -20,7 +20,9 @@ exec 003-restore-sysctls koppa
 # probably copy a local python helper program
 # to node beta.
 # xxx- prefixed applets are not implemented yet
-exec xxx-netperf beta [sink] mode:background port:8000
+# xxx-netperf source dest mode:[options] sport:[port] dport:[port]
+length:[seconds|bytes] netserver:[port]
+exec xxx-netperf beta [sink] mode:background port:8000 length:10
 
 # ok, if the previous process returns the data is transmitted
 
