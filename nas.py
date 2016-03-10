@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # Email: Hagen Paul Pfeifer <hagen@jauu.net>
 
