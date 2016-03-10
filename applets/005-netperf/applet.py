@@ -6,7 +6,7 @@ def netserver_start(x, host_name, host_ip, host_user, netserver_port):
     netserver_pid = "0"
     # netperf needs a netserver at target listening on a specific port (
     # control port)
-    stdout, stderr, exit_code, pid = x.ssh.exec(host_ip, host_user,
+    stdout, stderr, exit_code = x.ssh.exec(host_ip, host_user,
             "netserver -4 -p {}".format(netserver_port))
     # in case of error, there is a netserver possibly already running
     if exit_code != 0:
@@ -48,7 +48,7 @@ def main(x, conf, args):
             arg_d["port_dest"], arg_d["applet_mode"], arg_d["test_length"],
             arg_d["name_dest"], arg_d["netserver_port"]))
 
-    # retrieve: host ip, host user name, target ip
+    # retrieve: host ip, host user name, destination ip, destination user name
     ip_source = conf['boxes'][arg_d["name_source"]]["interfaces"][0]['ip-address']
     user_source = conf['boxes'][arg_d["name_source"]]['user']
     ip_dest = conf['boxes'][arg_d["name_dest"]]["interfaces"][0]['ip-address']
@@ -84,7 +84,9 @@ def main(x, conf, args):
         return False
 
     # end netserver
+    # try graceful end
     x.ssh.exec(ip_dest, user_dest, "kill -2 {}".format(netserver_pid))
+    # resort to kill
     x.ssh.exec(ip_dest, user_dest, "kill {}".format(netserver_pid))
     x.ssh.exec(ip_dest, user_dest, "rm /tmp/netserver_{}_{}".format(arg_d[
                 "name_dest"], netserver_pid))
