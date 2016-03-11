@@ -24,15 +24,12 @@ exec 003-restore-sysctls koppa
 
 
 #tcpdump
-exec xxx-capture-pcap beta mode:background ofile="stream1.pcap" filter="port
-8000"
-exec xxx-capture-pcap beta mode:background ofile="stream2.pcap" filter="port
-8001"
+exec 006-tcpdump alpha id:0001 mode:start ofile="stream1.pcap" filter="tcp and dst port 20000"
 
-exec xxx-capture-pcap beta mode:background id=1 filter=port 80
-exec xxx-capture-pcap beta mode:background id=2 filter=port 81
+exec xxx-capture-pcap beta mode:background id:1 filter=port 80
+exec xxx-capture-pcap beta mode:background id:2 filter=port 81
 [...]
-exec xxx-capture-pcap beta stop id=2
+exec xxx-capture-pcap beta stop id:2
 
 
 
@@ -44,14 +41,14 @@ exec xxx-capture-pcap beta fetch ofile="stream2.pcap"
 # start netperf server on destination:netserver_port, connect with source, send
 # [length] (-#bytes) tcp traffic from source:port to destination:port
 # Usage
-# xxx-netperf source dest mode:[options] sport:[port] dport:[port]
+# xxx-netperf source dest id:[id] sport:[port] dport:[port]
 # length:[seconds|bytes] netserver:[port]
-exec 005-netperf alpha beta mode:idontcareyet sport:18000 dport:18001
-length:-1000000 netserver:16666
+exec 005-netperf alpha beta id:0002 sport:19999 dport:20000 length:-1000000 netserver:16666
 
 
 # ok, if the previous process returns the data is transmitted
 
+exec 006-tcpdump alpha id:0001 mode:stop ofile="stream1.pcap" filter="tcp and dst port 20000"
 
 # now read the data at the sink. This command will
 # simple return the data writen with the previous backgrounded
