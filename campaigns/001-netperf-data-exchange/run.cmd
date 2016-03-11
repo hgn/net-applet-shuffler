@@ -1,15 +1,18 @@
 
-# check if all required nodes are
-# up, if at least one fails test will stop
+# xxx- prefixed applets are not implemented yet
+
+
+# check if all required nodes are up, if at least one fails test will stop
 exec 001-alive alpha
 exec 001-alive beta
 exec 001-alive koppa
 
+
 # clean tmp data as well
 # /tmp/net-applet-shuffler/*
-exec 002-kill beta netperf-server tcpdump netperf
-exec 002-kill beta netperf-server tcpdump netperf
-exec 002-kill beta netperf-server tcpdump netperf
+exec 007-kill host:alpha
+exec 007-kill host:beta
+
 
 # save syscall, no-op when already done
 exec 003-save-sysctls alpha
@@ -24,34 +27,23 @@ exec 003-restore-sysctls koppa
 
 
 #tcpdump
-exec xxx-capture-pcap beta mode:background ofile="stream1.pcap" filter="port
-8000"
-exec xxx-capture-pcap beta mode:background ofile="stream2.pcap" filter="port
-8001"
-
-exec xxx-capture-pcap beta mode:background id=1 filter=port 80
-exec xxx-capture-pcap beta mode:background id=2 filter=port 81
-[...]
-exec xxx-capture-pcap beta stop id=2
-
+exec 006-tcpdump host:alpha id:0001 mode:start ofile="stream1.pcap" filter="tcp and dst port 20000"
 
 
 exec xxx-capture-pcap beta fetch ofile="stream2.pcap"
 
 
-# xxx- prefixed applets are not implemented yet
-#
 # start netperf server on destination:netserver_port, connect with source, send
 # [length] (-#bytes) tcp traffic from source:port to destination:port
 # Usage
-# xxx-netperf source dest mode:[options] sport:[port] dport:[port]
+# xxx-netperf source:[name] dest:[name] id:[id] sport:[port] dport:[port]
 # length:[seconds|bytes] netserver:[port]
-exec 005-netperf alpha beta mode:idontcareyet sport:18000 dport:18001
-length:-1000000 netserver:16666
+exec 005-netperf source:alpha dest:beta id:0002 sport:19999 dport:20000 length:-1000000 netserver:16666
 
 
 # ok, if the previous process returns the data is transmitted
 
+exec 006-tcpdump host:alpha id:0001 mode:stop ofile="stream1.pcap" filter="tcp and dst port 20000"
 
 # now read the data at the sink. This command will
 # simple return the data writen with the previous backgrounded
