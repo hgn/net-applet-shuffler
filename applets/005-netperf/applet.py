@@ -30,14 +30,14 @@ def netserver_start(x, host_name, host_ip, host_user, netserver_port):
 def main(x, conf, args):
 
     if not len(args) == 7:
-        x.p.msg("wrong usage. use: source dest id:[id] sport:[port] "
-                "dport:[port] length:[bytes|seconds] netserver:[port]\n")
+        x.p.msg("wrong usage. use: source:[name] dest:[name] id:[id] sport:["
+                "port] dport:[port] length:[bytes|seconds] netserver:[port]\n")
         return False
 
     # arguments dictionary
     arg_d = {}
-    arg_d["name_source"] = args[0]
-    arg_d["name_dest"] = args[1]
+    arg_d["name_source"] = args[0].split(":")[1]
+    arg_d["name_dest"] = args[1].split(":")[1]
     arg_d["applet_id"] = args[2].split(":")[1]
     arg_d["port_source"] = args[3].split(":")[1]
     arg_d["port_dest"] = args[4].split(":")[1]

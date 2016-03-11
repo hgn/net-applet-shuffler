@@ -2,13 +2,13 @@
 def main(x, conf, args):
 
     if not len(args) == 5:
-        x.p.msg("wrong usage. use: host id:[number] mode:[start|stop] ofile=\"["
-                "filename]\" filter=\"[filter]\"\n")
+        x.p.msg("wrong usage. use: host:[name] id:[number] mode:[start|stop] "
+                "ofile=\"[filename]\" filter=\"[filter]\"\n")
         return False
 
     # arguments dictionary
     arg_d = {}
-    arg_d["host_name"] = args[0]
+    arg_d["host_name"] = args[0].split(":")[1]
     arg_d["applet_id"] = args[1].split(":")[1]
     arg_d["applet_mode"] = args[2].split(":")[1]
     arg_d["output_file"] = args[3].split("\"")[1]
