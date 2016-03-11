@@ -43,7 +43,7 @@ def main(x, conf, args):
     arg_d["port_dest"] = args[4].split(":")[1]
     arg_d["test_length"] = args[5].split(":")[1]
     arg_d["netserver_port"] = args[6].split(":")[1]
-    x.p.msg("netperf: starting host {}:{} with target {}:{} with "
+    x.p.msg("netperf: starting host {}:{} with target {}:{} and "
             "length {}. Netserver: {}:{}\n".format(
             arg_d["name_source"], arg_d["port_source"], arg_d["name_dest"],
             arg_d["port_dest"], arg_d["test_length"],arg_d["name_dest"],
