@@ -20,6 +20,7 @@ def netserver_start(x, host_name, host_ip, host_user, netserver_port):
     stdout = x.ssh.exec(host_ip, host_user, "ps -ef | grep netserver")
     stdout_decoded = stdout[0].decode("utf-8")
     for x in stdout_decoded.splitlines():
+        # unique identifier
         if "netserver -4 -p {}".format(netserver_port) in x:
             netserver_pid = x.split()[1]
 
@@ -29,7 +30,7 @@ def netserver_start(x, host_name, host_ip, host_user, netserver_port):
 def main(x, conf, args):
 
     if not len(args) == 7:
-        x.p.msg("wrong usage. use: source dest mode:[options] sport:[port] "
+        x.p.msg("wrong usage. use: source dest id:[id] sport:[port] "
                 "dport:[port] length:[bytes|seconds] netserver:[port]\n")
         return False
 
@@ -37,16 +38,16 @@ def main(x, conf, args):
     arg_d = {}
     arg_d["name_source"] = args[0]
     arg_d["name_dest"] = args[1]
-    arg_d["applet_mode"] = args[2].split(":")[1]
+    arg_d["applet_id"] = args[2].split(":")[1]
     arg_d["port_source"] = args[3].split(":")[1]
     arg_d["port_dest"] = args[4].split(":")[1]
     arg_d["test_length"] = args[5].split(":")[1]
     arg_d["netserver_port"] = args[6].split(":")[1]
     x.p.msg("netperf: starting host {}:{} with target {}:{} with "
-            "mode {} and length {}. Netserver: {}:{}\n".format(
+            "length {}. Netserver: {}:{}\n".format(
             arg_d["name_source"], arg_d["port_source"], arg_d["name_dest"],
-            arg_d["port_dest"], arg_d["applet_mode"], arg_d["test_length"],
-            arg_d["name_dest"], arg_d["netserver_port"]))
+            arg_d["port_dest"], arg_d["test_length"],arg_d["name_dest"],
+            arg_d["netserver_port"]))
 
     # retrieve: host ip, host user name, destination ip, destination user name
     ip_source = conf['boxes'][arg_d["name_source"]]["interfaces"][0]['ip-address']
@@ -61,8 +62,10 @@ def main(x, conf, args):
     if not netserver_started:
         return False
     # save netserver pid to /tmp/netserver_[hostname]_[pid] if start succeeded
-    x.ssh.exec(ip_dest, user_dest, "touch /tmp/netserver_{}_{}".format(arg_d[
-                "name_dest"], netserver_pid))
+    x.ssh.exec(ip_dest, user_dest, "touch /tmp/net-applet-shuffler/netserver_{"
+            "}".format(arg_d["applet_id"]))
+    x.ssh.exec(ip_dest, user_dest, "sh -c \"echo '{}' > /tmp/net-applet-shuffler/"
+            "netserver_{}\"".format(netserver_pid, arg_d["applet_id"]))
 
     # begin test
     # here, traffic flows from source to destination
@@ -88,7 +91,7 @@ def main(x, conf, args):
     x.ssh.exec(ip_dest, user_dest, "kill -2 {}".format(netserver_pid))
     # resort to kill
     x.ssh.exec(ip_dest, user_dest, "kill {}".format(netserver_pid))
-    x.ssh.exec(ip_dest, user_dest, "rm /tmp/netserver_{}_{}".format(arg_d[
-                "name_dest"], netserver_pid))
+    x.ssh.exec(ip_dest, user_dest, "rm /tmp/net-applet-shuffler/netserver_{"
+            "}".format(arg_d["applet_id"], netserver_pid))
 
     return True
