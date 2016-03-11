@@ -20,6 +20,7 @@ def netserver_start(x, host_name, host_ip, host_user, netserver_port):
     stdout = x.ssh.exec(host_ip, host_user, "ps -ef | grep netserver")
     stdout_decoded = stdout[0].decode("utf-8")
     for x in stdout_decoded.splitlines():
+        # unique identifier
         if "netserver -4 -p {}".format(netserver_port) in x:
             netserver_pid = x.split()[1]
 
@@ -61,8 +62,8 @@ def main(x, conf, args):
     if not netserver_started:
         return False
     # save netserver pid to /tmp/netserver_[hostname]_[pid] if start succeeded
-    x.ssh.exec(ip_dest, user_dest, "touch /tmp/netserver_{}_{}".format(arg_d[
-                "name_dest"], netserver_pid))
+    x.ssh.exec(ip_dest, user_dest, "touch /tmp/net-applet-shuffler/netserver_{"
+            "}_{}".format(arg_d["name_dest"], netserver_pid))
 
     # begin test
     # here, traffic flows from source to destination
@@ -88,7 +89,7 @@ def main(x, conf, args):
     x.ssh.exec(ip_dest, user_dest, "kill -2 {}".format(netserver_pid))
     # resort to kill
     x.ssh.exec(ip_dest, user_dest, "kill {}".format(netserver_pid))
-    x.ssh.exec(ip_dest, user_dest, "rm /tmp/netserver_{}_{}".format(arg_d[
-                "name_dest"], netserver_pid))
+    x.ssh.exec(ip_dest, user_dest, "rm /tmp/net-applet-shuffler/netserver_{}_{"
+            "}".format(arg_d["name_dest"], netserver_pid))
 
     return True
