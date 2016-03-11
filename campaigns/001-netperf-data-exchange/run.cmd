@@ -5,6 +5,11 @@ exec 001-alive alpha
 exec 001-alive beta
 exec 001-alive koppa
 
+# clean tmp data as well
+# /tmp/net-applet-shuffler/*
+exec 002-kill beta netperf-server tcpdump netperf
+exec 002-kill beta netperf-server tcpdump netperf
+exec 002-kill beta netperf-server tcpdump netperf
 
 # save syscall, no-op when already done
 exec 003-save-sysctls alpha
@@ -19,8 +24,19 @@ exec 003-restore-sysctls koppa
 
 
 #tcpdump
-exec xxx-capture-pcap beta background ofile="stream1.pcap" filter="port 8000"
-exec xxx-capture-pcap beta background ofile="stream2.pcap" filter="port 8001"
+exec xxx-capture-pcap beta mode:background ofile="stream1.pcap" filter="port
+8000"
+exec xxx-capture-pcap beta mode:background ofile="stream2.pcap" filter="port
+8001"
+
+exec xxx-capture-pcap beta mode:background id=1 filter=port 80
+exec xxx-capture-pcap beta mode:background id=2 filter=port 81
+[...]
+exec xxx-capture-pcap beta stop id=2
+
+
+
+exec xxx-capture-pcap beta fetch ofile="stream2.pcap"
 
 
 # xxx- prefixed applets are not implemented yet
