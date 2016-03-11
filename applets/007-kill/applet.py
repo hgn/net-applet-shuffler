@@ -27,12 +27,12 @@ def clean_service(x, host_ip, host_user, service_name):
 def main(x, conf, args):
 
     if not len(args) == 1:
-        x.p.msg("wrong usage. use: host")
+        x.p.msg("wrong usage. use: host:[name]")
 
         return False
 
     # retrieve host information
-    host_name = args[0]
+    host_name = args[0].split(":")[1]
     host_ip = conf['boxes'][host_name]["interfaces"][0]['ip-address']
     host_user = conf['boxes'][host_name]['user']
 

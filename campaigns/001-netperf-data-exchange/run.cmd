@@ -5,11 +5,12 @@ exec 001-alive alpha
 exec 001-alive beta
 exec 001-alive koppa
 
+
 # clean tmp data as well
 # /tmp/net-applet-shuffler/*
-exec 002-kill beta netperf-server tcpdump netperf
-exec 002-kill beta netperf-server tcpdump netperf
-exec 002-kill beta netperf-server tcpdump netperf
+exec 007-kill host:alpha
+exec 007-kill host:beta
+
 
 # save syscall, no-op when already done
 exec 003-save-sysctls alpha
