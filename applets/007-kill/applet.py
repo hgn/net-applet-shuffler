@@ -1,22 +1,17 @@
 
 def clean_directory(x, host_ip, host_user):
-
     x.ssh.exec(host_ip, host_user, "rm -fr /tmp/net-applet-shuffler/*")
 
     return True
 
 
 def clean_service(x, host_ip, host_user, service_name):
-
     stdout = x.ssh.exec(host_ip, host_user, "pgrep {}".format(service_name))
-
     # iter through all pids
     for service_pid in stdout[0].decode("utf-8").splitlines():
-
         # try to end gracefully
-        stdout, stderr, exit_code = x.ssh.exec(host_ip, host_user, "kill -2 {"
+        _, _, exit_code = x.ssh.exec(host_ip, host_user, "kill -2 {"
                 "}".format(service_pid))
-
         # process MUST be kill
         if exit_code != 0:
             x.ssh.exec(host_ip, host_user, "kill {}".format(service_pid))
@@ -25,7 +20,6 @@ def clean_service(x, host_ip, host_user, service_name):
 
 
 def main(x, conf, args):
-
     if not len(args) == 1:
         x.p.msg("wrong usage. use: host:[name]")
 
