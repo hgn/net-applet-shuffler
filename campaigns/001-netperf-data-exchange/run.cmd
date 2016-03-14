@@ -8,16 +8,19 @@ exec 001-alive beta
 exec 001-alive koppa
 
 
+exec 500-ip alpha set-direct-conf
+exec 500-ip beta set-direct-conf
+
+
 # clean tmp data as well
 # /tmp/net-applet-shuffler/*
 exec 007-kill host:alpha
 exec 007-kill host:beta
 
-
 # save syscall, no-op when already done
-exec 003-save-sysctls alpha
-exec 003-save-sysctls beta
-exec 003-save-sysctls koppa
+exec 002-save-sysctls alpha
+exec 002-save-sysctls beta
+exec 002-save-sysctls koppa
 
 
 # restore sysctls to initial default
@@ -26,33 +29,35 @@ exec 003-restore-sysctls beta
 exec 003-restore-sysctls koppa
 
 
-#tcpdump
-exec 006-tcpdump host:alpha id:0001 mode:start ofile="stream1.pcap" filter="tcp and dst port 20000"
+# tcpdump
+# start tcpdump on host
+# notes:
+# - [id] should be a self specified unique id string
+# - mode:start -> the local-file-name is ignored
+# usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump_filter_string"
+exec 006-tcpdump beta id:0001 mode:start local-file-name:"ignored" filter:"tcp and dst port 30000"
 
 
-exec xxx-capture-pcap beta fetch ofile="stream2.pcap"
-
-
-# start netperf server on destination:netserver_port, connect with source, send
-# [length] (-#bytes) tcp traffic from source:port to destination:port
-# Usage
-# xxx-netperf source:[name] dest:[name] id:[id] sport:[port] dport:[port]
-# length:[seconds|bytes] netserver:[port]
-exec 005-netperf source:alpha dest:beta id:0002 sport:19999 dport:20000 length:-1000000 netserver:16666
+# netperf
+# start netperf sink, connect to it from host (source) and start a transfer
+# notes:
+# - data will flow from host (source) to sink
+# - [name] is the hostname specified in the conf.json
+# - flow_length is in seconds, or if negative, in bytes
+# - flow_offset is the time in seconds after which the flow is started
+# - netserver is the control(!) port of the netserver
+# usage: host sink:[name] id:[string] source_port:[port] sink_port:[port] flow_length:[seconds|-bytes] flow_offset:[seconds] netserver:[port]
+exec 005-netperf alpha sink:beta id:0001 source_port:20000 sink_port:30000 flow_length:-10000000 flow_offset:1 netserver:29999
 
 
 # ok, if the previous process returns the data is transmitted
-
-exec 006-tcpdump host:alpha id:0001 mode:stop ofile="stream1.pcap" filter="tcp and dst port 20000"
-
-# now read the data at the sink. This command will
-# simple return the data writen with the previous backgrounded
-# "exec xxx-netperf-sink beta 8000" call. The data file
-# is copied here, the file at beta is removed (cleaned)
-exec xxx-netperf-sink beta stop-backgrouding
-exec xxx-netperf-sink beta fetch-data
+exec 009-wait-for-completion alpha beta
 
 
-exec xxx-capture-pcap beta fetch ofile="stream1.pcap"
-
-
+# tcpdump
+# stop tcpdump on host, which also collects the dumpfile
+# notes:
+# - mode:stop -> the filter is ignored
+# - id MUST match the id of the started tcpdump
+# usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump_filter_string"
+exec 006-tcpdump beta id:0001 mode:stop local-file-name:"/tmp/dumps/001_netperf_alpha_to_beta" filter:"ignored"
