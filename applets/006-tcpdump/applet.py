@@ -4,7 +4,7 @@ import subprocess
 
 
 def tcpdump_start(x, arg_d):
-    _, _, _ = x.ssh.exec(arg_d["host_ip"], arg_d["host_user"],
+    x.ssh.exec(arg_d["host_ip"], arg_d["host_user"],
             "mkdir /tmp/net-applet-shuffler")
     # connect to host and start tcpdump
     # https://wiki.ubuntuusers.de/tcpdump/
@@ -39,11 +39,12 @@ def tcpdump_start(x, arg_d):
             pid_tcpdump = x.split()[1]
 
     # save pid to file
-    x.ssh.exec(arg_d["host_ip"], arg_d["host_user"], "touch "
-            "/tmp/net-applet-shuffler/tcpdump_{}".format(arg_d["applet_id"]))
+    path_to_tcpdump_pid = "/tmp/net-applet-shuffler/tcpdump_{" \
+                          "}".format(arg_d["applet_id"])
+    x.ssh.exec(arg_d["host_ip"], arg_d["host_user"], "touch {"
+            "}".format(path_to_tcpdump_pid))
     x.ssh.exec(arg_d["host_ip"], arg_d["host_user"], "sh -c \"echo '{}' > "
-            "/tmp/net-applet-shuffler/tcpdump_{}\"".format(pid_tcpdump,
-                                                           arg_d["applet_id"]))
+            "{}\"".format(pid_tcpdump, path_to_tcpdump_pid))
 
     return True
 
@@ -58,7 +59,7 @@ def transfer_dumpfile(x, arg_d):
             arg_d["applet_id"], arg_d["local_file_name"]).split(),
             stdout=subprocess.PIPE)
     # block until file transfer is done
-    _, _ = process.communicate()
+    process.communicate()
     if process.returncode != 0:
         x.p.msg("error transferring the dumpfile dump_{}.pcap from host {"
                 "}".format(arg_d["applet_id"], arg_d["host_name"]))
@@ -77,7 +78,6 @@ def tcpdump_stop(x, arg_d):
     stdout, _, exit_code = x.ssh.exec(arg_d["host_ip"], arg_d["host_user"],
             "echo \"$(</tmp/net-applet-shuffler/tcpdump_{})\""
             .format(arg_d["applet_id"]))
-    pid_tcpdump = stdout.decode("utf-8").splitlines()[0]
 
     if exit_code != 0:
         x.p.msg("error: tcpdump pid at host {} could not be retrieved\n"
@@ -87,6 +87,7 @@ def tcpdump_stop(x, arg_d):
 
         return False
 
+    pid_tcpdump = stdout.decode("utf-8").splitlines()[0]
     # end tcpdump gracefully
     x.ssh.exec(arg_d["host_ip"], arg_d["host_user"],
                "kill -2 {}".format(pid_tcpdump))
