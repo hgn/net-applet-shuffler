@@ -58,7 +58,7 @@ def main(x, conf, args):
     if not len(args) == 8:
         x.p.msg("wrong usage. use: [name] sink:[name] id:[id] source_port:["
                 "port] sink_port:[port] length:[bytes|seconds] "
-                "transfer_offset:[seconds] netserver:[port]\n")
+                "flow_offset:[seconds] netserver:[port]\n")
         return False
 
     # arguments dictionary
@@ -69,12 +69,12 @@ def main(x, conf, args):
     arg_d["port_source"] = args[3].split(":")[1]
     arg_d["port_dest"] = args[4].split(":")[1]
     arg_d["test_length"] = args[5].split(":")[1]
-    arg_d["transfer_offset"] = args[6].split(":")[1]
+    arg_d["flow_offset"] = args[6].split(":")[1]
     arg_d["netserver_port"] = args[7].split(":")[1]
     x.p.msg("netperf: starting source {}:{} with sink {}:{}, "
             "length {} and offset {}. Netserver: {}:{}\n".format(
             arg_d["name_source"], arg_d["port_source"], arg_d["name_dest"],
-            arg_d["port_dest"], arg_d["test_length"], arg_d["transfer_offset"],
+            arg_d["port_dest"], arg_d["test_length"], arg_d["flow_offset"],
             arg_d["name_dest"], arg_d["netserver_port"]))
     # retrieve: source ip, source user name, destination ip, destination user name
     arg_d["ip_source"] = conf['boxes'][arg_d["name_source"]]["interfaces"][0]['ip-address']
@@ -109,7 +109,7 @@ def main(x, conf, args):
             "netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {},{} -T TCP "
             "-4 &".format(arg_d["ip_dest"], arg_d["ip_source"],
             arg_d["netserver_port"], arg_d["test_length"],
-            arg_d["transfer_offset"], arg_d["port_source"], arg_d["port_dest"]))
+            arg_d["flow_offset"], arg_d["port_source"], arg_d["port_dest"]))
 
     if exit_code != 0:
         x.p.msg("error: netperf performance test could not be "
@@ -117,7 +117,7 @@ def main(x, conf, args):
         x.p.msg("netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {},{} -T TCP "
             "-4\n".format(arg_d["ip_dest"], arg_d["ip_source"],
             arg_d["netserver_port"], arg_d["test_length"],
-            arg_d["transfer_offset"], arg_d["port_source"], arg_d["port_target"]))
+            arg_d["flow_offset"], arg_d["port_source"], arg_d["port_target"]))
         return False
     test_running(x, arg_d, False)
 
