@@ -52,6 +52,7 @@ def transfer_dumpfile(x, arg_d):
 
     # make local directories
     os.makedirs(arg_d["local_file_name"])
+    # use secure copy to retrieve the dump file
     process = subprocess.Popen("scp {}@{}:/tmp/net-applet-shuffler/dump_{}.pcap"
             " {}".format(arg_d["host_user"], arg_d["host_ip"],
             arg_d["applet_id"], arg_d["local_file_name"]).split(),
