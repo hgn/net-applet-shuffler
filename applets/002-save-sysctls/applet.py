@@ -14,7 +14,7 @@ def main(x, conf, args):
     # check if file exist already, if we break here
     # x.ssh.exec execute at ip with sudo
     stdout, stderr, exit_code = x.ssh.exec(ip, user, "test -f /tmp/sysctl.save")
-    if exit_code != 0:
+    if exit_code == 0:
         x.p.msg("file already available, nothing to do here")
 		# return true because it is not failure
         return True
