@@ -50,8 +50,14 @@ exec 006-tcpdump beta id:0001 mode:start local-file-name:"ignored" filter:"tcp a
 exec 005-netperf alpha sink:beta id:0001 source_port:20000 sink_port:30000 flow_length:-10000000 flow_offset:1 netserver:29999
 
 
-# ok, if the previous process returns the data is transmitted
-exec 009-wait-for-completion alpha beta
+# blocker
+# waits for all processes to complete
+# notes:
+# - interval_time is the interval in seconds that for the completion of the processes is checked
+# - every host:id tuple actively participating in the test should be specified here
+# - one host can have several running ids, but one (unique) id can have only one host
+# usage: interval_time:[seconds] [name_1]:[id_1] [name_1]:[id_2] [name_2]:[id_3] ...
+exec 008-wait-for-completion interval_time:5 alpha:0001
 
 
 # tcpdump
