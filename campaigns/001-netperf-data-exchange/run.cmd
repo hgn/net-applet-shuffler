@@ -41,6 +41,7 @@ exec 006-tcpdump beta id:0001 mode:start local-file-name:"ignored" filter:"tcp a
 # netperf
 # start netperf sink, connect to it from host (source) and start a transfer
 # notes:
+# - a default netserver will run on port 12865 (if kill applet was not used)
 # - data will flow from host (source) to sink
 # - [name] is the hostname specified in the conf.json
 # - flow_length is in seconds, or if negative, in bytes
