@@ -268,7 +268,7 @@ class CampaignExecuter():
             if d['cmd'] == CampaignExecuter.OPCODE_CMD_EXEC:
                 ret = self.execute_applet(d['name'], d['args'])
             if d['cmd'] == CampaignExecuter.OPCODE_CMD_SLEEP:
-                time.sleep(d['time'])
+                time.sleep(int(d['time']))
             if ret == False:
                 print("Applet returned negative return code, stop campaign now")
                 return
