@@ -27,17 +27,13 @@ sudo visudo
 
 Append to the end of file of alpha, beta and koppa (careful, this is a
 possible security leak!):
-[username] ALL=NOPASSWD: ALL
+[username] ALL = NOPASSWD: ALL
 
-Use RSA key pair for remote login:
+Use RSA key pair and distributed public key for remote login:
 alpha:
 ssh-keygen
-ssh-copy-id user@beta
-ssh-copy-id user@koppa
-
-Remote log in once for key unlocking (to both servers), e.g. (perform LOGOUT
-or RESTART first!):
-ssh ["beta", "koppa"]@[ip] sudo apt-get update
+[ssh-copy-id beta@10.0.1.1]
+ssh-copy-id user@[ip]
 ```
 
 
@@ -80,10 +76,10 @@ customization. An example workflow for Ubuntu 15.10 is the following:
 
 ```
 - PREVENT OS FROM OVERWRITING CHANGES:
-    E.g. Ubuntu has a habit to override manual changes on layer 3.
+    E.g. Ubuntu has a weird habit to sometimes override manual changes on layer 3.
     To prevent this, go to Network Settings and open "Edit Connections...".
     Select the interface(s) in question and open "Edit". Uncheck "Automatically
-    connect to this network when it is available"
+    connect to this network when it is available".
 
 
 [on alpha]
@@ -97,7 +93,7 @@ sudo ifconfig enp4s0 up
 sleep 1
 sudo ip r add default via 10.0.0.205
 [/network.sh]
-sudo /home/alpha/network.sh
+sudo bash /home/alpha/network.sh
 
 [on beta]
 sudo touch /etc/init.d/startup.sh
