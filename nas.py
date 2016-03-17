@@ -144,7 +144,7 @@ class AppletExecuter():
 		# the status is used later for campaigns:
 		# if the status is false the campaing must be
 		# stopped, if true everything is fine!
-        print("  execute applet \"{} [{}]\"".format(self.applet_name, self.applet_args))
+        print("  execute applet \"{} {}\"".format(self.applet_name, self.applet_args))
         status = self.applet.main(xchange, self.conf, self.applet_args)
         if status == True:
             return True
