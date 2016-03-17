@@ -5,10 +5,10 @@
 
 			"alpha": {
 				"description": "Data Sender (often local PC)",
-				"user":        "joe",
+				"user":        "tcp1",
 				"interfaces": [
 				   {
-						 "name": "eth0",
+						 "name": "enp4s0",
 						 "ip-address": "10.0.0.1"
 				}
 				]
@@ -16,10 +16,10 @@
 
 			"beta": {
 				"description": "Data Sink (often remote PC)",
-				"user":        "joe",
+				"user":        "beta",
 				"interfaces": [
 				   {
-						 "name": "eth0",
+						 "name": "enp0s25",
 						 "ip-address": "10.0.1.1"
 					 }
 				]
@@ -27,14 +27,14 @@
 
 			"koppa": {
 				"description": "Middle box, running netem, etc",
-				"user":        "joe",
+				"user":        "koppa",
 				"interfaces": [
 				   {
-						 "name": "left",
+						 "name": "enp3s2",
 						 "ip-address": "10.0.0.205"
 					 },
 					 {
-						 "name": "right",
+						 "name": "enp0s25",
 						 "ip-address": "10.0.1.205"
 					 }
 					]
