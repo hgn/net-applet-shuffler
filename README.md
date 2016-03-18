@@ -10,6 +10,7 @@
 ```
 sudo apt-get install python3 foobar
 sudo apt-get install netperf
+sudo apt-get install ssh
 ```
 
 # System Setup #
@@ -29,8 +30,9 @@ Append to the end of file of alpha, beta and koppa (careful, this is a
 possible security leak!):
 [username] ALL = NOPASSWD: ALL
 
-Use RSA key pair and distributed public key for remote login:
-alpha:
+Use RSA key pair and distributed public key for remote login (make sure this
+is done for every machine which needs to connect to another):
+[on alpha]
 ssh-keygen
 [ssh-copy-id beta@10.0.1.1]
 ssh-copy-id user@[ip]
@@ -45,19 +47,19 @@ on the router.
 Note: These changes will be lost on a restart.
 
 ```
-alpha:
+[on alpha]
 [sudo] ip link set dev enp4s0 down
 [sudo] ip a add 10.0.0.1/24 dev enp4s0
 [sudo] ip r add default via 10.0.0.205
 [sudo] ip link set dev enp4s0 up
 
-beta:
+[on beta]
 [sudo] ip link set dev eth0 down
 [sudo] ip a add 10.0.1.1/24 dev eth0
 [sudo] ip r add default via 10.0.1.205
 [sudo] ip link set dev eth0 down
 
-koppa:
+[on koppa]
 [sudo] ip link set dev left down
 [sudo] ip link set dev right down
 [sudo] ip a add 10.0.0.205/24 dev left
