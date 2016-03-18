@@ -65,6 +65,18 @@ class Ssh():
         stdout, stderr = p.communicate()
         return stdout, stderr, p.returncode
 
+    def copy(self, remote_user, remote_ip, remote_path, local_path, to_local):
+        command = str()
+        if to_local:
+            command = "scp {}@{}:{} {}".format(remote_user, remote_ip,
+                                               remote_path, local_path)
+        else:
+            command = "scp {} {}@{}:{}".format(local_path, remote_user,
+                                               remote_ip, remote_path)
+        p = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+        return stdout, stderr, p.returncode
+
 
 class Exchange():
 
@@ -141,9 +153,9 @@ class AppletExecuter():
         self.import_applet_module()
         xchange = Exchange()
         xchange.p = self.p
-		# the status is used later for campaigns:
-		# if the status is false the campaing must be
-		# stopped, if true everything is fine!
+        # the status is used later for campaigns:
+        # if the status is false the campaing must be
+        # stopped, if true everything is fine!
         print("  execute applet \"{} {}\"".format(self.applet_name, self.applet_args))
         status = self.applet.main(xchange, self.conf, self.applet_args)
         if status == True:
