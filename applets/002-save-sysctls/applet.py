@@ -6,16 +6,15 @@ def main(x, conf, args):
         return False
 
     hostname = args[0]
-    x.p.msg("save sysctl to /tmp/sysctl.save at host {}\n".format(hostname))
-    x.p.msg("use restore to restore values")
+    #x.p.msg("save sysctls to /tmp/sysctl.save at host {}\n".format(hostname))
 
     ip = conf['boxes'][hostname]["interfaces"][0]['ip-address']
     user = conf['boxes'][hostname]['user']
     # check if file exist already, if we break here
     # x.ssh.exec execute at ip with sudo
-    stdout, stderr, exit_code = x.ssh.exec(ip, user, "test -f /tmp/sysctl.save")
+    _, _, exit_code = x.ssh.exec(ip, user, "test -f /tmp/sysctl.save")
     if exit_code == 0:
-        x.p.msg("file already available, nothing to do here")
+        #x.p.msg("file already available, nothing to do here\n")
 		# return true because it is not failure
         return True
     # there should be no failure here

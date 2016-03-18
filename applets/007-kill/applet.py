@@ -21,21 +21,23 @@ def clean_service(x, host_ip, host_user, service_name):
 
 def main(x, conf, args):
     if not len(args) == 1:
-        x.p.msg("wrong usage. use: host:[name]")
+        x.p.msg("wrong usage. use: [hostname]")
 
         return False
 
     # retrieve host information
-    host_name = args[0].split(":")[1]
+    host_name = args[0]
     host_ip = conf['boxes'][host_name]["interfaces"][0]['ip-address']
     host_user = conf['boxes'][host_name]['user']
 
-    x.p.msg("cleaning up host {}".format(host_name))
+    #x.p.msg("cleaning up host {}\n".format(host_name))
     # 1. directory cleanup of /tmp/net-applet-shuffler/
     clean_directory(x, host_ip, host_user)
     # 2. netserver cleanup
     clean_service(x, host_ip, host_user, "netserver")
     # 3. tcpdump cleanup
     clean_service(x, host_ip, host_user, "tcpdump")
+    # 4. netperf cleanup
+    clean_service(x, host_ip, host_user, "netperf")
 
     return True
