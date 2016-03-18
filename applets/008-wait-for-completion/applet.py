@@ -14,7 +14,7 @@ def is_id_running(x, host_ip, host_user, applet_id):
 
 
 def main(x, conf, args):
-    if not len(args) < 1:
+    if len(args) < 1:
         x.p.msg("wrong usage: first specify the interval check time "
                 "interval_time:[seconds], then 1...n host:id tuples for which "
                 "to wait, e.g. [name1]:[id1] [name2]:[id2] ...\n")
@@ -23,12 +23,12 @@ def main(x, conf, args):
     # entries dictionary
     # note: a host can have multiple ids, but an id can (should) not have
     # multiple hosts -> key = unique == id, value == host
-    ent_d = {}
+    ent_d = dict()
     # in seconds
     interval_time = int(args[0].split(":")[1])
     # read in all host:id tuples
     # len(sys.argv) includes the program name (subtract 1 due to interval time)
-    for argument_number in range(0, (len(sys.argv)-1)):
+    for argument_number in range(0, (len(sys.argv))):
         name_host = args[argument_number].split(":")[0]
         applet_id = args[argument_number].split(":")[1]
         if not name_host == "interval_time":
@@ -42,7 +42,7 @@ def main(x, conf, args):
 
         # dict size must not change during iteration
         # therefore use a list for entries to be deleted
-        entries_marked = []
+        entries_marked = list()
         for applet_id in ent_d:
             host_name = ent_d[applet_id]
             host_ip = conf['boxes'][host_name]["interfaces"][0]['ip-address']

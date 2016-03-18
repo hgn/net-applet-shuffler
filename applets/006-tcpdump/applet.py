@@ -10,9 +10,10 @@ def tcpdump_start(x, arg_d):
     # https://wiki.ubuntuusers.de/tcpdump/
     # tcpdump -i [interface] [protocol] -n -s 0 -w
     # /tmp/net-applet-shuffler/[filename] '[filter(e.g. dst port 20000)]
+    # interestingly, the " &" is sufficient here, to run in background
     _, _, exit_code = x.ssh.exec(arg_d["host_ip"], arg_d["host_user"],
             "tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/dump_{}.pcap "
-            "'{}'".format(arg_d["host_interface"], arg_d["applet_id"],
+            "'{}' &".format(arg_d["host_interface"], arg_d["applet_id"],
                           arg_d["filter"]))
 
     if exit_code != 0:
@@ -31,12 +32,12 @@ def tcpdump_start(x, arg_d):
     stdout = x.ssh.exec(arg_d["host_ip"], arg_d["host_user"],
                         "ps -ef | grep tcpdump")
     stdout_decoded = stdout[0].decode("utf-8")
-    for x in stdout_decoded.splitlines():
+    for line in stdout_decoded.splitlines():
         # unique identifier
         if "sudo tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/tcpdump_{} " \
            "'{}'".format(arg_d["host_interface"], arg_d["applet_id"],
-                         arg_d["filter"]) in x:
-            pid_tcpdump = x.split()[1]
+                         arg_d["filter"]) in line:
+            pid_tcpdump = line.split()[1]
 
     # save pid to file
     path_to_tcpdump_pid = "/tmp/net-applet-shuffler/tcpdump_{" \
@@ -52,7 +53,11 @@ def tcpdump_start(x, arg_d):
 def transfer_dumpfile(x, arg_d):
 
     # make local directories
-    os.makedirs(arg_d["local_file_name"])
+    try:
+        os.makedirs(arg_d["local_file_name"])
+    except os.error:
+        # path/file exsits
+        pass
     # use secure copy to retrieve the dump file
     process = subprocess.Popen("scp {}@{}:/tmp/net-applet-shuffler/dump_{}.pcap"
             " {}".format(arg_d["host_user"], arg_d["host_ip"],
@@ -68,7 +73,7 @@ def transfer_dumpfile(x, arg_d):
 
     # clean up dumpfile on host
     x.ssh.exec(arg_d["host_ip"], arg_d["host_user"], "rm "
-            "/tmp/net-applet-shuffler/dump_{}.pcpa".format(arg_d["applet_id"]))
+            "/tmp/net-applet-shuffler/dump_{}.pcap".format(arg_d["applet_id"]))
 
     return True
 
@@ -111,7 +116,7 @@ def main(x, conf, args):
         return False
 
     # arguments dictionary
-    arg_d = {}
+    arg_d = dict()
     arg_d["host_name"] = args[0]
     arg_d["applet_id"] = args[1].split(":")[1]
     arg_d["applet_mode"] = args[2].split(":")[1]
@@ -119,7 +124,7 @@ def main(x, conf, args):
     arg_d["filter"] = args[4].split("\"")[1]
     # retrieve: host ip, host user name
     arg_d["host_ip"] = conf['boxes'][arg_d["host_name"]]["interfaces"][0]['ip-address']
-    arg_d["host_interface"] = conf['boxes'][arg_d["host_name"]][0]['name']
+    arg_d["host_interface"] = conf['boxes'][arg_d["host_name"]]['interfaces'][0]['name']
     arg_d["host_user"] = conf['boxes'][arg_d["host_name"]]['user']
 
     # applet mode:
