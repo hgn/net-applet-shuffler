@@ -10,7 +10,6 @@ def tcpdump_start(x, arg_d):
     # https://wiki.ubuntuusers.de/tcpdump/
     # tcpdump -i [interface] [protocol] -n -s 0 -w
     # /tmp/net-applet-shuffler/[filename] '[filter(e.g. dst port 20000)]
-    # interestingly, the " &" is sufficient here, to run in background
     _, _, exit_code = x.ssh.exec(arg_d["host_ip"], arg_d["host_user"],
             "tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/dump_{}.pcap "
             "'{}' &".format(arg_d["host_interface"], arg_d["applet_id"],
