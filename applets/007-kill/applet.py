@@ -37,5 +37,7 @@ def main(x, conf, args):
     clean_service(x, host_ip, host_user, "netserver")
     # 3. tcpdump cleanup
     clean_service(x, host_ip, host_user, "tcpdump")
+    # 4. netperf cleanup
+    clean_service(x, host_ip, host_user, "netperf")
 
     return True
