@@ -1,3 +1,32 @@
+# Welcome to Net Applet Shuffler #
+
+The net-applet-shuffler or short nas is a network test framework for testing
+and analysis. Conceptual similar to UNIX design philosophy: "do one thing, do
+it well" is nas the lowest building block for network testing.
+
+Nas will execute so called applets on a particular machine. Examples are:
+
+* setting special sysctls on all receiver machines
+* rate limiting (via netem) the bandwidth at all middle boxes
+* start n netperf client and server instances and transmit m bytes each
+* capture PCAP files on machine "alpha" and "beta" and download the file locally if netperf is finished
+
+See the end of this file for more examples!
+
+Writing own applets is simple, applets already provides some common
+functionality for you. For example wrapping ssh and scp.
+
+Executing applets one after another manually by hand is error prone and
+unnecessary. Nas provides a higher level abstraction to merge combined
+test-applets into so called campaigns. With campaigns you define your tests.
+After the campaign is executed all required applets are shuffled to the correct
+test boxes, the tests are executed and the results are downloaded to the local
+machine.
+
+What do you need? Probably you need as many as required hardware machines. If you
+want to test within a typical bumbbell topology you need probably 5 machines.
+Simple request/reply test can be done on one machine too.
+
 
 # Requirements #
 
