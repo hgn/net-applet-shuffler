@@ -25,11 +25,11 @@ __version__  = "1"
 
 class Printer:
 
+    STD = 0
+    VERBOSE = 1
+
     def __init__(self, verbose=False):
         self.verbose = verbose
-
-    def set_verbose(self):
-        self.verbose = True
 
     def err(self, msg):
         sys.stderr.write(msg)
@@ -39,20 +39,19 @@ class Printer:
             return
         sys.stderr.write(msg)
 
-    def msg(self, msg):
-        return sys.stdout.write(msg) - 1
+    def msg(self, msg, level=VERBOSE, underline=False):
+        if level == VERBOSE and self.verbose == False:
+            return
+        if underline == False:
+            return sys.stdout.write(msg) - 1
+        else:
+            str_len = len(msg)
+            sys.stdout.write(msg)
+            self.msg("\n" + '=' * str_len + "\n")
 
     def line(self, length, char='-'):
         sys.stdout.write(char * length + "\n")
 
-    def msg_underline(self, msg, pre_news=0, post_news=0):
-        str_len = len(msg)
-        if pre_news:
-            self.msg("\n" * pre_news)
-        self.msg(msg)
-        self.msg("\n" + '=' * str_len)
-        if post_news:
-            self.msg("\n" * post_news)
 
 class Ssh():
 
@@ -96,7 +95,7 @@ class AppletExecuter():
     def __init__(self, external_controlled=False, verbose=False):
         self.verbose = verbose
         self.applet_name = False
-        self.p = Printer()
+        self.p = Printer(verbose=self.verbose)
         if not external_controlled:
             self.parse_local_options()
         self.load_conf()
@@ -172,7 +171,7 @@ class AppletLister():
 
     def __init__(self, verbose=False):
         self.verbose = verbose
-        self.p = Printer()
+        self.p = Printer(verbose=self.verbose)
 
     def subdirs(self, d):
         return [name for name in os.listdir(d) if os.path.isdir(os.path.join(d, name))]
@@ -193,7 +192,7 @@ class CampaignExecuter():
 
     def __init__(self, verbose=False):
         self.verbose = verbose
-        self.p = Printer()
+        self.p = Printer(verbose=self.verbose)
         self.parse_local_options()
 
     def campaign_path(self, name):
@@ -307,7 +306,7 @@ class CampaignLister():
 
     def __init__(self, verbose=False):
         self.verbose = verbose
-        self.p = Printer()
+        self.p = Printer(verbose=self.verbose)
 
     def subdirs(self, d):
         return [name for name in os.listdir(d) if os.path.isdir(os.path.join(d, name))]
