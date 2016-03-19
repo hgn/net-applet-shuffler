@@ -93,7 +93,8 @@ class Exchange():
 
 class AppletExecuter():
 
-    def __init__(self, external_controlled=False):
+    def __init__(self, external_controlled=False, verbose=False):
+        self.verbose = verbose
         self.applet_name = False
         self.p = Printer()
         if not external_controlled:
@@ -169,7 +170,8 @@ class AppletExecuter():
 
 class AppletLister():
 
-    def __init__(self):
+    def __init__(self, verbose=False):
+        self.verbose = verbose
         self.p = Printer()
 
     def subdirs(self, d):
@@ -189,7 +191,8 @@ class CampaignExecuter():
     OPCODE_CMD_EXEC = 1
     OPCODE_CMD_SLEEP = 2
 
-    def __init__(self):
+    def __init__(self, verbose=False):
+        self.verbose = verbose
         self.p = Printer()
         self.parse_local_options()
 
@@ -302,7 +305,8 @@ class CampaignExecuter():
 
 class CampaignLister():
 
-    def __init__(self):
+    def __init__(self, verbose=False):
+        self.verbose = verbose
         self.p = Printer()
 
     def subdirs(self, d):
@@ -327,7 +331,7 @@ class NetAppletShuffler:
             }
 
     def __init__(self):
-        pass
+        self.verbose = False
 
     def which(self, program):
         for path in os.environ["PATH"].split(os.pathsep):
@@ -371,6 +375,14 @@ class NetAppletShuffler:
             self.print_version()
             return None
 
+        # handle verbose flag
+        if "--verbose" in sys.argv:
+            sys.argv.remove("--verbose")
+            self.verbose = True
+        if "-v" in sys.argv:
+            self.verbose = True
+            sys.argv.remove("-v")
+
         # -h | --help as first argument is treated special
         # and has other meaning as a submodule
         if self.args_contains(sys.argv[1:2], "-h", "--help"):
@@ -396,7 +408,7 @@ class NetAppletShuffler:
         if not classtring:
             return 1
 
-        classinstance = globals()[classtring]()
+        classinstance = globals()[classtring](verbose=self.verbose)
         ok = classinstance.run()
         if not ok:
             return 1
