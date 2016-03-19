@@ -67,7 +67,6 @@ def transfer_dumpfile(x, arg_d):
     if process.returncode != 0:
         x.p.msg("error transferring the dumpfile dump_{}.pcap from host {"
                 "}".format(arg_d["applet_id"], arg_d["host_name"]))
-
         return False
 
     # clean up dumpfile on host
@@ -88,7 +87,6 @@ def tcpdump_stop(x, arg_d):
                 "failed params:\n".format(arg_d["host_name"]))
         x.p.msg("echo \"$(</tmp/net-applet-shuffler/tcpdump_{})\""
                 .format(arg_d["applet_id"]))
-
         return False
 
     pid_tcpdump = stdout.decode("utf-8").splitlines()[0]
@@ -102,7 +100,6 @@ def tcpdump_stop(x, arg_d):
                "}".format(arg_d["applet_id"]))
 
     if not transfer_dumpfile(x, arg_d):
-
         return False
 
     return True
@@ -130,9 +127,7 @@ def main(x, conf, args):
     # start: start the tcpdump
     if arg_d["applet_mode"] == "start":
         if tcpdump_start(x, arg_d):
-
             return True
-
         return False
 
     # applet mode:
@@ -140,7 +135,5 @@ def main(x, conf, args):
     # blocks until file is transferred
     if arg_d["applet_mode"] == "stop":
         if tcpdump_stop(x, arg_d):
-
             return True
-
         return False
