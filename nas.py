@@ -49,9 +49,6 @@ class Printer:
             sys.stdout.write(msg)
             self.msg("\n" + '=' * str_len + "\n")
 
-    def line(self, length, char='-'):
-        sys.stdout.write(char * length + "\n")
-
 
 class Ssh():
 
