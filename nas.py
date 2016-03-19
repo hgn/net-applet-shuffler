@@ -37,11 +37,12 @@ class Printer:
     def msg(self, msg, level=VERBOSE, underline=False):
         if level == Printer.VERBOSE and self.verbose == False:
             return
+        prefix = "  #   " if level == Printer.VERBOSE else ""
         if underline == False:
-            return sys.stdout.write(msg) - 1
+            return sys.stdout.write(prefix + msg) - 1
         else:
-            str_len = len(msg)
-            sys.stdout.write(msg)
+            str_len = len(prefix + msg)
+            sys.stdout.write(prefix + msg)
             self.msg("\n" + '=' * str_len + "\n")
 
 
@@ -148,7 +149,9 @@ class AppletExecuter():
         # the status is used later for campaigns:
         # if the status is false the campaing must be
         # stopped, if true everything is fine!
-        self.p.msg("  execute applet \"{} {}\"".format(self.applet_name, self.applet_args),                   level=Printer.STD)
+        self.p.msg("execute applet \"{} {}\"\n".format(self.applet_name,
+                                                         self.applet_args),
+                                                         level=Printer.VERBOSE)
         status = self.applet.main(xchange, self.conf, self.applet_args)
         if status == True:
             return True
@@ -213,7 +216,7 @@ class CampaignExecuter():
         self.campaign_name = args[2]
 
     def execute_applet(self, applet_name, applet_args):
-        app_executer = AppletExecuter(external_controlled=True)
+        app_executer = AppletExecuter(external_controlled=True, verbose=self.verbose)
         app_executer.set_applet_data(applet_name, applet_args)
         return app_executer.run()
 
@@ -270,15 +273,25 @@ class CampaignExecuter():
         return data, True
 
     def execute_campaign(self, data):
+        test_no = len(data)
+        run_no = 1
         for d in data:
             ret = True
+            cmd = "unknown"
             if d['cmd'] == CampaignExecuter.OPCODE_CMD_EXEC:
+                cmd = "exec {}".format(d['name'])
+                self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
+                                                 cmd), level=Printer.STD)
                 ret = self.execute_applet(d['name'], d['args'])
             if d['cmd'] == CampaignExecuter.OPCODE_CMD_SLEEP:
+                cmd = "sleep {}".format(d['time'])
+                self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
+                                                 cmd), level=Printer.STD)
                 time.sleep(int(d['time']))
             if ret == False:
                 print("Applet returned negative return code, stop campaign now")
                 return
+            run_no += 1
 
     def parse_campaign(self):
         path, ok = self.campaign_path(self.campaign_name)
@@ -292,7 +305,8 @@ class CampaignExecuter():
         data, ok = self.parse_campaign()
         if not ok:
             sys.exit(1)
-        print("Execute Campaign \"{}\"".format(self.campaign_name))
+        self.p.msg("Execute Campaign \"{}\"\n".format(self.campaign_name),
+                   level=Printer.STD)
         self.execute_campaign(data)
 
 class CampaignLister():
