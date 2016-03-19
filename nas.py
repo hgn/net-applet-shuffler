@@ -184,6 +184,7 @@ class CampaignExecuter():
 
     OPCODE_CMD_EXEC = 1
     OPCODE_CMD_SLEEP = 2
+    OPCODE_CMD_PRINT = 3
 
     def __init__(self, verbose=False):
         self.verbose = verbose
@@ -256,6 +257,15 @@ class CampaignExecuter():
         d['time'] = chunks[0]
         ret.append(d)
 
+    def transform_print_statement(self, chunks, ret):
+        d = dict()
+        if not len(chunks) > 0:
+            # need a second value
+            return
+        d['cmd'] = CampaignExecuter.OPCODE_CMD_PRINT
+        d['msg'] = chunks[:]
+        ret.append(d)
+
     def transform(self, content):
         data = list()
         for c in content:
@@ -267,6 +277,8 @@ class CampaignExecuter():
                 self.transform_exec_statement(chunks[1:], data)
             elif chunks[0] == "sleep":
                 self.transform_sleep_statement(chunks[1:], data)
+            elif chunks[0] == "print":
+                self.transform_print_statement(chunks[1:], data)
             else:
                 self.p.err("Command \"{}\" not known, only exec and sleep allowed".format(chunks[0]))
                 return None, False
@@ -283,11 +295,15 @@ class CampaignExecuter():
                 self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
                                                  cmd), level=Printer.STD)
                 ret = self.execute_applet(d['name'], d['args'])
-            if d['cmd'] == CampaignExecuter.OPCODE_CMD_SLEEP:
+            elif d['cmd'] == CampaignExecuter.OPCODE_CMD_SLEEP:
                 cmd = "sleep {}".format(d['time'])
                 self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
                                                  cmd), level=Printer.STD)
                 time.sleep(int(d['time']))
+            elif d['cmd'] == CampaignExecuter.OPCODE_CMD_PRINT:
+                # when we print we do not print the print   
+                self.p.msg("  # {}\n".format(" ".join(d['msg'])), level=Printer.STD)
+
             if ret == False:
                 print("Applet returned negative return code, stop campaign now")
                 return
