@@ -300,6 +300,22 @@ class CampaignExecuter():
         print("Execute Campaign \"{}\"".format(self.campaign_name))
         self.execute_campaign(data)
 
+class CampaignLister():
+
+    def __init__(self):
+        self.p = Printer()
+
+    def subdirs(self, d):
+        return [name for name in os.listdir(d) if os.path.isdir(os.path.join(d, name))]
+
+    def run(self):
+        hp = os.path.dirname(os.path.realpath(__file__))
+        fp = os.path.join(hp, "campaigns")
+        dirs = self.subdirs(fp)
+        sys.stdout.write("Available campaigns:\n")
+        for d in dirs:
+            sys.stdout.write("  {}\n".format(d))
+
 
 class NetAppletShuffler:
 
