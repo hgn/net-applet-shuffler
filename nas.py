@@ -35,7 +35,7 @@ class Printer:
         sys.stderr.write(msg)
 
     def msg(self, msg, level=VERBOSE, underline=False):
-        if level == VERBOSE and self.verbose == False:
+        if level == Printer.VERBOSE and self.verbose == False:
             return
         if underline == False:
             return sys.stdout.write(msg) - 1
@@ -148,7 +148,7 @@ class AppletExecuter():
         # the status is used later for campaigns:
         # if the status is false the campaing must be
         # stopped, if true everything is fine!
-        print("  execute applet \"{} {}\"".format(self.applet_name, self.applet_args))
+        self.p.msg("  execute applet \"{} {}\"".format(self.applet_name, self.applet_args),                   level=Printer.STD)
         status = self.applet.main(xchange, self.conf, self.applet_args)
         if status == True:
             return True
@@ -172,9 +172,9 @@ class AppletLister():
         hp = os.path.dirname(os.path.realpath(__file__))
         fp = os.path.join(hp, "applets")
         dirs = self.subdirs(fp)
-        sys.stdout.write("Available applets:\n")
+        self.p.msg("Available applets:\n", level=Printer.STD)
         for d in dirs:
-            sys.stdout.write("  {}\n".format(d))
+            self.p.msg("  {}\n".format(d), level=Printer.STD)
 
 
 class CampaignExecuter():
@@ -191,7 +191,8 @@ class CampaignExecuter():
         hp = os.path.dirname(os.path.realpath(__file__))
         fp = os.path.join(hp, "campaigns", name)
         if not os.path.exists(fp):
-            print("Campaign path \"{}\" do not exist".format(fp))
+            self.p.msg("Campaign path \"{}\" do not exist".format(fp),
+                       level=Printer.STD)
             return None, False
         ffp = os.path.join(fp, "run.cmd")
         return ffp, True
@@ -264,7 +265,7 @@ class CampaignExecuter():
             elif chunks[0] == "sleep":
                 self.transform_sleep_statement(chunks[1:], data)
             else:
-                print("Command \"{}\" not known, only exec and sleep allowed".format(chunks[0]))
+                self.p.err("Command \"{}\" not known, only exec and sleep allowed".format(chunks[0]))
                 return None, False
         return data, True
 
