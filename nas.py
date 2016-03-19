@@ -34,11 +34,6 @@ class Printer:
     def err(self, msg):
         sys.stderr.write(msg)
 
-    def verbose(self, msg):
-        if not self.verbose:
-            return
-        sys.stderr.write(msg)
-
     def msg(self, msg, level=VERBOSE, underline=False):
         if level == VERBOSE and self.verbose == False:
             return
