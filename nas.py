@@ -25,34 +25,26 @@ __version__  = "1"
 
 class Printer:
 
+    STD = 0
+    VERBOSE = 1
+
     def __init__(self, verbose=False):
         self.verbose = verbose
-
-    def set_verbose(self):
-        self.verbose = True
 
     def err(self, msg):
         sys.stderr.write(msg)
 
-    def verbose(self, msg):
-        if not self.verbose:
+    def msg(self, msg, level=VERBOSE, underline=False):
+        if level == Printer.VERBOSE and self.verbose == False:
             return
-        sys.stderr.write(msg)
+        prefix = "  #   " if level == Printer.VERBOSE else ""
+        if underline == False:
+            return sys.stdout.write(prefix + msg) - 1
+        else:
+            str_len = len(prefix + msg)
+            sys.stdout.write(prefix + msg)
+            self.msg("\n" + '=' * str_len + "\n")
 
-    def msg(self, msg):
-        return sys.stdout.write(msg) - 1
-
-    def line(self, length, char='-'):
-        sys.stdout.write(char * length + "\n")
-
-    def msg_underline(self, msg, pre_news=0, post_news=0):
-        str_len = len(msg)
-        if pre_news:
-            self.msg("\n" * pre_news)
-        self.msg(msg)
-        self.msg("\n" + '=' * str_len)
-        if post_news:
-            self.msg("\n" * post_news)
 
 class Ssh():
 
@@ -93,9 +85,10 @@ class Exchange():
 
 class AppletExecuter():
 
-    def __init__(self, external_controlled=False):
+    def __init__(self, external_controlled=False, verbose=False):
+        self.verbose = verbose
         self.applet_name = False
-        self.p = Printer()
+        self.p = Printer(verbose=self.verbose)
         if not external_controlled:
             self.parse_local_options()
         self.load_conf()
@@ -156,7 +149,9 @@ class AppletExecuter():
         # the status is used later for campaigns:
         # if the status is false the campaing must be
         # stopped, if true everything is fine!
-        print("  execute applet \"{} {}\"".format(self.applet_name, self.applet_args))
+        self.p.msg("execute applet \"{} {}\"\n".format(self.applet_name,
+                                                         self.applet_args),
+                                                         level=Printer.VERBOSE)
         status = self.applet.main(xchange, self.conf, self.applet_args)
         if status == True:
             return True
@@ -169,8 +164,9 @@ class AppletExecuter():
 
 class AppletLister():
 
-    def __init__(self):
-        self.p = Printer()
+    def __init__(self, verbose=False):
+        self.verbose = verbose
+        self.p = Printer(verbose=self.verbose)
 
     def subdirs(self, d):
         return [name for name in os.listdir(d) if os.path.isdir(os.path.join(d, name))]
@@ -179,25 +175,28 @@ class AppletLister():
         hp = os.path.dirname(os.path.realpath(__file__))
         fp = os.path.join(hp, "applets")
         dirs = self.subdirs(fp)
-        sys.stdout.write("Available applets:\n")
+        self.p.msg("Available applets:\n", level=Printer.STD)
         for d in dirs:
-            sys.stdout.write("  {}\n".format(d))
+            self.p.msg("  {}\n".format(d), level=Printer.STD)
 
 
 class CampaignExecuter():
 
     OPCODE_CMD_EXEC = 1
     OPCODE_CMD_SLEEP = 2
+    OPCODE_CMD_PRINT = 3
 
-    def __init__(self):
-        self.p = Printer()
+    def __init__(self, verbose=False):
+        self.verbose = verbose
+        self.p = Printer(verbose=self.verbose)
         self.parse_local_options()
 
     def campaign_path(self, name):
         hp = os.path.dirname(os.path.realpath(__file__))
         fp = os.path.join(hp, "campaigns", name)
         if not os.path.exists(fp):
-            print("Campaign path \"{}\" do not exist".format(fp))
+            self.p.msg("Campaign path \"{}\" do not exist".format(fp),
+                       level=Printer.STD)
             return None, False
         ffp = os.path.join(fp, "run.cmd")
         return ffp, True
@@ -218,7 +217,7 @@ class CampaignExecuter():
         self.campaign_name = args[2]
 
     def execute_applet(self, applet_name, applet_args):
-        app_executer = AppletExecuter(external_controlled=True)
+        app_executer = AppletExecuter(external_controlled=True, verbose=self.verbose)
         app_executer.set_applet_data(applet_name, applet_args)
         return app_executer.run()
 
@@ -258,6 +257,15 @@ class CampaignExecuter():
         d['time'] = chunks[0]
         ret.append(d)
 
+    def transform_print_statement(self, chunks, ret):
+        d = dict()
+        if not len(chunks) > 0:
+            # need a second value
+            return
+        d['cmd'] = CampaignExecuter.OPCODE_CMD_PRINT
+        d['msg'] = chunks[:]
+        ret.append(d)
+
     def transform(self, content):
         data = list()
         for c in content:
@@ -269,21 +277,37 @@ class CampaignExecuter():
                 self.transform_exec_statement(chunks[1:], data)
             elif chunks[0] == "sleep":
                 self.transform_sleep_statement(chunks[1:], data)
+            elif chunks[0] == "print":
+                self.transform_print_statement(chunks[1:], data)
             else:
-                print("Command \"{}\" not known, only exec and sleep allowed".format(chunks[0]))
+                self.p.err("Command \"{}\" not known, only exec and sleep allowed".format(chunks[0]))
                 return None, False
         return data, True
 
     def execute_campaign(self, data):
+        test_no = len(data)
+        run_no = 1
         for d in data:
             ret = True
+            cmd = "unknown"
             if d['cmd'] == CampaignExecuter.OPCODE_CMD_EXEC:
+                cmd = "exec {}".format(d['name'])
+                self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
+                                                 cmd), level=Printer.STD)
                 ret = self.execute_applet(d['name'], d['args'])
-            if d['cmd'] == CampaignExecuter.OPCODE_CMD_SLEEP:
+            elif d['cmd'] == CampaignExecuter.OPCODE_CMD_SLEEP:
+                cmd = "sleep {}".format(d['time'])
+                self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
+                                                 cmd), level=Printer.STD)
                 time.sleep(int(d['time']))
+            elif d['cmd'] == CampaignExecuter.OPCODE_CMD_PRINT:
+                # when we print we do not print the print   
+                self.p.msg("  # {}\n".format(" ".join(d['msg'])), level=Printer.STD)
+
             if ret == False:
                 print("Applet returned negative return code, stop campaign now")
                 return
+            run_no += 1
 
     def parse_campaign(self):
         path, ok = self.campaign_path(self.campaign_name)
@@ -297,8 +321,26 @@ class CampaignExecuter():
         data, ok = self.parse_campaign()
         if not ok:
             sys.exit(1)
-        print("Execute Campaign \"{}\"".format(self.campaign_name))
+        self.p.msg("Execute Campaign \"{}\"\n".format(self.campaign_name),
+                   level=Printer.STD)
         self.execute_campaign(data)
+
+class CampaignLister():
+
+    def __init__(self, verbose=False):
+        self.verbose = verbose
+        self.p = Printer(verbose=self.verbose)
+
+    def subdirs(self, d):
+        return [name for name in os.listdir(d) if os.path.isdir(os.path.join(d, name))]
+
+    def run(self):
+        hp = os.path.dirname(os.path.realpath(__file__))
+        fp = os.path.join(hp, "campaigns")
+        dirs = self.subdirs(fp)
+        sys.stdout.write("Available campaigns:\n")
+        for d in dirs:
+            sys.stdout.write("  {}\n".format(d))
 
 
 class NetAppletShuffler:
@@ -311,7 +353,7 @@ class NetAppletShuffler:
             }
 
     def __init__(self):
-        pass
+        self.verbose = False
 
     def which(self, program):
         for path in os.environ["PATH"].split(os.pathsep):
@@ -355,6 +397,14 @@ class NetAppletShuffler:
             self.print_version()
             return None
 
+        # handle verbose flag
+        if "--verbose" in sys.argv:
+            sys.argv.remove("--verbose")
+            self.verbose = True
+        if "-v" in sys.argv:
+            self.verbose = True
+            sys.argv.remove("-v")
+
         # -h | --help as first argument is treated special
         # and has other meaning as a submodule
         if self.args_contains(sys.argv[1:2], "-h", "--help"):
@@ -380,7 +430,7 @@ class NetAppletShuffler:
         if not classtring:
             return 1
 
-        classinstance = globals()[classtring]()
+        classinstance = globals()[classtring](verbose=self.verbose)
         ok = classinstance.run()
         if not ok:
             return 1

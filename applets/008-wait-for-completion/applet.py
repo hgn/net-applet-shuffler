@@ -9,7 +9,6 @@ def is_id_running(x, host_ip, host_user, applet_id):
     # with error code == 0: file exists -> process is running
     if exit_code == 0:
         return True
-
     return False
 
 

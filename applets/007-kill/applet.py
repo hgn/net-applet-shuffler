@@ -1,9 +1,7 @@
 
 def clean_directory(x, host_ip, host_user):
     x.ssh.exec(host_ip, host_user, "rm -fr /tmp/net-applet-shuffler/*")
-
     return True
-
 
 def clean_service(x, host_ip, host_user, service_name):
     stdout = x.ssh.exec(host_ip, host_user, "pgrep {}".format(service_name))
@@ -18,11 +16,9 @@ def clean_service(x, host_ip, host_user, service_name):
 
     return True
 
-
 def main(x, conf, args):
     if not len(args) == 1:
         x.p.msg("wrong usage. use: [hostname]")
-
         return False
 
     # retrieve host information
