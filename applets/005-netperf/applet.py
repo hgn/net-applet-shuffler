@@ -85,6 +85,7 @@ def main(x, conf, args):
     arg_d["user_source"] = conf['boxes'][arg_d["name_source"]]['user']
     arg_d["ip_dest"] = conf['boxes'][arg_d["name_dest"]]["interfaces"][0]['ip-address']
     arg_d["user_dest"] = conf['boxes'][arg_d["name_dest"]]['user']
+
     # potentially start parallel netperf instances
     # note: at this point, the distribution of the applet will be done, which
     # is probably not the best way to do (can cause unwanted time offsets)
