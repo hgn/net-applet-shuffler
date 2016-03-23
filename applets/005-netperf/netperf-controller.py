@@ -110,14 +110,20 @@ class NetperfController:
         return True
 
     def test_running(self, starting):
-        # while the following file exists, there is a ongoing transfer
-        if starting:
-            self.exec("touch /tmp/net-applet-shuffler/running_{}"
+        # due to network congestion, this might fail, thus has to be robust
+        done = False
+        while not done:
+            try:
+                # while the following file exists, there is a ongoing transfer
+                if starting:
+                    self.exec("touch /tmp/net-applet-shuffler/running_{}"
                                             .format(self.arg_d["applet_id"]))
-        if not starting:
-            self.exec("rm /tmp/net-applet-shuffler/running_{}"
+                if not starting:
+                    self.exec("rm /tmp/net-applet-shuffler/running_{}"
                                             .format(self.arg_d["applet_id"]))
-        return True
+                return True
+            except subprocess.SubprocessError:
+                pass
 
     def main(self):
         # demonize program

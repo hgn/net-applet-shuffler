@@ -1,15 +1,24 @@
 
-import time
+import subprocess
 import sys
+import time
 
 
 def is_id_running(x, host_ip, host_user, applet_id):
-    _, _, exit_code = x.ssh.exec(host_ip, host_user, "test -f "
-            "/tmp/net-applet-shuffler/running_{}".format(applet_id))
-    # with exit code == 0: file exists -> process is running
-    if exit_code == 0:
-        return True
-    return False
+    # due to active tests, the host might seem to be unavailable (congestion)
+    try:
+        _, _, exit_code = x.ssh.exec(host_ip, host_user, "test -f "
+                "/tmp/net-applet-shuffler/running_{}".format(applet_id))
+        # with exit code == 0: file exists -> process is running
+        if exit_code == 0:
+            return True
+
+        return False
+    # try again after sleep
+    except subprocess.SubprocessError:
+        x.p.msg("check got lost in congestion\n")
+        return False
+
 
 
 def main(x, conf, args):
@@ -25,19 +34,20 @@ def main(x, conf, args):
     ent_d = dict()
     # in seconds
     interval_time = int(args[0].split(":")[1])
+    interval_waited = 0
     # read in all host:id tuples
     for argument_number in range(0, (len(sys.argv))):
         name_host = args[argument_number].split(":")[0]
         applet_id = args[argument_number].split(":")[1]
         if not name_host == "interval_time":
             ent_d[applet_id] = name_host
-
     # iter through all dict entries, and test them one in an interval
     # remove items which are not running anymore
     # when the dict is empty, all processes are finished
     while len(ent_d) > 0:
+        if interval_waited > 0:
+            x.p.msg("{} interval(s) waited...\n".format(str(interval_waited)))
         time.sleep(interval_time)
-
         # dict size must not change during iteration
         # therefore use a list for entries to be deleted
         entries_marked = list()
@@ -48,9 +58,9 @@ def main(x, conf, args):
             # mark dict entry if running is false, else do nothing
             if not is_id_running(x, host_ip, host_user, applet_id):
                 entries_marked.append(applet_id)
-
         # remove marked entries from dict
         for entry in entries_marked:
             ent_d.pop(entry)
+        interval_waited += interval_time
 
     return True
