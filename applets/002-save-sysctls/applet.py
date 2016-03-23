@@ -10,7 +10,7 @@ def main(x, conf, args):
     ip = conf['boxes'][hostname]["interfaces"][0]['ip-address']
     user = conf['boxes'][hostname]['user']
     # check if file exist already, if we break here
-    # x.ssh.exec execute at ip with sudo
+    # the following three lines are probably obsolete
     _, _, exit_code = x.ssh.exec(ip, user, "test -f /tmp/sysctl.save")
     if exit_code == 0:
         #x.p.msg("file already available, nothing to do here\n")
