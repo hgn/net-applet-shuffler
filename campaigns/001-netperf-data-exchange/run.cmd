@@ -53,11 +53,11 @@ exec 006-tcpdump beta id:0001 mode:start local-file-name:"ignored" filter:"tcp a
 # - flow_offset is the time in seconds after which the flow is started
 # - netserver is the control(!) port of the netserver
 # usage: host sink:[name] id:[string] source_port:[port] sink_port:[port] flow_length:[seconds|-bytes] flow_offset:[seconds] netserver:[port]
-exec 005-netperf alpha sink:beta id:0001 source_port:20000 sink_port:30000 flow_length:20 flow_offset:1 netserver:29999
-exec 005-netperf beta sink:alpha id:0002 source_port:20001 sink_port:30001 flow_length:20 flow_offset:11 netserver:29998
+exec 005-netperf alpha sink:beta id:0001 source_port:20000 sink_port:30000 flow_length:20 flow_offset:5 netserver:29999
+exec 005-netperf beta sink:alpha id:0002 source_port:20001 sink_port:30001 flow_length:20 flow_offset:10 netserver:29998
 
 
-sleep 2
+sleep 4
 
 
 # blocker

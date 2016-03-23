@@ -1,56 +1,66 @@
 
-def netserver_end(x, arg_d):
-    # try graceful end
-    x.ssh.exec(arg_d["ip_dest"], arg_d["user_dest"], "kill -2 {"
-            "}".format(arg_d["netserver_pid"]))
-    # resort to kill
-    x.ssh.exec(arg_d["ip_dest"], arg_d["user_dest"], "kill {"
-            "}".format(arg_d["netserver_pid"]))
-    # remove pid file
-    x.ssh.exec(arg_d["ip_dest"], arg_d["user_dest"], "rm "
-            "/tmp/net-applet-shuffler/netserver_{}".format(arg_d["applet_id"],
-                                                    arg_d["netserver_pid"]))
+import os
+import subprocess
 
-    return True
+from threading import Thread
+
+LOCAL_NET_PATH = os.path.dirname(os.path.realpath(__file__))
+REMOTE_NET_PATH = "/tmp/net-applet-shuffler"
 
 
-def netserver_start(x, arg_d):
-    # pid of netserver which is about to be started
-    netserver_pid = "0"
-    # netperf needs a netserver at target listening on a specific port (
-    # control port)
-    _, _, exit_code = x.ssh.exec(arg_d["ip_dest"], arg_d["user_dest"],
-            "netserver -4 -p {}".format(arg_d["netserver_port"]))
-    # in case of error, there is a netserver possibly already running
-    if exit_code != 0:
-        x.p.msg("error: netserver (required for netperf) could not be started "
-                "at {}\n".format(arg_d["name_dest"]))
-        return False, netserver_pid
-
-    # get the process id of the just started netserver != pid of ssh.exec
-    # process
-    # Note: "pgrep netserver" does not work, since we want to get a specific one
-    stdout = x.ssh.exec(arg_d["ip_dest"], arg_d["user_dest"],
-                        "ps -ef | grep netserver")
-    stdout_decoded = stdout[0].decode("utf-8")
-    for x in stdout_decoded.splitlines():
-        # unique identifier
-        if "netserver -4 -p {}".format(arg_d["netserver_port"]) in x:
-            netserver_pid = x.split()[1]
-
-    return True, netserver_pid
+def ssh_exec(ip, user, cmd):
+    ssh_command = "ssh {}@{} sudo {}".format(user, ip, cmd)
+    process = subprocess.Popen(ssh_command.split(), stdout=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    return stdout, stderr, process.returncode
 
 
-def test_running(x, arg_d, starting):
-    # while the following file exists, there is a ongoing transfer
-    if starting:
-        x.ssh.exec(arg_d["ip_dest"], arg_d["user_dest"], "touch "
-                "/tmp/net-applet-shuffler/running_{}".format(arg_d["applet_id"]))
-    if not starting:
-        x.ssh.exec(arg_d["ip_dest"], arg_d["user_dest"], "rm "
-                "/tmp/net-applet-shuffler/running_{}".format(arg_d["applet_id"]))
+def scp(remote_user, remote_ip, remote_path, local_path, to_local):
+    command = str()
+    if to_local:
+        command = "scp {}@{}:{} {}".format(remote_user, remote_ip, remote_path,
+                                           local_path)
+    else:
+        command = "scp {} {}@{}:{}".format(local_path, remote_user, remote_ip,
+                                           remote_path)
+    p = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    return stdout, stderr, p.returncode
 
-    return True
+
+def controller_thread(arg_d):
+    # assemble arguments
+    arguments_string = "{} {} {} {} {} {} {} {} {} {} {} {}".format(
+        arg_d["applet_id"], arg_d["name_source"], arg_d["user_source"],
+        arg_d["ip_source"], arg_d["port_source"], arg_d["name_dest"],
+        arg_d["user_dest"], arg_d["ip_dest"], arg_d["port_dest"],
+        arg_d["netserver_port"], arg_d["flow_length"], arg_d["flow_offset"])
+    # check if netperf controller is already on source
+    _, _, exit_code = ssh_exec(arg_d["ip_source"], arg_d["user_source"],
+                                 "test -f {}".format(REMOTE_NET_PATH))
+    # if not, copy it to source
+    if not exit_code == 0:
+        copy_to_destination(arg_d["user_source"], arg_d["ip_source"],
+                            LOCAL_NET_PATH, REMOTE_NET_PATH,
+                            "netperf-controller.py", "netperf-controller.py")
+    ssh_exec(arg_d["ip_source"], arg_d["user_source"], "python3.5 {}/{} {}"
+               .format(REMOTE_NET_PATH, "netperf-controller.py",
+                       arguments_string))
+
+
+def copy_to_destination(user, ip, from_path, to_path, source_filename, dest_filename):
+    # due to permission restrictions, scp can't copy to not user owned
+    # places directly
+    # 1. temp copy to user home
+    scp(user, ip, "/home/{}/tmp_f".format(user),
+               (from_path + "/" + source_filename), False)
+    # 2. make target dir
+    ssh_exec(ip, user, "mkdir {}".format(to_path))
+    # 3. copy to target location
+    ssh_exec(ip, user, "cp /home/{}/tmp_f {}/{}".format(user, to_path,
+                                                            dest_filename))
+    # 4. remove temp copy
+    ssh_exec(ip, user, "rm -f /home/{}/tmp_f".format(user))
 
 
 def main(x, conf, args):
@@ -60,67 +70,26 @@ def main(x, conf, args):
                 "port] sink_port:[port] length:[bytes|seconds] "
                 "flow_offset:[seconds] netserver:[port]\n")
         return False
-
     # arguments dictionary
-    arg_d = {}
+    arg_d = dict()
     arg_d["name_source"] = args[0]
     arg_d["name_dest"] = args[1].split(":")[1]
     arg_d["applet_id"] = args[2].split(":")[1]
     arg_d["port_source"] = args[3].split(":")[1]
     arg_d["port_dest"] = args[4].split(":")[1]
-    arg_d["test_length"] = args[5].split(":")[1]
+    arg_d["flow_length"] = args[5].split(":")[1]
     arg_d["flow_offset"] = args[6].split(":")[1]
     arg_d["netserver_port"] = args[7].split(":")[1]
-    x.p.msg("netperf: starting source {}:{} with sink {}:{}, "
-            "length {} and offset {}. Netserver: {}:{}\n".format(
-            arg_d["name_source"], arg_d["port_source"], arg_d["name_dest"],
-            arg_d["port_dest"], arg_d["test_length"], arg_d["flow_offset"],
-            arg_d["name_dest"], arg_d["netserver_port"]))
     # retrieve: source ip, source user name, destination ip, destination user name
     arg_d["ip_source"] = conf['boxes'][arg_d["name_source"]]["interfaces"][0]['ip-address']
     arg_d["user_source"] = conf['boxes'][arg_d["name_source"]]['user']
     arg_d["ip_dest"] = conf['boxes'][arg_d["name_dest"]]["interfaces"][0]['ip-address']
     arg_d["user_dest"] = conf['boxes'][arg_d["name_dest"]]['user']
 
-    # start netserver on destination
-    netserver_started, arg_d["netserver_pid"] = netserver_start(x, arg_d)
-    # return false if netserver could not be started
-    if not netserver_started:
-        return False
-    # save netserver pid to /tmp/net-applet-shuffler/netserver_[pid]
-    # if start succeeded
-    x.ssh.exec(arg_d["ip_dest"], arg_d["user_dest"], "mkdir "
-                                                    "/tmp/net-applet-shuffler")
-    x.ssh.exec(arg_d["ip_dest"], arg_d["user_dest"], "touch "
-            "/tmp/net-applet-shuffler/netserver_{}".format(arg_d["applet_id"]))
-    x.ssh.exec(arg_d["ip_dest"], arg_d["user_dest"], "sh -c \"echo '{}' > "
-            "/tmp/net-applet-shuffler/netserver_{}\"".format(
-            arg_d["netserver_pid"], arg_d["applet_id"]))
-    # write test in progress file
-    # to be checked if there are ongoing transfers
-    test_running(x, arg_d, True)
-    # begin test, as a non-blocking background process
-    # here, traffic flows from source to destination
-    # netperf -H [dest_ip],[ipv4] -L [source_ip],[ipv4] -p [
-    # netserver_control_port] -l [flow_length: bytes(<0) or seconds(>0)] -s [
-    # seconds_to_wait_before_test] -- -P [port_source],[port_target] -T [
-    # protocol] -4
-    _, _, exit_code = x.ssh.exec(arg_d["ip_source"], arg_d["user_source"],
-            "netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {},{} -T TCP "
-            "-4 &".format(arg_d["ip_dest"], arg_d["ip_source"],
-            arg_d["netserver_port"], arg_d["test_length"],
-            arg_d["flow_offset"], arg_d["port_source"], arg_d["port_dest"]))
-
-    if exit_code != 0:
-        x.p.msg("error: netperf performance test could not be "
-                "executed\nfailed params:\n")
-        x.p.msg("netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {},{} -T TCP "
-            "-4\n".format(arg_d["ip_dest"], arg_d["ip_source"],
-            arg_d["netserver_port"], arg_d["test_length"],
-            arg_d["flow_offset"], arg_d["port_source"], arg_d["port_target"]))
-        return False
-    test_running(x, arg_d, False)
-
-    netserver_end(x, arg_d)
+    # potentially start parallel netperf instances
+    # note: at this point, the distribution of the applet will be done, which
+    # is probably not the best way to do (can cause unwanted time offsets)
+    contr_thread = Thread(target=controller_thread, args=(arg_d, ))
+    contr_thread.start()
 
     return True

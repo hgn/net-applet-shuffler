@@ -6,7 +6,7 @@ import sys
 def is_id_running(x, host_ip, host_user, applet_id):
     _, _, exit_code = x.ssh.exec(host_ip, host_user, "test -f "
             "/tmp/net-applet-shuffler/running_{}".format(applet_id))
-    # with error code == 0: file exists -> process is running
+    # with exit code == 0: file exists -> process is running
     if exit_code == 0:
         return True
     return False
@@ -26,7 +26,6 @@ def main(x, conf, args):
     # in seconds
     interval_time = int(args[0].split(":")[1])
     # read in all host:id tuples
-    # len(sys.argv) includes the program name (subtract 1 due to interval time)
     for argument_number in range(0, (len(sys.argv))):
         name_host = args[argument_number].split(":")[0]
         applet_id = args[argument_number].split(":")[1]
