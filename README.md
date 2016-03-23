@@ -174,21 +174,28 @@ Now every interface in question should be able to ping any.
 Save sysctls at PC beta:
 
 ```
-./nas.py exec 003-save-sysctls beta
+python3.5 ./nas.py exec-applet 003-save-sysctls beta
 ```
 
 
 Restore sysctls at PC beta:
 
 ```
-./nas.py exec 003-save-sysctls beta
+python3.5 ./nas.py exec-applet 003-save-sysctls beta
 ```
 
 Set rate to 1000 byte/sec at koppa towards alpha (left interface):
 
 ```
-./nas.py exec 005-netem koppa interface:left rate:1000byte
+python3.5 ./nas.py exec-applet 005-netem koppa interface:left rate:1000byte
 ```
+
+Execute netperf data exchange campaign:
+
+```
+python3.5 ./nas.py -v exec-campaign 001-netperf-data-exchange
+```
+
 
 # ToDo #
 
