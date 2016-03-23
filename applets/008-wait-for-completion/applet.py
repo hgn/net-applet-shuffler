@@ -26,7 +26,6 @@ def main(x, conf, args):
     # in seconds
     interval_time = int(args[0].split(":")[1])
     # read in all host:id tuples
-    # len(sys.argv) includes the program name (subtract 1 due to interval time)
     for argument_number in range(0, (len(sys.argv))):
         name_host = args[argument_number].split(":")[0]
         applet_id = args[argument_number].split(":")[1]
