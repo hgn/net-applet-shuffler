@@ -1,4 +1,3 @@
-import sys
 
 def main(x, conf, args):
     if not len(args) > 0:
@@ -15,7 +14,7 @@ def main(x, conf, args):
     _, _, exit_code = x.ssh.exec(ip, user, "test -f /tmp/sysctl.save")
     if exit_code == 0:
         #x.p.msg("file already available, nothing to do here\n")
-		# return true because it is not failure
+        # return true because it is not failure
         return True
     # there should be no failure here
     x.ssh.exec(ip, user, "sysctl -a > /tmp/sysctl.save")
