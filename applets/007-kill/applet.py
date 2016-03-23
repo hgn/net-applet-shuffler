@@ -26,7 +26,7 @@ def main(x, conf, args):
     host_ip = conf['boxes'][host_name]["interfaces"][0]['ip-address']
     host_user = conf['boxes'][host_name]['user']
 
-    #x.p.msg("cleaning up host {}\n".format(host_name))
+    x.p.msg("cleaning up host {}\n".format(host_name))
     # 1. directory cleanup of /tmp/net-applet-shuffler/
     clean_directory(x, host_ip, host_user)
     # 2. netserver cleanup

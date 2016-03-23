@@ -99,6 +99,7 @@ def tcpdump_stop(x, arg_d):
                "rm /tmp/net-applet-shuffler/tcpdump_{"
                "}".format(arg_d["applet_id"]))
 
+    x.p.msg("fetching dumpfile from {}".format(arg_d["host_name"]))
     if not transfer_dumpfile(x, arg_d):
         return False
 
@@ -125,7 +126,9 @@ def main(x, conf, args):
 
     # applet mode:
     # start: start the tcpdump
+    # black voodoo magic: arg_d["applet_mode"] is "start" does not work
     if arg_d["applet_mode"] == "start":
+        x.p.msg("starting tcpdump at host {}".format(arg_d["host_name"]))
         if tcpdump_start(x, arg_d):
             return True
         return False
@@ -134,6 +137,7 @@ def main(x, conf, args):
     # stop: stop the tcpdump
     # blocks until file is transferred
     if arg_d["applet_mode"] == "stop":
+        x.p.msg("stopping tcpdump at host {}".format(arg_d["host_name"]))
         if tcpdump_stop(x, arg_d):
             return True
         return False

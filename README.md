@@ -9,11 +9,11 @@ Nas will execute so called applets on a particular machine. Examples are:
 * setting special sysctls on all receiver machines
 * rate limiting (via netem) the bandwidth at all middle boxes
 * start n netperf client and server instances and transmit m bytes each
-* capture PCAP files on machine "alpha" and "beta" and download the file locally if netperf is finished
+* capture PCAP files on machine "alpha" and "beta" and download the file locally when netperf is finished
 
 See the end of this file for more examples!
 
-Writing own applets is simple, applets already provides some common
+Writing own applets is simple, nas already provides some common
 functionality for you. For example wrapping ssh and scp.
 
 Executing applets one after another manually by hand is error prone and
@@ -47,7 +47,7 @@ sudo apt-get install ssh
 ## Passwordless SSH and Sudo Access ##
 
 Notes:
-- Make sure ssh servers are running (in ubuntu 15.10 this is not the case)
+- Make sure ssh servers are running (in ubuntu 15.10 by default this is not the case)
 - After ssh key distribution, the machine in question has to be restarted (or
 a logout has to happen).
 
@@ -174,21 +174,28 @@ Now every interface in question should be able to ping any.
 Save sysctls at PC beta:
 
 ```
-./nas.py exec 003-save-sysctls beta
+python3.5 ./nas.py exec-applet 003-save-sysctls beta
 ```
 
 
 Restore sysctls at PC beta:
 
 ```
-./nas.py exec 003-save-sysctls beta
+python3.5 ./nas.py exec-applet 003-save-sysctls beta
 ```
 
 Set rate to 1000 byte/sec at koppa towards alpha (left interface):
 
 ```
-./nas.py exec 005-netem koppa interface:left rate:1000byte
+python3.5 ./nas.py exec-applet 005-netem koppa interface:left rate:1000byte
 ```
+
+Execute netperf data exchange campaign:
+
+```
+python3.5 ./nas.py -v exec-campaign 001-netperf-data-exchange
+```
+
 
 # ToDo #
 

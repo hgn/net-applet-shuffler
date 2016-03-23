@@ -89,6 +89,8 @@ def main(x, conf, args):
     # potentially start parallel netperf instances
     # note: at this point, the distribution of the applet will be done, which
     # is probably not the best way to do (can cause unwanted time offsets)
+    x.p.msg("Starting netperf applet on host {}\n".format(
+                                                        arg_d["user_source"]))
     contr_thread = Thread(target=controller_thread, args=(arg_d, ))
     contr_thread.start()
 

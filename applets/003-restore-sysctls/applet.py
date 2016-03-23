@@ -11,11 +11,9 @@ def main(x, conf, args):
     user = conf['boxes'][hostname]['user']
 
     # check if a backup sysctl.save file exists
-    # x.ssh.exec execute at ip with sudo
     _, _, exit_code = x.ssh.exec(ip, user, "test -f /tmp/sysctl.save")
     if exit_code != 0:
         x.p.msg("there is no sysctl.save backup which could be restored\n")
-		# return true because it is not failure
         return False
     # there should be no failure here
     x.ssh.exec(ip, user, "sysctl -p/tmp/sysctl.save")
