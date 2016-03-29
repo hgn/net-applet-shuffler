@@ -1,6 +1,5 @@
 
 import subprocess
-import sys
 import time
 
 
@@ -34,8 +33,8 @@ def main(x, conf, args):
     # in seconds
     interval_time = int(args[0].split(":")[1])
     intervals_waited = 0
-    # read in all host:id tuples
-    for argument_number in range(0, (len(sys.argv))):
+    # read in all host:id
+    for argument_number in range(0, (len(args))):
         name_host = args[argument_number].split(":")[0]
         applet_id = args[argument_number].split(":")[1]
         if not name_host == "interval_time":
