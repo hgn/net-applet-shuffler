@@ -20,7 +20,6 @@ def is_id_running(x, host_ip, host_user, applet_id):
         return False
 
 
-
 def main(x, conf, args):
     if len(args) < 1:
         x.p.msg("wrong usage: first specify the interval check time "
@@ -34,7 +33,7 @@ def main(x, conf, args):
     ent_d = dict()
     # in seconds
     interval_time = int(args[0].split(":")[1])
-    interval_waited = 0
+    intervals_waited = 0
     # read in all host:id tuples
     for argument_number in range(0, (len(sys.argv))):
         name_host = args[argument_number].split(":")[0]
@@ -45,22 +44,22 @@ def main(x, conf, args):
     # remove items which are not running anymore
     # when the dict is empty, all processes are finished
     while len(ent_d) > 0:
-        if interval_waited > 0:
-            x.p.msg("{} interval(s) waited...\n".format(str(interval_waited)))
+        if intervals_waited > 0:
+            x.p.msg("{} interval(s) waited...\n".format(str(intervals_waited)))
         time.sleep(interval_time)
         # dict size must not change during iteration
         # therefore use a list for entries to be deleted
         entries_marked = list()
         for applet_id in ent_d:
             host_name = ent_d[applet_id]
-            host_ip = conf['boxes'][host_name]["interfaces"][0]['ip-address']
-            host_user = conf['boxes'][host_name]['user']
+            host_ip = conf.get_ip(host_name, 0)
+            host_user = conf.get_user(host_name)
             # mark dict entry if running is false, else do nothing
             if not is_id_running(x, host_ip, host_user, applet_id):
                 entries_marked.append(applet_id)
         # remove marked entries from dict
         for entry in entries_marked:
             ent_d.pop(entry)
-        interval_waited += interval_time
+        intervals_waited += 1
 
     return True
