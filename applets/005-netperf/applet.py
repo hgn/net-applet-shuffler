@@ -37,7 +37,7 @@ def controller_thread(arg_d):
         arg_d["netserver_port"], arg_d["flow_length"], arg_d["flow_offset"])
     # check if netperf controller is already on source
     _, _, exit_code = ssh_exec(arg_d["ip_source"], arg_d["user_source"],
-                                 "test -f {}".format(REMOTE_NET_PATH))
+            "test -f {}/netperf-controller.py".format(REMOTE_NET_PATH))
     # if not, copy it to source
     if not exit_code == 0:
         copy_to_destination(arg_d["user_source"], arg_d["ip_source"],
@@ -81,10 +81,10 @@ def main(x, conf, args):
     arg_d["flow_offset"] = args[6].split(":")[1]
     arg_d["netserver_port"] = args[7].split(":")[1]
     # retrieve: source ip, source user name, destination ip, destination user name
-    arg_d["ip_source"] = conf['boxes'][arg_d["name_source"]]["interfaces"][0]['ip-address']
-    arg_d["user_source"] = conf['boxes'][arg_d["name_source"]]['user']
-    arg_d["ip_dest"] = conf['boxes'][arg_d["name_dest"]]["interfaces"][0]['ip-address']
-    arg_d["user_dest"] = conf['boxes'][arg_d["name_dest"]]['user']
+    arg_d["ip_source"] = conf.get_ip(arg_d["name_source"], 0)
+    arg_d["user_source"] = conf.get_user(arg_d["name_source"])
+    arg_d["ip_dest"] = conf.get_ip(arg_d["name_dest"], 0)
+    arg_d["user_dest"] = conf.get_user(arg_d["name_dest"])
 
     # potentially start parallel netperf instances
     # note: at this point, the distribution of the applet will be done, which
