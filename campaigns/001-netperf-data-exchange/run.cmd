@@ -1,4 +1,6 @@
 
+print Starting campaign 001-netperf-data exchange
+
 # xxx- prefixed applets are not implemented yet
 
 
@@ -59,7 +61,7 @@ exec 005-netperf alpha sink:beta id:0001 source_port:20000 sink_port:30000 flow_
 exec 005-netperf beta sink:alpha id:0002 source_port:20001 sink_port:30001 flow_length:20 flow_offset:10 netserver:29998
 
 
-sleep 4
+sleep 2
 
 
 # blocker
@@ -69,13 +71,13 @@ sleep 4
 # - every host:id tuple actively participating in the test should be specified here
 # - one host can have several running ids, but one (unique) id can have only one host
 # usage: interval_time:[seconds] [name_1]:[id_1] [name_1]:[id_2] [name_2]:[id_3] ...
-exec 008-wait-for-completion interval_time:1 alpha:0001 beta:0002
+exec 008-wait-for-completion interval_time:5 alpha:0001 beta:0002
 
 
 # tcpdump
 # stop tcpdump on host, which also collects the dumpfile
 # notes:
 # - mode:stop -> the filter is ignored
-# - id MUST match the id of the started tcpdump
+# - id and host MUST match the id of the started tcpdump
 # usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump_filter_string"
 exec 006-tcpdump beta id:0001 mode:stop local-file-name:"/tmp/dumps/001_netperf_alpha_to_beta" filter:"ignored"
