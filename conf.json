@@ -9,7 +9,9 @@
 				"interfaces": [
 				   {
 						 "name": "enp4s0",
-						 "ip-address": "10.0.0.1"
+					     "type": "test",
+						 "ip-address": "10.0.0.1",
+                         "default-route": "10.0.0.205"
 				}
 				]
 			},
@@ -20,7 +22,9 @@
 				"interfaces": [
 				   {
 						 "name": "enp0s25",
-						 "ip-address": "10.0.1.1"
+                         "type": "test",
+						 "ip-address": "10.0.1.1",
+                         "default-route": "10.0.1.205"
 					 }
 				]
 			},
