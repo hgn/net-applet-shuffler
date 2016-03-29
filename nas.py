@@ -68,6 +68,21 @@ class Ssh():
         stdout, stderr = p.communicate()
         return stdout, stderr, p.returncode
 
+    def copy_to_restricted(self, user, ip, from_path, to_path,
+                           source_filename, dest_filename):
+        # due to permission restrictions, scp can't copy to not user owned
+        # places directly
+        # 1. temp copy to user home
+        self.copy(user, ip, "/home/{}/tmp_f".format(user),
+                  (from_path + "/" + source_filename), False)
+        # 2. make target dir
+        self.exec(ip, user, "mkdir {}".format(to_path))
+        # 3. copy to target location
+        self.exec(ip, user, "cp /home/{}/tmp_f {}/{}".format(user, to_path,
+                                                             dest_filename))
+        # 4. remove temp copy
+        self.exec(ip, user, "rm -f /home/{}/tmp_f".format(user))
+
 
 class Exchange():
 
