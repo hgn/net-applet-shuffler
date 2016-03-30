@@ -6,7 +6,7 @@ def main(x, conf, args):
 
     hostname = args[0]
 
-    ip = conf.get_ip(hostname, 0)
+    ip = conf.get_control_ip(hostname)
     user = conf.get_user(hostname)
 
     # check if a backup sysctl.save file exists

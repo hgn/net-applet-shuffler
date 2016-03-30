@@ -75,7 +75,11 @@ ssh-copy-id user@[ip]
 Configure static routes and add static ARP entries. Static
 arp entries are required to reduce measurement noise. Also, enable ip forward
 on the router.
-Note: These changes will be lost on a restart.
+
+Notes:
+- These changes will be lost on a restart
+- The test networks are expected to use a /24 net-mask
+- The direct network is expected to us a /16 net-mask
 
 ```
 [on alpha]
@@ -176,26 +180,26 @@ Now every interface in question should be able to ping any.
 Save sysctls at PC beta:
 
 ```
-python3.5 ./nas.py exec-applet 003-save-sysctls beta
+python3 ./nas.py exec-applet 003-save-sysctls beta
 ```
 
 
 Restore sysctls at PC beta:
 
 ```
-python3.5 ./nas.py exec-applet 003-save-sysctls beta
+python3 ./nas.py exec-applet 003-save-sysctls beta
 ```
 
 Set rate to 1000 byte/sec at koppa towards alpha (left interface):
 
 ```
-python3.5 ./nas.py exec-applet 005-netem koppa interface:left rate:1000byte
+python3 ./nas.py exec-applet 005-netem koppa interface:left rate:1000byte
 ```
 
 Execute netperf data exchange campaign:
 
 ```
-python3.5 ./nas.py -v exec-campaign 001-netperf-data-exchange
+python3 ./nas.py -v exec-campaign 001-netperf-data-exchange
 ```
 
 

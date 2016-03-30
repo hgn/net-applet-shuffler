@@ -5,7 +5,7 @@ def main(x, conf, args):
         return False
 
     hostname = args[0]
-    ip = conf.get_ip(hostname, 0)
+    ip = conf.get_test_ip(hostname)
     ok = x.ping(ip)
     if not ok:
         return False
