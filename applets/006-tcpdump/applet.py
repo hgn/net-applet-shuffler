@@ -70,7 +70,6 @@ def transfer_dumpfile(x, arg_d):
         x.p.msg("error transferring the dumpfile dump_{}.pcap from host {}\n"
                 .format(arg_d["applet_id"], arg_d["host_name"]))
         return False
-
     # clean up dumpfile on host
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
                "rm /tmp/net-applet-shuffler/dump_{}.pcap"
