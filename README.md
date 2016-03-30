@@ -50,6 +50,8 @@ Notes:
 - Make sure ssh servers are running (in ubuntu 15.10 by default this is not the case)
 - After ssh key distribution, the machine in question has to be restarted (or
 a logout has to happen).
+- Every host which wishes to connect to another at some point in time has to be
+on it's known hosts file
 
 ```
 alpha, beta, koppa:

@@ -19,7 +19,7 @@ def tcpdump_start(x, arg_d):
         x.p.msg("error: tcpdump could not be started at host {}\n"
                 "failed params:\n".format(arg_d["host_name"]))
         x.p.msg("tcpdump -i {} -n -s 0 -w "
-                "/tmp/net-applet-shuffler/dump_{}.pcap '{}'".format
+                "/tmp/net-applet-shuffler/dump_{}.pcap '{}'\n".format
                 (arg_d["host_interface"], arg_d["applet_id"], arg_d["filter"]))
         return False
 
@@ -66,7 +66,7 @@ def transfer_dumpfile(x, arg_d):
     process.communicate()
     if process.returncode != 0:
         x.p.msg("error transferring the dumpfile dump_{}.pcap from host {"
-                "}".format(arg_d["applet_id"], arg_d["host_name"]))
+                "}\n".format(arg_d["applet_id"], arg_d["host_name"]))
         return False
 
     # clean up dumpfile on host
@@ -85,7 +85,7 @@ def tcpdump_stop(x, arg_d):
     if exit_code != 0:
         x.p.msg("error: tcpdump pid at host {} could not be retrieved\n"
                 "failed params:\n".format(arg_d["host_name"]))
-        x.p.msg("echo \"$(</tmp/net-applet-shuffler/tcpdump_{})\""
+        x.p.msg("echo \"$(</tmp/net-applet-shuffler/tcpdump_{})\"\n"
                 .format(arg_d["applet_id"]))
         return False
 
@@ -99,7 +99,7 @@ def tcpdump_stop(x, arg_d):
                "rm /tmp/net-applet-shuffler/tcpdump_{"
                "}".format(arg_d["applet_id"]))
 
-    x.p.msg("fetching dumpfile from {}".format(arg_d["host_name"]))
+    x.p.msg("fetching dumpfile from {}\n".format(arg_d["host_name"]))
     if not transfer_dumpfile(x, arg_d):
         return False
 
@@ -120,15 +120,15 @@ def main(x, conf, args):
     arg_d["local_file_name"] = args[3].split("\"")[1]
     arg_d["filter"] = args[4].split("\"")[1]
     # retrieve: host ip, host user name
-    arg_d["host_ip"] = conf['boxes'][arg_d["host_name"]]["interfaces"][0]['ip-address']
-    arg_d["host_interface"] = conf['boxes'][arg_d["host_name"]]['interfaces'][0]['name']
-    arg_d["host_user"] = conf['boxes'][arg_d["host_name"]]['user']
+    arg_d["host_ip"] = conf.get_ip(arg_d["host_name"], 0)
+    arg_d["host_interface"] = conf.get_iface_name(arg_d["host_name"], 0)
+    arg_d["host_user"] = conf.get_user(arg_d["host_name"])
 
     # applet mode:
     # start: start the tcpdump
     # black voodoo magic: arg_d["applet_mode"] is "start" does not work
     if arg_d["applet_mode"] == "start":
-        x.p.msg("starting tcpdump at host {}".format(arg_d["host_name"]))
+        x.p.msg("starting tcpdump at host {}\n".format(arg_d["host_name"]))
         if tcpdump_start(x, arg_d):
             return True
         return False
@@ -137,7 +137,7 @@ def main(x, conf, args):
     # stop: stop the tcpdump
     # blocks until file is transferred
     if arg_d["applet_mode"] == "stop":
-        x.p.msg("stopping tcpdump at host {}".format(arg_d["host_name"]))
+        x.p.msg("stopping tcpdump at host {}\n".format(arg_d["host_name"]))
         if tcpdump_stop(x, arg_d):
             return True
         return False

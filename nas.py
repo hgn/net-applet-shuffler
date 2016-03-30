@@ -6,11 +6,7 @@
 import sys
 import os
 import optparse
-import subprocess
 import pprint
-import re
-import ctypes
-import math
 import time
 import importlib.util
 import json
@@ -45,6 +41,9 @@ class Printer:
             sys.stdout.write(prefix + msg)
             self.msg("\n" + '=' * str_len + "\n")
 
+    def set_verbose(self):
+        pass
+
 
 class Ssh():
 
@@ -69,6 +68,21 @@ class Ssh():
         stdout, stderr = p.communicate()
         return stdout, stderr, p.returncode
 
+    def copy_to_restricted(self, user, ip, from_path, to_path,
+                           source_filename, dest_filename):
+        # due to permission restrictions, scp can't copy to not user owned
+        # places directly
+        # 1. temp copy to user home
+        self.copy(user, ip, "/home/{}/tmp_f".format(user),
+                  (from_path + "/" + source_filename), False)
+        # 2. make target dir
+        self.exec(ip, user, "mkdir {}".format(to_path))
+        # 3. copy to target location
+        self.exec(ip, user, "cp /home/{}/tmp_f {}/{}".format(user, to_path,
+                                                             dest_filename))
+        # 4. remove temp copy
+        self.exec(ip, user, "rm -f /home/{}/tmp_f".format(user))
+
 
 class Exchange():
 
@@ -81,6 +95,46 @@ class Exchange():
         if response == 0:
             return True
         return False
+
+
+class Conf():
+
+    def __init__(self):
+        hp = os.path.dirname(os.path.realpath(__file__))
+        fp = os.path.join(hp, "conf.json")
+        with open(fp, 'r') as fd:
+            data = fd.read()
+            self.data = json.loads(data)
+
+    def __getitem__(self, item):
+        pass
+
+    # by host name and iface num
+    def get_ip(self, host_name, iface_num):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                return self.data["boxes"][host_name]["interfaces"][iface_num]["ip-address"]
+        return None
+
+    # by host name and iface num
+    def get_iface_name(self, host_name, iface_num):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                return self.data["boxes"][host_name]["interfaces"][iface_num]["name"]
+        return None
+
+    # by host name and iface num
+    def get_default_route(self, host_name, iface_num):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                return self.data["boxes"][host_name]["interfaces"][iface_num]["default-route"]
+
+    # by hostname
+    def get_user(self, host_name):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                return self.data["boxes"][host_name]["user"]
+        return None
 
 
 class AppletExecuter():
@@ -152,7 +206,7 @@ class AppletExecuter():
         self.p.msg("execute applet \"{} {}\"\n".format(self.applet_name,
                                                          self.applet_args),
                                                          level=Printer.VERBOSE)
-        status = self.applet.main(xchange, self.conf, self.applet_args)
+        status = self.applet.main(xchange, Conf(), self.applet_args)
         if status == True:
             return True
         elif status == False:
@@ -280,7 +334,8 @@ class CampaignExecuter():
             elif chunks[0] == "print":
                 self.transform_print_statement(chunks[1:], data)
             else:
-                self.p.err("Command \"{}\" not known, only exec and sleep allowed".format(chunks[0]))
+                self.p.err("Command \"{}\" not known, only exec, sleep and "
+                           "print allowed".format(chunks[0]))
                 return None, False
         return data, True
 
