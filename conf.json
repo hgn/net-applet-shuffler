@@ -1,18 +1,16 @@
 {
-
-
 "boxes": {
 
 			"alpha": {
 				"description": "Data Sender (often local PC)",
 				"user":        "tcp1",
 				"interfaces": [
-				   {
-						 "name": "enp4s0",
-					     "type": "test",
-						 "ip-address": "10.0.0.1",
-                         "default-route": "10.0.0.205"
-				}
+					{
+						"name": "enp4s0",
+						"type": "test",
+						"ip-address": "10.0.0.1",
+						"default-route": "10.0.0.205"
+					}
 				]
 			},
 
@@ -20,12 +18,12 @@
 				"description": "Data Sink (often remote PC)",
 				"user":        "beta",
 				"interfaces": [
-				   {
-						 "name": "enp0s25",
-                         "type": "test",
-						 "ip-address": "10.0.1.1",
-                         "default-route": "10.0.1.205"
-					 }
+					{
+						"name": "enp0s25",
+						"type": "test",
+						"ip-address": "10.0.1.1",
+						"default-route": "10.0.1.205"
+					}
 				]
 			},
 
@@ -33,15 +31,15 @@
 				"description": "Middle box, running netem, etc",
 				"user":        "koppa",
 				"interfaces": [
-				   {
-						 "name": "enp3s2",
-						 "ip-address": "10.0.0.205"
-					 },
-					 {
-						 "name": "enp0s25",
-						 "ip-address": "10.0.1.205"
-					 }
-					]
+					{
+						"name": "enp3s2",
+						"ip-address": "10.0.0.205"
+					},
+					{
+						"name": "enp0s25",
+						"ip-address": "10.0.1.205"
+					}
+				]
 			}
 
 		}
