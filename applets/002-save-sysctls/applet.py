@@ -8,7 +8,7 @@ def main(x, conf, args):
     ip = conf.get_control_ip(hostname)
     user = conf.get_user(hostname)
     # check if file exist already, if we break here
-    # the following three lines are probably obsolete
+    # the following four lines are probably obsolete
     _, _, exit_code = x.ssh.exec(ip, user, "test -f /tmp/sysctl.save")
     if exit_code == 0:
         x.p.msg("file already available, nothing to do here\n")
