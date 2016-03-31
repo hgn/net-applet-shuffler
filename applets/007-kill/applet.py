@@ -10,14 +10,10 @@ def clean_directory(x, host_name, host_user, host_ip):
 
 
 def clean_service(x, host_name, host_user, host_ip, service_name):
-    stdout, _, exit_code = x.ssh.exec(host_ip, host_user, "pgrep {}"
-                                      .format(service_name))
-    if exit_code != 0:
-        x.p.msg("error: retrieving {}'s {} pid\n"
-                .format(host_name, service_name))
-        return False
+    stdout, _, _ = x.ssh.exec(host_ip, host_user, "pgrep {}"
+                              .format(service_name))
     # iter through all pids
-    for service_pid in stdout[0].decode("utf-8").splitlines():
+    for service_pid in stdout.decode("utf-8").splitlines():
         # try to end gracefully
         _, _, exit_code = x.ssh.exec(host_ip, host_user, "kill -2 {}"
                                      .format(service_pid))

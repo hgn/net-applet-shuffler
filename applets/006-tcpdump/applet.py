@@ -29,7 +29,7 @@ def tcpdump_start(x, arg_d):
     pid_tcpdump = "0"
     stdout, _, _ = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
                               "ps -ef | grep tcpdump")
-    stdout_decoded = stdout[0].decode("utf-8")
+    stdout_decoded = stdout.decode("utf-8")
     for line in stdout_decoded.splitlines():
         # unique identifier
         if "sudo tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/tcpdump_{}" \
