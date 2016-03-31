@@ -40,11 +40,9 @@ def controller_thread(x, arg_d):
                       LOCAL_NET_PATH, REMOTE_NET_PATH, "netperf-controller.py",
                       "netperf-controller.py")
 
-    x.ssh.exec(arg_d["ip_source_control"], arg_d["user_source"],
-               "python3.5 {}/{} {}".format(REMOTE_NET_PATH,
-               "netperf-controller.py", arguments_string))
-
-    return True
+    _, _, exit_code = x.ssh.exec(arg_d["ip_source_control"],
+            arg_d["user_source"], "python3.5 {}/{} {}".format(REMOTE_NET_PATH,
+            "netperf-controller.py", arguments_string))
 
 
 def main(x, conf, args):
@@ -56,15 +54,20 @@ def main(x, conf, args):
         return False
     # arguments dictionary
     arg_d = dict()
-    arg_d["name_source"] = args[0]
-    arg_d["name_dest"] = args[1].split(":")[1]
-    arg_d["applet_id"] = args[2].split(":")[1]
-    arg_d["port_source"] = args[3].split(":")[1]
-    arg_d["port_dest"] = args[4].split(":")[1]
-    arg_d["flow_length"] = args[5].split(":")[1]
-    arg_d["flow_offset"] = args[6].split(":")[1]
-    arg_d["netserver_port"] = args[7].split(":")[1]
-    # retrieve: source ip, source user name, destination ip, destination user name
+    try:
+        arg_d["name_source"] = args[0]
+        arg_d["name_dest"] = args[1].split(":")[1]
+        arg_d["applet_id"] = args[2].split(":")[1]
+        arg_d["port_source"] = args[3].split(":")[1]
+        arg_d["port_dest"] = args[4].split(":")[1]
+        arg_d["flow_length"] = args[5].split(":")[1]
+        arg_d["flow_offset"] = args[6].split(":")[1]
+        arg_d["netserver_port"] = args[7].split(":")[1]
+    except IndexError:
+        x.p.msg("error: wrong usage\n")
+        return False
+    # retrieve: source ip, source user name, destination ip, destination user
+    # name
     arg_d["ip_source_test"] = conf.get_test_ip(arg_d["name_source"])
     arg_d["ip_source_control"] = conf.get_control_ip(arg_d["name_source"])
     arg_d["user_source"] = conf.get_user(arg_d["name_source"])

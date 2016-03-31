@@ -110,8 +110,8 @@ class NetperfController:
                       .format(self.arg_d["applet_id"]))
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
                       self.arg_d["user_source"], "sh -c \"echo '{}' > "
-                        "/tmp/net-applet-shuffler/netserver_{}\"".format(
-                        self.arg_d["netserver_pid"], self.arg_d["applet_id"]))
+                      "/tmp/net-applet-shuffler/netserver_{}\"".format(
+                      self.arg_d["netserver_pid"], self.arg_d["applet_id"]))
         return True
 
     def test_running(self, starting):
@@ -135,6 +135,11 @@ class NetperfController:
         self.demonize_program()
         # make sure necessary dirs exist, local and remote
         self.exec("mkdir /tmp/net-applet-shuffler")
+        # redirect output to file
+        sys.stdout = open("/tmp/net-applet-shuffler/netperf_controller_stdout",
+                          "w")
+        sys.stderr = open("/tmp/net-applet-shuffler/netperf_controller_stderr",
+                          "w")
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
                       self.arg_d["user_source"],
                       "mkdir /tmp/net-applet-shuffler")
@@ -184,6 +189,7 @@ class NetperfController:
 
         self.test_running(False)
         self.netserver_end()
+        print("netperf-controller ended gracefully")
         sys.exit(0)
 
 
