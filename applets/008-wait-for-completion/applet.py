@@ -30,15 +30,19 @@ def main(x, conf, args):
     # note: a host can have multiple ids, but an id can (should) not have
     # multiple hosts -> key = unique == id, value == host
     ent_d = dict()
-    # in seconds
-    interval_time = int(args[0].split(":")[1])
-    intervals_waited = 0
-    # read in all host:id
-    for argument_number in range(0, (len(args))):
-        name_host = args[argument_number].split(":")[0]
-        applet_id = args[argument_number].split(":")[1]
-        if not name_host == "interval_time":
-            ent_d[applet_id] = name_host
+    try:
+        # in seconds
+        interval_time = int(args[0].split(":")[1])
+        intervals_waited = 0
+        # read in all host:id
+        for argument_number in range(0, (len(args))):
+            name_host = args[argument_number].split(":")[0]
+            applet_id = args[argument_number].split(":")[1]
+            if not name_host == "interval_time":
+                ent_d[applet_id] = name_host
+    except IndexError:
+        x.p.msg("error: wrong usage\n")
+        return False
     # iter through all dict entries, and test them one in an interval
     # remove items which are not running anymore
     # when the dict is empty, all processes are finished
