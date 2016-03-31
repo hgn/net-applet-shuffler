@@ -26,7 +26,7 @@ class ControllerStart(Thread):
         self.arguments = arguments
 
     def run(self):
-        ssh_command = "ssh {}@{} sudo python3 {}/{} {}".format(
+        ssh_command = "ssh {}@{} sudo python3.5 {}/{} {}".format(
             self.host_user, self.host_ip_control, REMOTE_CONT_PATH, CONTR_NAME,
             self.arguments)
         process = subprocess.Popen(ssh_command.split(), stdout=subprocess.PIPE)

@@ -41,7 +41,7 @@ def controller_thread(x, arg_d):
                       "netperf-controller.py")
 
     x.ssh.exec(arg_d["ip_source_control"], arg_d["user_source"],
-               "python3 {}/{} {}".format(REMOTE_NET_PATH,
+               "python3.5 {}/{} {}".format(REMOTE_NET_PATH,
                "netperf-controller.py", arguments_string))
 
     return True
