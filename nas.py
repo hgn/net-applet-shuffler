@@ -56,7 +56,7 @@ class Ssh():
         stdout, stderr = p.communicate()
         return stdout, stderr, p.returncode
 
-    def copy(self, remote_user, remote_ip, remote_path, local_path, to_local):
+    def _copy(self, remote_user, remote_ip, remote_path, local_path, to_local):
         command = str()
         if to_local:
             command = "scp {}@{}:{} {}".format(remote_user, remote_ip,
@@ -68,13 +68,21 @@ class Ssh():
         stdout, stderr = p.communicate()
         return stdout, stderr, p.returncode
 
-    def copy_to_restricted(self, user, ip, from_path, to_path,
-                           source_filename, dest_filename):
+    # e.g. path: "/tmp/net-applet-shuffler"
+    # filename: "tcp_dump.file"
+    def copy_from(self, user, ip, from_path, to_path, source_filename,
+                  dest_filename):
+        stdout, stderr, exit_code = self._copy(user, ip, from_path + "/" +
+                source_filename, to_path + "/" + dest_filename, True)
+        return stdout, stderr, exit_code
+
+    def copy_to(self, user, ip, from_path, to_path, source_filename,
+                dest_filename):
         # due to permission restrictions, scp can't copy to not user owned
         # places directly
         # 1. temp copy to user home
-        self.copy(user, ip, "/home/{}/tmp_f".format(user),
-                  (from_path + "/" + source_filename), False)
+        stdout, stderr, exit_code = self._copy(user, ip, "/home/{}/tmp_f".format(user),
+                   (from_path + "/" + source_filename), False)
         # 2. make target dir
         self.exec(ip, user, "mkdir {}".format(to_path))
         # 3. copy to target location
@@ -82,6 +90,7 @@ class Ssh():
                                                              dest_filename))
         # 4. remove temp copy
         self.exec(ip, user, "rm -f /home/{}/tmp_f".format(user))
+        return stdout, stderr, exit_code
 
 
 class Exchange():
@@ -109,27 +118,60 @@ class Conf():
     def __getitem__(self, item):
         pass
 
-    # by host name and iface num
-    def get_ip(self, host_name, iface_num):
+    def get_test_ip(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
-                return self.data["boxes"][host_name]["interfaces"][iface_num]["ip-address"]
+                interfaces = self.data["boxes"][host_name]["interfaces"]
+                for interface in interfaces:
+                    if interface["type"] == "test":
+                        return interface["ip-address"]
         return None
 
-    # by host name and iface num
-    def get_iface_name(self, host_name, iface_num):
+    def get_control_ip(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
-                return self.data["boxes"][host_name]["interfaces"][iface_num]["name"]
+                interfaces = self.data["boxes"][host_name]["interfaces"]
+                for interface in interfaces:
+                    if interface["type"] == "control":
+                        return interface["ip-address"]
         return None
 
-    # by host name and iface num
-    def get_default_route(self, host_name, iface_num):
+    def get_test_iface_name(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
-                return self.data["boxes"][host_name]["interfaces"][iface_num]["default-route"]
+                interfaces = self.data["boxes"][host_name]["interfaces"]
+                for interface in interfaces:
+                    if interface["type"] == "test":
+                        return interface["name"]
+        return None
 
-    # by hostname
+    def get_control_iface_name(self, host_name):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                interfaces = self.data["boxes"][host_name]["interfaces"]
+                for interface in interfaces:
+                    if interface["type"] == "control":
+                        return interface["name"]
+        return None
+
+    def get_test_default_route(self, host_name):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                interfaces = self.data["boxes"][host_name]["interfaces"]
+                for interface in interfaces:
+                    if interface["type"] == "test":
+                        return interface["default-route"]
+        return None
+
+    def get_control_default_route(self, host_name):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                interfaces = self.data["boxes"][host_name]["interfaces"]
+                for interface in interfaces:
+                    if interface["type"] == "control":
+                        return interface["default-route"]
+        return None
+
     def get_user(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:

@@ -51,7 +51,7 @@ def main(x, conf, args):
         entries_marked = list()
         for applet_id in ent_d:
             host_name = ent_d[applet_id]
-            host_ip = conf.get_ip(host_name, 0)
+            host_ip = conf.get_control_ip(host_name)
             host_user = conf.get_user(host_name)
             # mark dict entry if running is false, else do nothing
             if not is_id_running(x, host_ip, host_user, applet_id):

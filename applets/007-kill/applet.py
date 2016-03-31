@@ -25,7 +25,7 @@ def main(x, conf, args):
 
     # retrieve host information
     host_name = args[0]
-    host_ip = conf.get_ip(host_name, 0)
+    host_ip = conf.get_control_ip(host_name)
     host_user = conf.get_user(host_name)
 
     #x.p.msg("cleaning up host {}\n".format(host_name))
