@@ -125,7 +125,8 @@ class Conf():
                 for interface in interfaces:
                     if interface["type"] == "test":
                         return interface["ip-address"]
-        return None
+        print("error: get_test_ip not found for {}\n".format(host_name))
+        sys.exit(1)
 
     def get_control_ip(self, host_name):
         for host in self.data["boxes"]:
@@ -134,7 +135,8 @@ class Conf():
                 for interface in interfaces:
                     if interface["type"] == "control":
                         return interface["ip-address"]
-        return None
+        print("error: get_control_ip not found for {}\n".format(host_name))
+        sys.exit(1)
 
     def get_test_iface_name(self, host_name):
         for host in self.data["boxes"]:
@@ -143,7 +145,8 @@ class Conf():
                 for interface in interfaces:
                     if interface["type"] == "test":
                         return interface["name"]
-        return None
+        print("error: get_test_iface_name not found for {}\n".format(host_name))
+        sys.exit(1)
 
     def get_control_iface_name(self, host_name):
         for host in self.data["boxes"]:
@@ -152,7 +155,9 @@ class Conf():
                 for interface in interfaces:
                     if interface["type"] == "control":
                         return interface["name"]
-        return None
+        print("error: get_control_iface_name not found for {}\n"
+              .format(host_name))
+        sys.exit(1)
 
     def get_test_default_route(self, host_name):
         for host in self.data["boxes"]:
@@ -161,7 +166,9 @@ class Conf():
                 for interface in interfaces:
                     if interface["type"] == "test":
                         return interface["default-route"]
-        return None
+        print("error: get_test_default_route not found for {}\n"
+              .format(host_name))
+        sys.exit(1)
 
     def get_control_default_route(self, host_name):
         for host in self.data["boxes"]:
@@ -170,13 +177,16 @@ class Conf():
                 for interface in interfaces:
                     if interface["type"] == "control":
                         return interface["default-route"]
-        return None
+        print("error: get_control_default_route not found for {}\n"
+              .format(host_name))
+        sys.exit(1)
 
     def get_user(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
                 return self.data["boxes"][host_name]["user"]
-        return None
+        print("error: get_user not found for {}\n".format(host_name))
+        sys.exit(1)
 
 
 class AppletExecuter():
