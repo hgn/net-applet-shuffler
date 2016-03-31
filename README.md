@@ -105,7 +105,9 @@ Notes:
 ```
 
 
-## Helpful hints #
+# Helpful hints #
+
+## Configuration ##
 
 Normally, routing information is lost after a shutdown. One possible solution
 is to enable ssh access via ssh on os startup, then use ssh for further
@@ -172,7 +174,22 @@ echo "Configuring network parameters done!"
 ...
 
 Now every interface in question should be able to ping any.
-```
+
+
+## Configuration ##
+
+The setup is stored in a file called conf.json in the nas directory root.
+Hosts are expected have at least one test interface (where the tests will run),
+and one control interface (where setup and test information is shared).
+This is due to the reason, that if only one interface is used, this interface is
+basically unavailable during heavy testing periods and the resulting congestion.
+The existing nas framework provides a certain robustness to congestion on the control interfaces, so
+only one single interface can theoretically be used for certain test. However,
+this is not advised. Still, every host needs to have at least one control type
+interface and one test type interface specified in the conf.json. These might specify the
+same interface, if separated interfaces are not available.
+
+
 
 # Examples #
 
