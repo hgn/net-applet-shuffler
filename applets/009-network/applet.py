@@ -48,7 +48,11 @@ def main(x, conf, args):
                 "host3...\n")
         return False
 
-    setup = args[0].split(":")[1]
+    try:
+        setup = args[0].split(":")[1]
+    except IndexError:
+        x.p.msg("error: wrong usage\n")
+        return False
     # arguments for controller on hosts
     host_list = list()
     # read in all host names
