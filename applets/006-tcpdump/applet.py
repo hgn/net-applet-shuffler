@@ -27,23 +27,30 @@ def tcpdump_start(x, arg_d):
     # the dump will have a sudo in front and end the writer gracefully,
     # if ended gracefully
     pid_tcpdump = "0"
-    stdout = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-                        "ps -ef | grep tcpdump")
+    stdout, _, _ = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
+                              "ps -ef | grep tcpdump")
     stdout_decoded = stdout[0].decode("utf-8")
     for line in stdout_decoded.splitlines():
         # unique identifier
-        if "sudo tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/tcpdump_{} " \
-           "'{}'".format(arg_d["host_interface"], arg_d["applet_id"],
-                         arg_d["filter"]) in line:
+        if "sudo tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/tcpdump_{}" \
+           " '{}'".format(arg_d["host_interface"], arg_d["applet_id"],
+                          arg_d["filter"]) in line:
             pid_tcpdump = line.split()[1]
+        else:
+            x.p.msg("problem (no abort): tcpdump pid on host {} could not be "
+                    "retrieved\n".format(arg_d["host_name"]))
 
     # save pid to file
     path_to_tcpdump_pid = "/tmp/net-applet-shuffler/tcpdump_{}"\
-            .format(arg_d["applet_id"])
-    x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"], "touch {}"
-               .format(path_to_tcpdump_pid))
-    x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"], "sh -c \"echo '{}'"
-               " > {}\"".format(pid_tcpdump, path_to_tcpdump_pid))
+                          .format(arg_d["applet_id"])
+    _, _, exit_code_1 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
+                                   "touch {}".format(path_to_tcpdump_pid))
+    _, _, exit_code_2 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
+                                   "sh -c \"echo '{}' > {}\""
+                                   .format(pid_tcpdump, path_to_tcpdump_pid))
+    if (exit_code_1 or exit_code_2) != 0:
+        x.p.msg("problem (no abort): tcpdump pid could not be saved to file on "
+                "host {}\n".format(arg_d["name_host"]))
 
     return True
 
@@ -86,7 +93,7 @@ def tcpdump_stop(x, arg_d):
 
     if exit_code != 0:
         x.p.msg("error: tcpdump pid at host {} could not be retrieved\n"
-                "failed params:\n".format(arg_d["host_name"]))
+                "failed params: ".format(arg_d["host_name"]))
         x.p.msg("echo \"$(</tmp/net-applet-shuffler/tcpdump_{})\"\n"
                 .format(arg_d["applet_id"]))
         return False
@@ -116,11 +123,15 @@ def main(x, conf, args):
 
     # arguments dictionary
     arg_d = dict()
-    arg_d["host_name"] = args[0]
-    arg_d["applet_id"] = args[1].split(":")[1]
-    arg_d["applet_mode"] = args[2].split(":")[1]
-    arg_d["local_file_name"] = args[3].split("\"")[1]
-    arg_d["filter"] = args[4].split("\"")[1]
+    try:
+        arg_d["host_name"] = args[0]
+        arg_d["applet_id"] = args[1].split(":")[1]
+        arg_d["applet_mode"] = args[2].split(":")[1]
+        arg_d["local_file_name"] = args[3].split("\"")[1]
+        arg_d["filter"] = args[4].split("\"")[1]
+    except IndexError:
+        x.p.msg("error: wrong usage\n")
+        return False
     # retrieve: host ip, host user name
     arg_d["host_ip_control"] = conf.get_control_ip(arg_d["host_name"])
     arg_d["host_interface"] = conf.get_test_iface_name(arg_d["host_name"])
@@ -134,12 +145,14 @@ def main(x, conf, args):
         if tcpdump_start(x, arg_d):
             return True
         return False
-
     # applet mode:
     # stop: stop the tcpdump
     # blocks until file is transferred
-    if arg_d["applet_mode"] == "stop":
+    elif arg_d["applet_mode"] == "stop":
         x.p.msg("stopping tcpdump at host {}\n".format(arg_d["host_name"]))
         if tcpdump_stop(x, arg_d):
             return True
+        return False
+    else:
+        x.p.msg("error: wrong applet mode")
         return False
