@@ -5,8 +5,6 @@ def main(x, conf, args):
         return False
 
     hostname = args[0]
-    #x.p.msg("save sysctls to /tmp/sysctl.save at host {}\n".format(hostname))
-
     ip = conf.get_control_ip(hostname)
     user = conf.get_user(hostname)
     # check if file exist already, if we break here
