@@ -52,6 +52,7 @@ Notes:
 a logout has to happen).
 - Every host which wishes to connect to another at some point in time has to be
 on it's known hosts file
+- The rsa identity path is hard coded to /home/[USER]/.ssh/id_rsa (default path)
 
 ```
 alpha, beta, koppa:
