@@ -23,12 +23,12 @@ def controller_thread(x, arg_d):
     # 12. flow_offset
     # 13. ip_source_control
     # 14. ip_dest_control
-    arguments_string = "{} {} {} {} {} {} {} {} {} {} {} {} {} {}".format(
-        arg_d["applet_id"], arg_d["name_source"], arg_d["user_source"],
-        arg_d["ip_source_test"], arg_d["port_source"], arg_d["name_dest"],
-        arg_d["user_dest"], arg_d["ip_dest_test"], arg_d["port_dest"],
-        arg_d["netserver_port"], arg_d["flow_length"], arg_d["flow_offset"],
-        arg_d["ip_source_control"], arg_d["ip_dest_control"])
+    arguments_string = " ".join((arg_d["applet_id"], arg_d["name_source"],
+            arg_d["user_source"], arg_d["ip_source_test"], arg_d["port_source"],
+            arg_d["name_dest"], arg_d["user_dest"], arg_d["ip_dest_test"],
+            arg_d["port_dest"], arg_d["netserver_port"], arg_d["flow_length"],
+            arg_d["flow_offset"], arg_d["ip_source_control"],
+            arg_d["ip_dest_control"]))
     # check if netperf controller is already on source
     _, _, exit_code = x.ssh.exec(arg_d["ip_source_control"],
                                  arg_d["user_source"],
@@ -38,11 +38,11 @@ def controller_thread(x, arg_d):
     if not exit_code == 0:
         x.ssh.copy_to(arg_d["user_source"], arg_d["ip_source_control"],
                       LOCAL_NET_PATH, REMOTE_NET_PATH, "netperf-controller.py",
-                   "netperf-controller.py")
+                      "netperf-controller.py")
 
     x.ssh.exec(arg_d["ip_source_control"], arg_d["user_source"],
                "python3 {}/{} {}".format(REMOTE_NET_PATH,
-                "netperf-controller.py", arguments_string))
+               "netperf-controller.py", arguments_string))
 
     return True
 
