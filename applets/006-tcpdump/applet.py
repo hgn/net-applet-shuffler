@@ -1,44 +1,52 @@
 
 import os
+import time
+
+from threading import Thread
 
 
-def tcpdump_start(x, arg_d):
-    x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-               "mkdir /tmp/net-applet-shuffler")
+def tcpdump_start_thread(x, arg_d):
     # connect to host and start tcpdump
     # https://wiki.ubuntuusers.de/tcpdump/
     # tcpdump -i [interface] [protocol] -n -s 0 -w
     # /tmp/net-applet-shuffler/[filename] '[filter(e.g. dst port 20000)]
     _, _, exit_code = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-            "tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/dump_{}.pcap "
-            "'{}' &".format(arg_d["host_interface"], arg_d["applet_id"],
-                            arg_d["filter"]))
+            "tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/tcpdump_{}.pcap "
+            "'{}' > /dev/null".format(arg_d["host_interface"],
+                                      arg_d["applet_id"], arg_d["filter"]))
 
-    if exit_code != 0:
-        x.p.msg("error: tcpdump could not be started at host {}\n"
-                "failed params:\n".format(arg_d["host_name"]))
-        x.p.msg("tcpdump -i {} -n -s 0 -w "
-                "/tmp/net-applet-shuffler/dump_{}.pcap '{}'\n".format
-                (arg_d["host_interface"], arg_d["applet_id"], arg_d["filter"]))
-        return False
 
+def tcpdump_start(x, arg_d):
+    x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
+               "mkdir /tmp/net-applet-shuffler")
+    tcp_thread = Thread(target=tcpdump_start_thread, args=(x, arg_d, ))
+    tcp_thread.daemon = True
+    tcp_thread.start()
     # retrieve tcpdump pid
     # there will be two processes running, tcpdump and the file writer
     # the dump will have a sudo in front and end the writer gracefully,
     # if ended gracefully
     pid_tcpdump = "0"
-    stdout, _, _ = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-                              "ps -ef | grep tcpdump")
-    stdout_decoded = stdout.decode("utf-8")
-    for line in stdout_decoded.splitlines():
-        # unique identifier
-        if "sudo tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/tcpdump_{}" \
-           " '{}'".format(arg_d["host_interface"], arg_d["applet_id"],
-                          arg_d["filter"]) in line:
-            pid_tcpdump = line.split()[1]
-        else:
-            x.p.msg("problem (no abort): tcpdump pid on host {} could not be "
-                    "retrieved\n".format(arg_d["host_name"]))
+    no_pid_found = True
+    tcp_pid_fetch_tries = 5
+    while tcp_pid_fetch_tries > 0 and no_pid_found:
+        stdout, _, _ = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
+                                  "ps -ef | grep tcpdump")
+        stdout_decoded = stdout.decode("utf-8")
+        for line in stdout_decoded.splitlines():
+            # unique identifier
+            if "sudo tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/" \
+                    "tcpdump_{}.pcap '{}'".format(arg_d["host_interface"],
+                    arg_d["applet_id"], arg_d["filter"]) in line:
+                pid_tcpdump = line.split()[1]
+                no_pid_found = False
+        tcp_pid_fetch_tries -= 1
+        time.sleep(1)
+
+    if no_pid_found:
+        x.p.msg("error: tcpdump pid on host {} could not be "
+                "retrieved\n".format(arg_d["host_name"]))
+        return False
 
     # save pid to file
     path_to_tcpdump_pid = "/tmp/net-applet-shuffler/tcpdump_{}"\
@@ -71,15 +79,15 @@ def transfer_dumpfile(x, arg_d):
     # retrieve dump file and block until it's done
     _, _, exit_code = x.ssh.copy_from(arg_d["host_user"],
             arg_d["host_ip_control"], "/tmp/net-applet-shuffler",
-            local_file_path, "dump_{}.pcap".format(arg_d["applet_id"]),
+            local_file_path, "tcpdump_{}.pcap".format(arg_d["applet_id"]),
             local_file_name)
     if exit_code != 0:
-        x.p.msg("error transferring the dumpfile dump_{}.pcap from host {}\n"
+        x.p.msg("error transferring the dumpfile tcpdump_{}.pcap from host {}\n"
                 .format(arg_d["applet_id"], arg_d["host_name"]))
         return False
     # clean up dumpfile on host
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-               "rm /tmp/net-applet-shuffler/dump_{}.pcap"
+               "rm /tmp/net-applet-shuffler/tcpdump_{}.pcap"
                .format(arg_d["applet_id"]))
 
     return True
@@ -128,7 +136,13 @@ def main(x, conf, args):
         arg_d["applet_id"] = args[1].split(":")[1]
         arg_d["applet_mode"] = args[2].split(":")[1]
         arg_d["local_file_name"] = args[3].split("\"")[1]
-        arg_d["filter"] = args[4].split("\"")[1]
+        # args is split by whitespaces, but the filter can contain them
+        filter_list = list()
+        filter_list.append(args[4].split("\"")[1])
+        for list_item_num in range(5, len(args)):
+            filter_list.append(args[list_item_num])
+        # join the filter list string and remove trailing '"'
+        arg_d["filter"] = (" ".join(filter_list))[:-1]
     except IndexError:
         x.p.msg("error: wrong usage\n")
         return False
