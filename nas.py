@@ -227,7 +227,7 @@ class AppletExecuter():
     def import_applet_module(self):
         ffp, ok = self.applet_path(self.applet_name)
         if not ok:
-            self.p.err("Applet ({}) not avaiable, call list\n".format(self.applet_name))
+            self.p.err("Applet ({}) not available, call list\n".format(self.applet_name))
             sys.exit(1)
 
         spec = importlib.util.spec_from_file_location("applet", ffp)
