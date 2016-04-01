@@ -175,7 +175,7 @@ echo "Configuring network parameters done!"
 ...
 
 Now every interface in question should be able to ping any.
-
+```
 
 ## Configuration ##
 
