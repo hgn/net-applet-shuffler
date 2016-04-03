@@ -26,7 +26,7 @@ class ControllerStart(Thread):
         self.arguments = arguments
 
     def run(self):
-        ssh_command = "ssh {}@{} sudo python3 {}/{} {}".format(
+        ssh_command = "ssh {}@{} sudo python3.5 {}/{} {}".format(
             self.host_user, self.host_ip_control, REMOTE_CONT_PATH, CONTR_NAME,
             self.arguments)
         process = subprocess.Popen(ssh_command.split(), stdout=subprocess.PIPE)
@@ -48,7 +48,11 @@ def main(x, conf, args):
                 "host3...\n")
         return False
 
-    setup = args[0].split(":")[1]
+    try:
+        setup = args[0].split(":")[1]
+    except IndexError:
+        x.p.msg("error: wrong usage\n")
+        return False
     # arguments for controller on hosts
     host_list = list()
     # read in all host names

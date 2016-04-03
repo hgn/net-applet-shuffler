@@ -1,19 +1,30 @@
 
-def clean_directory(x, host_ip, host_user):
-    x.ssh.exec(host_ip, host_user, "rm -fr /tmp/net-applet-shuffler/*")
+def clean_directory(x, host_name, host_user, host_ip):
+    _, _, exit_code = x.ssh.exec(host_ip, host_user,
+                                 "rm -fr /tmp/net-applet-shuffler/*")
+    if exit_code != 0:
+        x.p.msg("error: cleaning up {}'s /tmp/net-applet-shuffler/\n"
+                .format(host_name))
+        return False
     return True
 
 
-def clean_service(x, host_ip, host_user, service_name):
-    stdout = x.ssh.exec(host_ip, host_user, "pgrep {}".format(service_name))
+def clean_service(x, host_name, host_user, host_ip, service_name):
+    stdout, _, _ = x.ssh.exec(host_ip, host_user, "pgrep {}"
+                              .format(service_name))
     # iter through all pids
-    for service_pid in stdout[0].decode("utf-8").splitlines():
+    for service_pid in stdout.decode("utf-8").splitlines():
         # try to end gracefully
-        _, _, exit_code = x.ssh.exec(host_ip, host_user, "kill -2 {"
-                "}".format(service_pid))
+        _, _, exit_code = x.ssh.exec(host_ip, host_user, "kill -2 {}"
+                                     .format(service_pid))
         # process MUST be kill
         if exit_code != 0:
-            x.ssh.exec(host_ip, host_user, "kill {}".format(service_pid))
+            _, _, exit_code = x.ssh.exec(host_ip, host_user, "kill {}"
+                                         .format(service_pid))
+            if exit_code != 0:
+                x.p.msg("error: {}'s {} could not be ended"
+                        .format(host_name, service_name))
+                return False
 
     return True
 
@@ -27,15 +38,17 @@ def main(x, conf, args):
     host_name = args[0]
     host_ip = conf.get_control_ip(host_name)
     host_user = conf.get_user(host_name)
-
-    #x.p.msg("cleaning up host {}\n".format(host_name))
     # 1. directory cleanup of /tmp/net-applet-shuffler/
-    clean_directory(x, host_ip, host_user)
+    if not clean_directory(x, host_name, host_user, host_ip):
+        return False
     # 2. netserver cleanup
-    clean_service(x, host_ip, host_user, "netserver")
+    if not clean_service(x, host_name, host_user, host_ip, "netserver"):
+        return False
     # 3. tcpdump cleanup
-    clean_service(x, host_ip, host_user, "tcpdump")
+    if not clean_service(x, host_name, host_user, host_ip, "tcpdump"):
+        return False
     # 4. netperf cleanup
-    clean_service(x, host_ip, host_user, "netperf")
+    if not clean_service(x, host_name, host_user, host_ip, "netperf"):
+        return False
 
     return True

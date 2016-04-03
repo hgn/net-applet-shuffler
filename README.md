@@ -52,6 +52,7 @@ Notes:
 a logout has to happen).
 - Every host which wishes to connect to another at some point in time has to be
 on it's known hosts file
+- The rsa identity path is hard coded to /home/[USER]/.ssh/id_rsa (default path)
 
 ```
 alpha, beta, koppa:
@@ -105,7 +106,9 @@ Notes:
 ```
 
 
-## Helpful hints #
+# Helpful hints #
+
+## Configuration ##
 
 Normally, routing information is lost after a shutdown. One possible solution
 is to enable ssh access via ssh on os startup, then use ssh for further
@@ -174,32 +177,47 @@ echo "Configuring network parameters done!"
 Now every interface in question should be able to ping any.
 ```
 
+## Configuration ##
+
+The setup is stored in a file called conf.json in the nas directory root.
+Hosts are expected have at least one test interface (where the tests will run),
+and one control interface (where setup and test information is shared).
+This is due to the reason, that if only one interface is used, this interface is
+basically unavailable during heavy testing periods and the resulting congestion.
+The existing nas framework provides a certain robustness to congestion on the control interfaces, so
+only one single interface can theoretically be used for certain test. However,
+this is not advised. Still, every host needs to have at least one control type
+interface and one test type interface specified in the conf.json. These might specify the
+same interface, if separated interfaces are not available.
+
+
+
 # Examples #
 
 
 Save sysctls at PC beta:
 
 ```
-python3 ./nas.py exec-applet 003-save-sysctls beta
+python3.5 ./nas.py exec-applet 003-save-sysctls beta
 ```
 
 
 Restore sysctls at PC beta:
 
 ```
-python3 ./nas.py exec-applet 003-save-sysctls beta
+python3.5 ./nas.py exec-applet 003-save-sysctls beta
 ```
 
 Set rate to 1000 byte/sec at koppa towards alpha (left interface):
 
 ```
-python3 ./nas.py exec-applet 005-netem koppa interface:left rate:1000byte
+python3.5 ./nas.py exec-applet 005-netem koppa interface:left rate:1000byte
 ```
 
 Execute netperf data exchange campaign:
 
 ```
-python3 ./nas.py -v exec-campaign 001-netperf-data-exchange
+python3.5 ./nas.py -v exec-campaign 001-netperf-data-exchange
 ```
 
 
