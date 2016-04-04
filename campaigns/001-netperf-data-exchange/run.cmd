@@ -41,8 +41,8 @@ exec 003-restore-sysctls koppa
 # notes:
 # - [id] should be a self specified unique id string
 # - mode:start -> the local-file-name is ignored
-# usage: host id:[string] mode:[start|stop] local-file-name-[absolute|relative]:"path_and_filename" filter:"tcpdump filter string"
-exec 006-tcpdump beta id:0001 mode:start local-file-name-absolute:"ignored" filter:"tcp and dst port 30000"
+# usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
+exec 006-tcpdump beta id:0001 mode:start local-file-name:"ignored" filter:"tcp and dst port 30000"
 
 
 # netperf
@@ -77,5 +77,5 @@ exec 008-wait-for-completion interval_time:5 alpha:0001 beta:0002
 # notes:
 # - mode:stop -> the filter is ignored
 # - id and host MUST match the id of the started tcpdump
-# usage: host id:[string] mode:[start|stop] local-file-name-[absolute|relative]:"path_and_filename" filter:"tcpdump filter string"
-exec 006-tcpdump beta id:0001 mode:stop local-file-name-absolute:"/tmp/dumps/001_netperf_alpha_to_beta" filter:"ignored"
+# usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
+exec 006-tcpdump beta id:0001 mode:stop local-file-name:"../../dumps/001_netperf_alpha_to_beta.pcap" filter:"ignored"
