@@ -41,8 +41,8 @@ exec 003-restore-sysctls koppa
 # notes:
 # - [id] should be a self specified unique id string
 # - mode:start -> the local-file-name is ignored
-# usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
-exec 006-tcpdump beta id:0001 mode:start local-file-name:"ignored" filter:"tcp and dst port 30000"
+# usage: host id:[string] mode:[start|stop] local-file-name-[absolute|relative]:"path_and_filename" filter:"tcpdump filter string"
+exec 006-tcpdump beta id:0001 mode:start local-file-name-absolute:"ignored" filter:"tcp and dst port 30000"
 
 
 # netperf
@@ -54,11 +54,9 @@ exec 006-tcpdump beta id:0001 mode:start local-file-name:"ignored" filter:"tcp a
 # - flow_length is in seconds, or if negative, in bytes
 # - flow_offset is the time in seconds after which the flow is started
 # - netserver is the control(!) port of the netserver
-# - IMPORTANT: due to command and distribution problems on congested networks,
-#               the flow offsets should include enough time for setup
 # usage: host sink:[name] id:[string] source_port:[port] sink_port:[port] flow_length:[seconds|-bytes] flow_offset:[seconds] netserver:[port]
-exec 005-netperf alpha sink:beta id:0001 source_port:20000 sink_port:30000 flow_length:20 flow_offset:5 netserver:29999
-exec 005-netperf beta sink:alpha id:0002 source_port:20001 sink_port:30001 flow_length:20 flow_offset:10 netserver:29998
+exec 005-netperf alpha sink:beta id:0001 source_port:20000 sink_port:30000 flow_length:6 flow_offset:1 netserver:29999
+exec 005-netperf beta sink:alpha id:0002 source_port:20001 sink_port:30001 flow_length:6 flow_offset:3 netserver:29998
 
 
 sleep 2
@@ -79,5 +77,5 @@ exec 008-wait-for-completion interval_time:5 alpha:0001 beta:0002
 # notes:
 # - mode:stop -> the filter is ignored
 # - id and host MUST match the id of the started tcpdump
-# usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
-exec 006-tcpdump beta id:0001 mode:stop local-file-name:"/tmp/dumps/001_netperf_alpha_to_beta" filter:"ignored"
+# usage: host id:[string] mode:[start|stop] local-file-name-[absolute|relative]:"path_and_filename" filter:"tcpdump filter string"
+exec 006-tcpdump beta id:0001 mode:stop local-file-name-absolute:"/tmp/dumps/001_netperf_alpha_to_beta" filter:"ignored"
