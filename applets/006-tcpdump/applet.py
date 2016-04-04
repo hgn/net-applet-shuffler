@@ -64,15 +64,29 @@ def tcpdump_start(x, arg_d):
 
 
 def transfer_dumpfile(x, arg_d):
+    # relative file path logic
+    file_path = ""
+    local_file_path_split = ""
+    if arg_d["path_usage"] == "relative":
+        current_file_dir = os.path.dirname(__file__)
+        file_path = os.path.join(current_file_dir, arg_d["local_file_name"])
+        # make local directories
+        try:
+            os.makedirs(file_path)
+        except os.error:
+            # path/file exists
+            pass
+        local_file_path_split = file_path.split("/")
+    elif arg_d["path_usage"] == "absolute":
+        # make local directories
+        try:
+            os.makedirs(arg_d["local_file_name"])
+        except os.error:
+            # path/file exists
+            pass
+        local_file_path_split = arg_d["local_file_name"].split("/")
 
-    # make local directories
-    try:
-        os.makedirs(arg_d["local_file_name"])
-    except os.error:
-        # path/file exists
-        pass
-    # some random filename string shuffles
-    local_file_path_split = arg_d["local_file_name"].split("/")
+    # path and file name shuffling magic
     local_file_name = local_file_path_split[len(local_file_path_split)-1]
     local_file_path_split.pop(len(local_file_path_split)-1)
     local_file_path = "/".join(local_file_path_split)
@@ -126,7 +140,7 @@ def tcpdump_stop(x, arg_d):
 def main(x, conf, args):
     if not len(args) >= 4:
         x.p.msg("wrong usage. use: [hostname] id:[number] mode:[start|stop] "
-                "'local-file-name:\"[filename]\"'' 'filter:\"[filter]\"\n"'')
+                "local-file-name:\"[filename]\" filter:\"[filter]\"\n")
         return False
     # arguments dictionary
     arg_d = dict()
@@ -134,17 +148,19 @@ def main(x, conf, args):
         arg_d["host_name"] = args[0]
         arg_d["applet_id"] = args[1].split(":")[1]
         arg_d["applet_mode"] = args[2].split(":")[1]
+        path_usage = args[3].split(":")[1].replace("\"", "")
+        if path_usage[0] == "/":
+            arg_d["path_usage"] = "absolute"
+        else:
+            arg_d["path_usage"] = "relative"
         # string handling:
         # the shell cuts " or ' when arguments are used
         # tcpdumps filter via exec-applet can look like:
         # 'filter:tcp and dst port 20000'
         # tcpdumps filter via exec-campaign:
-        # filter:"tcp', 'and', 'dst', 'port', '30000"'
+        # 'filter:"tcp', 'and', 'dst', 'port', '30000"'
         local_file_name = args[3].split(":")[1]
-        if local_file_name.startswith("\""):
-            local_file_name = local_file_name[1:]
-            local_file_name = local_file_name[:-1]
-        arg_d["local_file_name"] = local_file_name
+        arg_d["local_file_name"] = local_file_name.replace("\"", "")
         position = 4
         filter_str = args[position].split(":")[1]
         # this part is for argument handling when called from exec-campaign
@@ -155,10 +171,7 @@ def main(x, conf, args):
         except IndexError:
             pass
         # cut beginning and trailing "
-        if filter_str.startswith("\""):
-            filter_str = filter_str[1:]
-            filter_str = filter_str[:-1]
-        arg_d["filter"] = filter_str
+        arg_d["filter"] = filter_str.replace("\"", "")
     except IndexError:
         x.p.msg("error: wrong usage\n")
         return False
@@ -166,7 +179,6 @@ def main(x, conf, args):
     arg_d["host_ip_control"] = conf.get_control_ip(arg_d["host_name"])
     arg_d["host_interface"] = conf.get_test_iface_name(arg_d["host_name"])
     arg_d["host_user"] = conf.get_user(arg_d["host_name"])
-
     # applet mode:
     # start: start the tcpdump
     # black voodoo magic: arg_d["applet_mode"] is "start" does not work
