@@ -126,23 +126,39 @@ def tcpdump_stop(x, arg_d):
 def main(x, conf, args):
     if not len(args) >= 4:
         x.p.msg("wrong usage. use: [hostname] id:[number] mode:[start|stop] "
-                "local-file-name:\"[filename]\" filter:\"[filter]\"\n")
+                "'local-file-name:\"[filename]\"'' 'filter:\"[filter]\"\n"'')
         return False
-
     # arguments dictionary
     arg_d = dict()
     try:
         arg_d["host_name"] = args[0]
         arg_d["applet_id"] = args[1].split(":")[1]
         arg_d["applet_mode"] = args[2].split(":")[1]
-        arg_d["local_file_name"] = args[3].split("\"")[1]
-        # args is split by whitespaces, but the filter can contain them
-        filter_list = list()
-        filter_list.append(args[4].split("\"")[1])
-        for list_item_num in range(5, len(args)):
-            filter_list.append(args[list_item_num])
-        # join the filter list string and remove trailing '"'
-        arg_d["filter"] = (" ".join(filter_list))[:-1]
+        # string handling:
+        # the shell cuts " or ' when arguments are used
+        # tcpdumps filter via exec-applet can look like:
+        # 'filter:tcp and dst port 20000'
+        # tcpdumps filter via exec-campaign:
+        # filter:"tcp', 'and', 'dst', 'port', '30000"'
+        local_file_name = args[3].split(":")[1]
+        if local_file_name.startswith("\""):
+            local_file_name = local_file_name[1:]
+            local_file_name = local_file_name[:-1]
+        arg_d["local_file_name"] = local_file_name
+        position = 4
+        filter_str = args[position].split(":")[1]
+        # this part is for argument handling when called from exec-campaign
+        try:
+            while True:
+                position += 1
+                filter_str += " " + args[position]
+        except IndexError:
+            pass
+        # cut beginning and trailing "
+        if filter_str.startswith("\""):
+            filter_str = filter_str[1:]
+            filter_str = filter_str[:-1]
+        arg_d["filter"] = filter_str
     except IndexError:
         x.p.msg("error: wrong usage\n")
         return False
