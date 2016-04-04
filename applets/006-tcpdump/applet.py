@@ -148,7 +148,7 @@ def main(x, conf, args):
         arg_d["host_name"] = args[0]
         arg_d["applet_id"] = args[1].split(":")[1]
         arg_d["applet_mode"] = args[2].split(":")[1]
-        path_usage = args[3].split(":")[1].replace("\"", "")
+        path_usage = args[3].split(":")[1].strip("\"")
         if path_usage[0] == "/":
             arg_d["path_usage"] = "absolute"
         else:
@@ -160,7 +160,7 @@ def main(x, conf, args):
         # tcpdumps filter via exec-campaign:
         # 'filter:"tcp', 'and', 'dst', 'port', '30000"'
         local_file_name = args[3].split(":")[1]
-        arg_d["local_file_name"] = local_file_name.replace("\"", "")
+        arg_d["local_file_name"] = local_file_name.strip("\"")
         position = 4
         filter_str = args[position].split(":")[1]
         # this part is for argument handling when called from exec-campaign
@@ -171,7 +171,7 @@ def main(x, conf, args):
         except IndexError:
             pass
         # cut beginning and trailing "
-        arg_d["filter"] = filter_str.replace("\"", "")
+        arg_d["filter"] = filter_str.strip("\"")
     except IndexError:
         x.p.msg("error: wrong usage\n")
         return False
