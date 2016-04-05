@@ -325,10 +325,10 @@ class CampaignExecuter():
     def execute_applet(self, applet):
         applet_name = applet.split()[0]
         applet_args = applet.split()[1:]
-        app_executor = AppletExecuter(external_controlled=True,
+        app_executer = AppletExecuter(external_controlled=True,
                                       verbose=self.verbose)
-        app_executor.set_applet_data(applet_name, applet_args)
-        app_status = app_executor.run()
+        app_executer.set_applet_data(applet_name, applet_args)
+        app_status = app_executer.run()
         if not app_status:
             print("Applet returned negative return code, stopping campaign now")
             sys.exit(1)
