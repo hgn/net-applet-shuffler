@@ -84,7 +84,7 @@ class Ssh():
         stdout, stderr, exit_code = self._copy(user, ip, "/home/{}/tmp_f".format(user),
                    (from_path + "/" + source_filename), False)
         # 2. make target dir
-        self.exec(ip, user, "mkdir {}".format(to_path))
+        self.exec(ip, user, "mkdir {} 1>/dev/null 2>&1".format(to_path))
         # 3. copy to target location
         self.exec(ip, user, "cp /home/{}/tmp_f {}/{}".format(user, to_path,
                                                              dest_filename))
@@ -301,10 +301,10 @@ class CampaignExecuter():
         hp = os.path.dirname(os.path.realpath(__file__))
         fp = os.path.join(hp, "campaigns", name)
         if not os.path.exists(fp):
-            self.p.msg("Campaign path \"{}\" do not exist".format(fp),
+            self.p.msg("Campaign path \"{}\" does not exist".format(fp),
                        level=Printer.STD)
             return None, False
-        ffp = os.path.join(fp, "run.cmd")
+        ffp = os.path.join(fp, "run.py")
         return ffp, True
 
     def parse_local_options(self):
@@ -322,10 +322,16 @@ class CampaignExecuter():
             self.p.set_verbose()
         self.campaign_name = args[2]
 
-    def execute_applet(self, applet_name, applet_args):
-        app_executer = AppletExecuter(external_controlled=True, verbose=self.verbose)
-        app_executer.set_applet_data(applet_name, applet_args)
-        return app_executer.run()
+    def execute_applet(self, applet):
+        applet_name = applet.split()[0]
+        applet_args = applet.split()[1:]
+        app_executor = AppletExecuter(external_controlled=True,
+                                      verbose=self.verbose)
+        app_executor.set_applet_data(applet_name, applet_args)
+        app_status = app_executor.run()
+        if not app_status:
+            print("Applet returned negative return code, stopping campaign now")
+            sys.exit(1)
 
     def read_campaign_file(self, path):
         data = list()
@@ -336,7 +342,7 @@ class CampaignExecuter():
                     break
                 line = line.strip()
                 if not line:
-                    # ignore lines with only withspaces
+                    # ignore lines with only with spaces
                     continue
                 if line.startswith("#"):
                     # ignore comment lines
@@ -397,18 +403,19 @@ class CampaignExecuter():
         for d in data:
             ret = True
             cmd = "unknown"
-            if d['cmd'] == CampaignExecuter.OPCODE_CMD_EXEC:
-                cmd = "exec {}".format(d['name'])
-                self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
-                                                 cmd), level=Printer.STD)
-                ret = self.execute_applet(d['name'], d['args'])
-            elif d['cmd'] == CampaignExecuter.OPCODE_CMD_SLEEP:
+            #if d['cmd'] == CampaignExecuter.OPCODE_CMD_EXEC:
+            cmd = "exec {}".format(d['name'])
+            self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
+                                             cmd), level=Printer.STD)
+            ret = self.execute_applet(d['name'] + " " + d['args'])
+            # elif
+            if d['cmd'] == CampaignExecuter.OPCODE_CMD_SLEEP:
                 cmd = "sleep {}".format(d['time'])
                 self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
                                                  cmd), level=Printer.STD)
                 time.sleep(int(d['time']))
             elif d['cmd'] == CampaignExecuter.OPCODE_CMD_PRINT:
-                # when we print we do not print the print   
+                # when we print we do not print the print
                 self.p.msg("  # {}\n".format(" ".join(d['msg'])), level=Printer.STD)
 
             if ret == False:
@@ -416,13 +423,23 @@ class CampaignExecuter():
                 return
             run_no += 1
 
+    def import_campaign_module(self):
+        ffp, ok = self.campaign_path(self.campaign_name)
+        if not ok:
+            self.p.err("Applet ({}) not available, call list\n"
+                       .format(self.campaign_name))
+            sys.exit(1)
+
+        spec = importlib.util.spec_from_file_location("campaign", ffp)
+        self.campaign = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.campaign)
+
     def parse_campaign(self):
-        path, ok = self.campaign_path(self.campaign_name)
+        self.path, ok = self.campaign_path(self.campaign_name)
         if not ok:
             print("Campaign \"{}\" not valid".format(self.campaign_name))
             return None, False
-        file_data = self.read_campaign_file(path)
-        return self.transform(file_data)
+        return True, True
 
     def run(self):
         data, ok = self.parse_campaign()
@@ -430,7 +447,16 @@ class CampaignExecuter():
             sys.exit(1)
         self.p.msg("Execute Campaign \"{}\"\n".format(self.campaign_name),
                    level=Printer.STD)
-        self.execute_campaign(data)
+        self.import_campaign_module()
+        # ssh class and ping
+        xchange = Exchange()
+        # printer (p.msg)
+        xchange.p = self.p
+        # applet name and args, creates AppletExecuter() and calls its run
+        xchange.exec = self.execute_applet
+        # starts the campaign run
+        self.campaign.main(xchange)
+
 
 class CampaignLister():
 
