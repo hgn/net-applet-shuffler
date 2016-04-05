@@ -13,6 +13,6 @@ def main(x, conf, args):
         x.p.msg("error: no sysctl.save backup found on {}\n".format(hostname))
         return False
     # there should be no failure here
-    x.ssh.exec(ip, user, "sysctl -p/tmp/sysctl.save")
+    x.ssh.exec(ip, user, "sysctl -p/tmp/sysctl.save 1>/dev/null 2>&1")
 
     return True

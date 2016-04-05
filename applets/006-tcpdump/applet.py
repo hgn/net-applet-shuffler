@@ -12,13 +12,13 @@ def tcpdump_start_thread(x, arg_d):
     # /tmp/net-applet-shuffler/[filename] '[filter(e.g. dst port 20000)]
     _, _, exit_code = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
             "tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/tcpdump_{}.pcap "
-            "'{}' > /dev/null".format(arg_d["host_interface"],
-                                      arg_d["applet_id"], arg_d["filter"]))
+            "'{}' 1>/dev/null 2>&1".format(arg_d["host_interface"],
+                                           arg_d["applet_id"], arg_d["filter"]))
 
 
 def tcpdump_start(x, arg_d):
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-               "mkdir /tmp/net-applet-shuffler")
+               "mkdir /tmp/net-applet-shuffler 1>/dev/null 2>&1")
     tcp_thread = Thread(target=tcpdump_start_thread, args=(x, arg_d, ))
     tcp_thread.daemon = True
     tcp_thread.start()
