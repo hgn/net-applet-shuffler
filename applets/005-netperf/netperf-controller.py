@@ -53,7 +53,7 @@ class NetperfController:
         return stdout, stderr, process.returncode
 
     def exec(self, cmd):
-        command = "sudo {}".format(cmd)
+        command = "sudo {} 1>/dev/null 2>&1".format(cmd)
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
         return stdout, stderr, process.returncode
@@ -134,7 +134,7 @@ class NetperfController:
         # demonize program
         self.demonize_program()
         # make sure necessary dirs exist, local and remote
-        self.exec("mkdir /tmp/net-applet-shuffler 1>/dev/null 2>&1")
+        self.exec("mkdir /tmp/net-applet-shuffler")
         # redirect output to file
         sys.stdout = open("/tmp/net-applet-shuffler/netperf_controller_stdout",
                           "w")
@@ -142,7 +142,7 @@ class NetperfController:
                           "w")
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
                       self.arg_d["user_source"],
-                      "mkdir /tmp/net-applet-shuffler 1>/dev/null 2>&1")
+                      "mkdir /tmp/net-applet-shuffler")
         # write test in progress file
         # to be checked if there are ongoing transfers
         self.test_running(True)
