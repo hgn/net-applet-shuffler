@@ -255,9 +255,8 @@ class AppletExecuter():
         # the status is used later for campaigns:
         # if the status is false the campaing must be
         # stopped, if true everything is fine!
-        self.p.msg("execute applet \"{} {}\"\n".format(self.applet_name,
-                                                         self.applet_args),
-                                                         level=Printer.VERBOSE)
+        self.p.msg("{}\n".format(self.applet_args),
+                   level=Printer.VERBOSE)
         status = self.applet.main(xchange, Conf(), self.applet_args)
         if status == True:
             return True
@@ -288,6 +287,8 @@ class AppletLister():
 
 class CampaignExecuter():
 
+    current_campaign_applet = 0
+    campaign_length = int()
     OPCODE_CMD_EXEC = 1
     OPCODE_CMD_SLEEP = 2
     OPCODE_CMD_PRINT = 3
@@ -325,6 +326,11 @@ class CampaignExecuter():
     def execute_applet(self, applet):
         applet_name = applet.split()[0]
         applet_args = applet.split()[1:]
+        if self.current_campaign_applet > 0:
+            sys.stdout.write("[{}/{}] {}\n".format(self.current_campaign_applet,
+                                                   self.campaign_length,
+                                                   applet_name))
+        self.current_campaign_applet += 1
         app_executer = AppletExecuter(external_controlled=True,
                                       verbose=self.verbose)
         app_executer.set_applet_data(applet_name, applet_args)
@@ -433,6 +439,7 @@ class CampaignExecuter():
         spec = importlib.util.spec_from_file_location("campaign", ffp)
         self.campaign = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.campaign)
+        return ffp
 
     def parse_campaign(self):
         self.path, ok = self.campaign_path(self.campaign_name)
@@ -441,13 +448,22 @@ class CampaignExecuter():
             return None, False
         return True, True
 
+    def parse_campaign_size(self, ffp):
+        campaign_file = open(ffp)
+        campaign_string = campaign_file.read()
+        campaign_file.close()
+        # two whitespaces for not counting comments
+        amount_execs = campaign_string.count("  x.exec")
+        return amount_execs
+
     def run(self):
         data, ok = self.parse_campaign()
         if not ok:
             sys.exit(1)
         self.p.msg("Execute Campaign \"{}\"\n".format(self.campaign_name),
                    level=Printer.STD)
-        self.import_campaign_module()
+        ffp = self.import_campaign_module()
+        self.campaign_length = self.parse_campaign_size(ffp)
         # ssh class and ping
         xchange = Exchange()
         # printer (p.msg)
