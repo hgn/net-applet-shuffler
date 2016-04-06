@@ -71,7 +71,7 @@ class NetworkController:
     def main(self):
         self.demonize_program()
         # wait, so every instance can be started before the network goes down
-        time.sleep(6)
+        time.sleep(4)
         if arg_d["setup"] == "direct":
             self.establish_direct_setup()
         elif arg_d["setup"] == "indirect":

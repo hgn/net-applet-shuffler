@@ -1,5 +1,4 @@
 # usage: exec 009-network setup:direct host1 host2 host3 ...
-# obviously, also the physical replug hast to happen as well
 
 import os
 import subprocess
@@ -77,9 +76,13 @@ def main(x, conf, args):
         host_thread = ControllerStart(host_user, host_ip_control, arguments)
         host_thread.daemon = True
         host_thread.start()
-    # sleep a minimum of 24 (network controller sleeps) + 2 (safety margin)
-    # seconds, unfortunately this is necessary
-    time.sleep(26)
+    # unfortunately this is necessary
+    if setup == "direct":
+        # sleep a minimum of 22 (network controller sleeps) + 2 (safety margin)
+        time.sleep(24)
+    else:
+        # indirect sleep is only 16 seconds
+        time.sleep(18)
     x.p.msg("direct setup (hopefully) completed\n")
 
     return True
