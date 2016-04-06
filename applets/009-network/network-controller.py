@@ -4,6 +4,7 @@ import subprocess
 import sys
 import time
 
+from time import strftime
 
 class NetworkController:
 
@@ -48,7 +49,9 @@ class NetworkController:
         command = "sudo {}".format(cmd)
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        return stdout, stderr, process.returncode
+        exit_code = process.returncode
+        print(" - exit code: {} - ".format(exit_code) + command)
+        return stdout, stderr, exit_code
 
     def establish_direct_setup(self):
         self.execute("ip link set dev {} down".format(arg_d["interface"]))
@@ -70,15 +73,25 @@ class NetworkController:
 
     def main(self):
         self.demonize_program()
+        time_now = strftime("%H_%M_%S")
+        self.execute("mkdir /tmp/net-applet-shuffler")
+        self.execute("mkdir /tmp/net-applet-shuffler/logs")
+        sys.stdout = open("/tmp/net-applet-shuffler/logs/{}_network_controller_"
+                          "stdout".format(time_now), "w")
+        sys.stderr = open("/tmp/net-applet-shuffler/logs/{}_network_controller_"
+                          "stderr".format(time_now), "w")
         # wait, so every instance can be started before the network goes down
         time.sleep(4)
         if arg_d["setup"] == "direct":
+            print(" - establishing direct setup")
             self.establish_direct_setup()
         elif arg_d["setup"] == "indirect":
+            print(" - establishing indirect setup")
             self.establish_indirect_setup()
         else:
             # this should not happen
             sys.exit(1)
+        print(" - network-controller ended gracefully")
 
 
 if __name__ == '__main__':

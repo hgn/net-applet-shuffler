@@ -3,6 +3,7 @@ import os
 import sys
 import subprocess
 
+from time import strftime
 
 class NetperfController:
 
@@ -56,7 +57,9 @@ class NetperfController:
         command = "sudo {} 1>/dev/null 2>&1".format(cmd)
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        return stdout, stderr, process.returncode
+        exit_code = process.returncode
+        print(" - exit code: {} - ".format(exit_code) + command)
+        return stdout, stderr, exit_code
 
     def netserver_end(self):
         # try graceful end
@@ -69,7 +72,7 @@ class NetperfController:
                       .format(self.arg_d["netserver_pid"]))
         # remove pid file
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
-                      self.arg_d["user_source"], "rm /tmp/net-applet-shuffler/#"
+                      self.arg_d["user_source"], "rm /tmp/net-applet-shuffler/"
                         "netserver_{}".format(self.arg_d["applet_id"],
                                               self.arg_d["netserver_pid"]))
         return True
@@ -135,11 +138,13 @@ class NetperfController:
         self.demonize_program()
         # make sure necessary dirs exist, local and remote
         self.exec("mkdir /tmp/net-applet-shuffler")
+        self.exec("mkdir /tmp/net-applet-shuffler/logs")
         # redirect output to file
-        sys.stdout = open("/tmp/net-applet-shuffler/netperf_controller_stdout",
-                          "w")
-        sys.stderr = open("/tmp/net-applet-shuffler/netperf_controller_stderr",
-                          "w")
+        time_now = strftime("%H_%M_%S")
+        sys.stdout = open("/tmp/net-applet-shuffler/logs/{}_netperf_controller_"
+                          "stdout".format(time_now), "w")
+        sys.stderr = open("/tmp/net-applet-shuffler/logs/{}_netperf_controller_"
+                          "stderr".format(time_now), "w")
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
                       self.arg_d["user_source"],
                       "mkdir /tmp/net-applet-shuffler")
@@ -163,6 +168,7 @@ class NetperfController:
         amount_tries = 0
         netperf_start_failed = True
         while amount_tries < 10:
+            print(" - trying to start netperf")
             netperf_cmd = "netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {}" \
                           ",{} -T TCP -4".format(self.arg_d["ip_dest_test"],
                                                  self.arg_d["ip_source_test"],
@@ -187,9 +193,10 @@ class NetperfController:
                     self.arg_d["port_source"], self.arg_d["port_dest"]))
             sys.exit(3)
 
+        print(" - netperf ended")
         self.test_running(False)
         self.netserver_end()
-        print("netperf-controller ended gracefully")
+        print(" - netperf-controller ended gracefully")
         sys.exit(0)
 
 
