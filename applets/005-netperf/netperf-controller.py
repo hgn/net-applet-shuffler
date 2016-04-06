@@ -53,7 +53,7 @@ class NetperfController:
         return stdout, stderr, process.returncode
 
     def exec(self, cmd):
-        command = "sudo {}".format(cmd)
+        command = "sudo {} 1>/dev/null 2>&1".format(cmd)
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
         return stdout, stderr, process.returncode
