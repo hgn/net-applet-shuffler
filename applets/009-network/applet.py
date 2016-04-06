@@ -20,7 +20,6 @@ class ControllerStart(Thread):
 
     def __init__(self, user, ip, arguments):
         Thread.__init__(self)
-        self.daemon = True
         self.host_user = user
         self.host_ip_control = ip
         self.arguments = arguments
@@ -76,6 +75,7 @@ def main(x, conf, args):
         arguments = "{} {} {} {}".format(setup, host_interface, host_ip_test,
                                          host_def_route)
         host_thread = ControllerStart(host_user, host_ip_control, arguments)
+        host_thread.daemon = True
         host_thread.start()
     # sleep a minimum of 24 (network controller sleeps) + 2 (safety margin)
     # seconds, unfortunately this is necessary
