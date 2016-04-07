@@ -81,6 +81,9 @@ Notes:
 - These changes will be lost on a restart
 - The test networks are expected to use a /24 net-mask
 - The direct network is expected to us a /16 net-mask
+- If an outer host, which is uninvolved in the tests (except for controlling) is
+used, make sure every host has ip forwarding enabled, so that the status of the
+test interfaces of the test hosts can be checked
 
 ```
 [on alpha]
