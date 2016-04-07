@@ -6,6 +6,7 @@ import time
 
 from time import strftime
 
+
 class NetworkController:
 
     def __init__(self, arguments_dictionary):

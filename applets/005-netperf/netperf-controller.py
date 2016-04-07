@@ -5,6 +5,7 @@ import subprocess
 
 from time import strftime
 
+
 class NetperfController:
 
     def demonize_program(self):
@@ -73,8 +74,8 @@ class NetperfController:
         # remove pid file
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
                       self.arg_d["user_source"], "rm /tmp/net-applet-shuffler/"
-                        "netserver_{}".format(self.arg_d["applet_id"],
-                                              self.arg_d["netserver_pid"]))
+                      "netserver_{}".format(self.arg_d["applet_id"],
+                                            self.arg_d["netserver_pid"]))
         return True
 
     def netserver_start(self):
@@ -188,9 +189,12 @@ class NetperfController:
                   "failed params:\n")
             print("netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {},{} -T "
                   "TCP -4\n".format(self.arg_d["ip_dest_test"],
-                    self.arg_d["ip_source_test"], self.arg_d["netserver_port"],
-                    self.arg_d["test_length"], self.arg_d["flow_offset"],
-                    self.arg_d["port_source"], self.arg_d["port_dest"]))
+                                    self.arg_d["ip_source_test"],
+                                    self.arg_d["netserver_port"],
+                                    self.arg_d["test_length"],
+                                    self.arg_d["flow_offset"],
+                                    self.arg_d["port_source"],
+                                    self.arg_d["port_dest"]))
             sys.exit(3)
 
         print(" - netperf ended")
