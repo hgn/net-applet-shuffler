@@ -181,6 +181,28 @@ class Conf():
               .format(host_name))
         sys.exit(1)
 
+    def get_middle_box_left_iface_name(self, host_name):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                interfaces = self.data["boxes"][host_name]["interfaces"]
+                for interface in interfaces:
+                    if interface["orientation"] == "left":
+                        return interface["name"]
+        print("error: get_middle_box_left_iface_name not found for {}\n"
+              .format(host_name))
+        sys.exit(1)
+
+    def get_middle_box_right_iface_name(self, host_name):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                interfaces = self.data["boxes"][host_name]["interfaces"]
+                for interface in interfaces:
+                    if interface["orientation"] == "right":
+                        return interface["name"]
+        print("error: get_middle_box_right_iface_name not found for {}\n"
+              .format(host_name))
+        sys.exit(1)
+
     def get_user(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
@@ -571,7 +593,6 @@ class NetAppletShuffler:
 
         classname = NetAppletShuffler.modes[submodule][0]
         return classname
-
 
     def run(self):
         classtring = self.parse_global_otions()
