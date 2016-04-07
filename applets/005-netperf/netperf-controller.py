@@ -8,6 +8,11 @@ from time import strftime
 
 class NetperfController:
 
+    def __init__(self, arguments_dictionary):
+        self.stdout_save = sys.stdout
+        self.stderr_save = sys.stderr
+        self.arg_d = arguments_dictionary
+
     def demonize_program(self):
         # https://gist.github.com/andreif/cbb71b0498589dac93cb
         # first fork
@@ -42,8 +47,20 @@ class NetperfController:
         os.dup2(std_out.fileno(), sys.stdin.fileno())
         os.dup2(std_err.fileno(), sys.stdin.fileno())
 
-    def __init__(self, arguments_dictionary):
-        self.arg_d = arguments_dictionary
+    def redirect_console_output(self, start):
+        if start:
+            time_now = strftime("%H_%M_%S")
+            self.file_out = open("/tmp/net-applet-shuffler/logs/netperf_"
+                                 "controller_stdout_{}".format(time_now), "w")
+            self.file_err = open("/tmp/net-applet-shuffler/logs/netperf_"
+                                 "controller_stderr_{}".format(time_now), "w")
+            self.file_out = sys.stdout
+            self.file_err = sys.stderr
+        if not start:
+            self.file_out.close()
+            self.file_err.close()
+            sys.stdout = self.stdout_save
+            sys.stderr = self.stderr_save
 
     def ssh_exec(self, ip, remote_user, local_user, cmd):
         # use the -i identity file option due to ssh forwarding
@@ -141,11 +158,7 @@ class NetperfController:
         self.exec("mkdir /tmp/net-applet-shuffler")
         self.exec("mkdir /tmp/net-applet-shuffler/logs")
         # redirect output to file
-        time_now = strftime("%H_%M_%S")
-        sys.stdout = open("/tmp/net-applet-shuffler/logs/{}_netperf_controller_"
-                          "stdout".format(time_now), "w")
-        sys.stderr = open("/tmp/net-applet-shuffler/logs/{}_netperf_controller_"
-                          "stderr".format(time_now), "w")
+        self.redirect_console_output(True)
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
                       self.arg_d["user_source"],
                       "mkdir /tmp/net-applet-shuffler")
@@ -201,6 +214,7 @@ class NetperfController:
         self.test_running(False)
         self.netserver_end()
         print(" - netperf-controller ended gracefully")
+        self.redirect_console_output(False)
         sys.exit(0)
 
 

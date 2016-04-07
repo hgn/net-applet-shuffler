@@ -10,6 +10,8 @@ from time import strftime
 class NetworkController:
 
     def __init__(self, arguments_dictionary):
+        self.stdout_save = sys.stdout
+        self.stderr_save = sys.stderr
         self.arg_d = arguments_dictionary
 
     def demonize_program(self):
@@ -46,6 +48,21 @@ class NetworkController:
         os.dup2(std_out.fileno(), sys.stdin.fileno())
         os.dup2(std_err.fileno(), sys.stdin.fileno())
 
+    def redirect_console_output(self, start):
+        if start:
+            time_now = strftime("%H_%M_%S")
+            self.file_out = open("/tmp/net-applet-shuffler/logs/netperf_"
+                                 "controller_stdout_{}".format(time_now), "w")
+            self.file_err = open("/tmp/net-applet-shuffler/logs/netperf_"
+                                 "controller_stderr_{}".format(time_now), "w")
+            self.file_out = sys.stdout
+            self.file_err = sys.stderr
+        if not start:
+            self.file_out.close()
+            self.file_err.close()
+            sys.stdout = self.stdout_save
+            sys.stderr = self.stderr_save
+
     def execute(self, cmd):
         command = "sudo {}".format(cmd)
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
@@ -74,13 +91,11 @@ class NetworkController:
 
     def main(self):
         self.demonize_program()
-        time_now = strftime("%H_%M_%S")
+        # make sure necessary dirs exist, local and remote
         self.execute("mkdir /tmp/net-applet-shuffler")
         self.execute("mkdir /tmp/net-applet-shuffler/logs")
-        sys.stdout = open("/tmp/net-applet-shuffler/logs/{}_network_controller_"
-                          "stdout".format(time_now), "w")
-        sys.stderr = open("/tmp/net-applet-shuffler/logs/{}_network_controller_"
-                          "stderr".format(time_now), "w")
+        # redirect output to file
+        self.redirect_console_output(True)
         # wait, so every instance can be started before the network goes down
         time.sleep(4)
         if arg_d["setup"] == "direct":
@@ -93,6 +108,8 @@ class NetworkController:
             # this should not happen
             sys.exit(1)
         print(" - network-controller ended gracefully")
+        self.redirect_console_output(False)
+        sys.exit(0)
 
 
 if __name__ == '__main__':
