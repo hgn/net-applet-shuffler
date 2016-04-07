@@ -44,11 +44,13 @@
 				"user":        "koppa",
 				"interfaces": [
 					{
+						"network-name": "red",
 						"name": "enp3s2",
 						"type": "test",
 						"ip-address": "10.0.0.205"
 					},
 					{
+						"network-name": "blue",
 						"type": "control",
 						"name": "enp0s25",
 						"ip-address": "10.0.1.205"
