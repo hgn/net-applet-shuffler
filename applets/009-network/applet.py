@@ -6,9 +6,10 @@ import time
 
 from threading import Thread
 
+CONTR_NAME = "network-controller.py"
 LOCAL_CONT_PATH = os.path.dirname(os.path.realpath(__file__))
 REMOTE_CONT_PATH = "/tmp/net-applet-shuffler"
-CONTR_NAME = "network-controller.py"
+TIMEOUT = 60
 
 
 class ControllerStart(Thread):
@@ -76,13 +77,27 @@ def main(x, conf, args):
         host_thread = ControllerStart(host_user, host_ip_control, arguments)
         host_thread.daemon = True
         host_thread.start()
-    # unfortunately this is necessary
-    if setup == "direct":
-        # sleep a minimum of 22 (network controller sleeps) + 2 (safety margin)
-        time.sleep(24)
-    else:
-        # indirect sleep is only 16 seconds
-        time.sleep(18)
-    x.p.msg("direct setup (hopefully) completed\n")
+    # minimum time a network controller needs before the network is reachable
+    start_time = round(time.time())
+    time.sleep(16)
+    # wait for the controllers on their respective hosts to complete the setup
+    x.p.msg("waiting for all hosts to be reachable again\n")
+    responding_hosts = list()
+    while len(host_list) > 0:
+        time.sleep(1)
+        for host in host_list:
+            host_ip = conf.get_test_ip(host)
+            if x.ping(host_ip):
+                responding_hosts.append(host)
+        for responding_host in responding_hosts:
+            host_list.remove(responding_host)
+            responding_hosts.remove(responding_host)
+        # timeout
+        if (start_time + TIMEOUT) < round(time.time()):
+            x.p.err("error: timeout occurred\n")
+            x.p.err("is the network still up?\n")
+            return False
+
+    x.p.msg("setup completed and hosts responding\n")
 
     return True
