@@ -181,6 +181,17 @@ class Conf():
               .format(host_name))
         sys.exit(1)
 
+    def get_middle_box_iface_name_by_network_name(self, host_name, network):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                interfaces = self.data["boxes"][host_name]["interfaces"]
+                for interface in interfaces:
+                    if interface["network-name"] == "network":
+                        return interface["name"]
+        print("error: get_middle_box_iface_name_by_network_name not found for "
+              "host {} and network name {}\n".format(host_name, network))
+        sys.exit(1)
+
     def get_user(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
@@ -571,7 +582,6 @@ class NetAppletShuffler:
 
         classname = NetAppletShuffler.modes[submodule][0]
         return classname
-
 
     def run(self):
         classtring = self.parse_global_otions()
