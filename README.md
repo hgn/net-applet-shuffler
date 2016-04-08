@@ -51,7 +51,8 @@ Notes:
 - After ssh key distribution, the machine in question has to be restarted (or
 a logout has to happen).
 - Every host which wishes to connect to another at some point in time has to be
-on it's known hosts file
+on it's known hosts file (IMPORTANT, e.g. if the main controller is alpha, even
+beta has to be able to ssh inti itself and alpha!)
 - The rsa identity path is hard coded to /home/[USER]/.ssh/id_rsa (default path)
 
 ```
