@@ -51,9 +51,9 @@ class NetworkController:
     def redirect_console_output(self, start):
         if start:
             time_now = strftime("%H_%M_%S")
-            self.file_out = open("/tmp/net-applet-shuffler/logs/netperf_"
+            self.file_out = open("/tmp/net-applet-shuffler/logs/network_"
                                  "controller_stdout_{}".format(time_now), "w")
-            self.file_err = open("/tmp/net-applet-shuffler/logs/netperf_"
+            self.file_err = open("/tmp/net-applet-shuffler/logs/network_"
                                  "controller_stderr_{}".format(time_now), "w")
             sys.stdout = self.file_out
             sys.stderr = self.file_err
