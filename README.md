@@ -163,7 +163,7 @@ sudo ip link set dev enp0s25 down
 sudo ip link set dev enp3s2 down
 sleep 1
 sudo ip a add 10.0.1.1/24 dev enp0s25
-sudo ip a add 10.1.1.1/16 dev enp0s25
+sudo ip a add 10.1.1.1/16 dev enp3s22
 sleep 1
 sudo ip link set dev enp0s25 up
 sudo ip link set dev enp3s2 up
