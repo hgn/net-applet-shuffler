@@ -54,8 +54,8 @@ class NetperfController:
                                  "controller_stdout_{}".format(time_now), "w")
             self.file_err = open("/tmp/net-applet-shuffler/logs/netperf_"
                                  "controller_stderr_{}".format(time_now), "w")
-            self.file_out = sys.stdout
-            self.file_err = sys.stderr
+            sys.stdout = self.file_out
+            sys.stderr = self.file_err
         if not start:
             self.file_out.close()
             self.file_err.close()
