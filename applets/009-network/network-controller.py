@@ -64,7 +64,7 @@ class NetworkController:
             sys.stderr = self.stderr_save
 
     def execute(self, cmd):
-        command = "sudo {}".format(cmd)
+        command = "sudo {} 1>/dev/null 2>&1".format(cmd)
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
         exit_code = process.returncode
