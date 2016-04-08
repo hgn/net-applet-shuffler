@@ -9,6 +9,15 @@ def clean_directory(x, host_name, host_user, host_ip):
     return True
 
 
+def clean_qdiscs(x, conf, host_name, host_user, host_ip):
+    interface_list = conf.get_all_iface_names(host_name)
+    for interface in interface_list:
+        cmd = "tc qdisc del dev {} root netem".format(interface)
+        # try, since this should only work for an active qdisc
+        x.ssh.exec(host_ip, host_user, cmd)
+    return True
+
+
 def clean_service(x, host_name, host_user, host_ip, service_name):
     stdout, _, _ = x.ssh.exec(host_ip, host_user, "pgrep {}"
                               .format(service_name))
@@ -50,5 +59,7 @@ def main(x, conf, args):
     # 4. netperf cleanup
     if not clean_service(x, host_name, host_user, host_ip, "netperf"):
         return False
+    # 5. qdiscs cleanup
+    clean_qdiscs(x, conf, host_name, host_user, host_ip)
 
     return True
