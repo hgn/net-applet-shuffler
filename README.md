@@ -105,10 +105,6 @@ this is not advised. Still, every host needs to have at least one control type
 interface and one test type interface specified in the conf.json. These might specify the
 same interface, if separated interfaces are not available.
 
-When a qdisc with netem is set, this qdisc also has to be deleted. If this is not done,
-e.g. due to an error while running a campaign, either the middle box has to be restarted,
-or the qdisc has to be deleted manually.
-
 Normally, routing information is lost after a shutdown. One possible solution
 is to enable ssh access via ssh on os startup, then use ssh for further
 customization. An example workflow for Ubuntu 15.10 is the following:
