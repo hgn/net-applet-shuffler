@@ -86,26 +86,7 @@ used, make sure every host has ip forwarding enabled, so that the status of the
 test interfaces of the test hosts can be checked
 
 ```
-[on alpha]
-[sudo] ip link set dev enp4s0 down
-[sudo] ip a add 10.0.0.1/24 dev enp4s0
-[sudo] ip r add default via 10.0.0.205
-[sudo] ip link set dev enp4s0 up
-
-[on beta]
-[sudo] ip link set dev eth0 down
-[sudo] ip a add 10.0.1.1/24 dev eth0
-[sudo] ip r add default via 10.0.1.205
-[sudo] ip link set dev eth0 down
-
-[on koppa]
-[sudo] ip link set dev left down
-[sudo] ip link set dev right down
-[sudo] ip a add 10.0.0.205/24 dev left
-[sudo] ip a add 10.0.1.205/24 dev right
-[sudo] ip link set dev left up
-[sudo] ip link set dev right up
-[sudo] echo 1 > /proc/sys/net/ipv4/ip_forward
+look at "Configuration"
 ```
 
 
@@ -126,56 +107,73 @@ customization. An example workflow for Ubuntu 15.10 is the following:
 
 
 [on alpha]
-[network.sh]
-#!/bin/bash
-sudo ifconfig enp4s0 down
-sleep 1
-sudo ip a add 10.0.0.1/24 dev enp4s0
-sleep 1
-sudo ifconfig enp4s0 up
-sleep 1
-sudo ip r add default via 10.0.0.205
-[/network.sh]
-sudo bash /home/alpha/network.sh
-
-[on beta]
 sudo touch /etc/init.d/startup.sh
 sudo vim /etc/init.d/startup.sh
 [startup.sh]
 #!/bin/bash
 echo "Configuring Network parameters..."
-sleep 10
-sudo ip link set dev enp3s2 down
-sudo ip link set dev enp0s25 down
+sleep 15
+sudo ip link set dev enp4s0 down
+sudo ip link set dev enp5s5 down
 sleep 1
-sudo ip a add 10.0.1.1/24 dev enp0s25
+sudo ip a add 10.0.0.1/24 dev enp4s0
+sudo ip a add 10.1.0.1/16 dev enp5s5
 sleep 1
-sudo ip link set dev enp0s25 up
+sudo ip link set dev enp4s0 up
+sudo ip link set dev enp5s5 up
 sleep 1
-sudo ip r add default via 10.0.1.205
+sudo ip r add default via 10.0.0.205
+sudo sysctl -w /net/ipv4/ip_forward="1"
 echo "Configuring network parameters done!"
 [/startup.sh]
 sudo chmod ugo+x /etc/init.d/startup.sh
-sudo update-rc.d myscript defaults
+sudo update-rc.d startup.sh defaults
+
 
 [on koppa]
 ...
 [startup.sh]
 #!/bin/bash
 echo "Configuring Network parameters..."
-sleep 10
-sudo ip link set dev enp3s2 down
+sleep 15
 sudo ip link set dev enp0s25 down
+sudo ip link set dev enp3s0 down
+sudo ip link set dev enp3s2 down
 sleep 1
-sudo ip a add 10.0.0.205/24 dev enp3s2
-sudo ip a add 10.0.1.205/24 dev enp0s25
+sudo ip a add 10.0.0.205/24 dev enp0s25
+sudo ip a add 10.1.0.205/16 dev enp3s0
+sudo ip a add 10.0.1.205/24 dev enp3s2
 sleep 1
-sudo ip link set dev enp3s2 up
 sudo ip link set dev enp0s25 up
-sudo echo 1 > /proc/sys/net/ipv4/ip_forward
+sudo ip link set dev enp3s0 up
+sudo ip link set dev enp3s2 up
+sudo sysctl -w /net/ipv4/ip_forward="1"
 echo "Configuring network parameters done!"
 [/startup.sh]
 ...
+
+
+[on beta]
+...
+[startup.sh]
+#!/bin/bash
+echo "Configuring Network parameters..."
+sleep 15
+sudo ip link set dev enp0s25 down
+sudo ip link set dev enp3s2 down
+sleep 1
+sudo ip a add 10.0.1.1/24 dev enp0s25
+sudo ip a add 10.1.1.1/16 dev enp0s25
+sleep 1
+sudo ip link set dev enp0s25 up
+sudo ip link set dev enp3s2 up
+sleep 1
+sudo ip r add default via 10.0.1.205
+sudo sysctl -w /net/ipv4/ip_forward="1"
+echo "Configuring network parameters done!"
+[/startup.sh]
+...
+
 
 Now every interface in question should be able to ping any.
 ```
@@ -227,4 +225,3 @@ python3.5 ./nas.py -v exec-campaign 001-netperf-data-exchange
 # ToDo #
 
 * Ethernet Offloading on/off applet
-* The configuration must be splitted into all interfaces per node (middlebox has two interfaces)
