@@ -12,8 +12,9 @@ def main(x):
     x.exec('001-alive beta')
     x.exec('001-alive koppa')
 
-    # clean tmp data as well
-    # /tmp/net-applet-shuffler/*
+    # clean running interfering processes
+    # clean tmp data /tmp/net-applet-shuffler/*
+    # clean possible qdiscs
     x.exec('007-kill alpha')
     x.exec('007-kill beta')
     # only qdisc logs should be on koppa
@@ -72,8 +73,8 @@ def main(x):
 
     # netem
     # cleanup, remove the added delays
-    x.exec('104-netem-cmd koppa control:part change:del to-network:red command:"delay 10ms"')
-    x.exec('104-netem-cmd koppa control:part change:del to-network:blue command:"delay 10ms"')
+    x.exec('104-netem-cmd koppa control:part change:del to-network:red command:""')
+    x.exec('104-netem-cmd koppa control:part change:del to-network:blue command:""')
 
     # tcpdump
     # stop tcpdump on host, which also collects the dumpfile
