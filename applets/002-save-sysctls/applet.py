@@ -15,6 +15,9 @@ def main(x, conf, args):
         # return true because it is not failure
         return True
     # there should be no failure here
-    x.ssh.exec(ip, user, "sysctl -a > /tmp/sysctl.save 1>/dev/null 2>&1")
+    _, _, exit_code = x.ssh.exec(ip, user, "sysctl -a > /tmp/sysctl.save")
+    if exit_code != 0:
+        x.p.err("error: sysctls could not be saved on {}\n".format(hostname))
+        return False
     
     return True
