@@ -1,3 +1,4 @@
+
 def main(x, conf, args):
 
     if not len(args) > 0:
@@ -13,6 +14,9 @@ def main(x, conf, args):
         x.p.msg("error: no sysctl.save backup found on {}\n".format(hostname))
         return False
     # there should be no failure here
-    x.ssh.exec(ip, user, "sysctl -p/tmp/sysctl.save 1>/dev/null 2>&1")
+    _, _, exit_code = x.ssh.exec(ip, user, "sysctl -p/tmp/sysctl.save")
+    if exit_code != 0:
+        x.p.err("error: sysctls could not be restored on {}\n".format(hostname))
+        return False
 
     return True

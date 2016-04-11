@@ -6,16 +6,18 @@
 				"user":        "tcp1",
 				"interfaces": [
 					{
-						"name": "enp4s0",
-						"type": "test",
+						"default-route": "10.0.0.205",
 						"ip-address": "10.0.0.1",
-						"default-route": "10.0.0.205"
+						"name": "enp4s0",
+						"network-name": "red",
+						"type": "test"
 					},
 					{
-						"name": "dev2",
-						"type": "control",
-						"ip-address": "10.0.0.1",
-						"default-route": "10.0.0.205"
+						"default-route": "10.0.0.205",
+						"ip-address": "10.1.0.1",
+						"name": "enp5s5",
+						"network-name": "control",
+						"type": "control"
 					}
 				]
 			},
@@ -25,16 +27,18 @@
 				"user":        "beta",
 				"interfaces": [
 					{
-						"name": "enp0s25",
-						"type": "test",
+						"default-route": "10.0.1.205",
 						"ip-address": "10.0.1.1",
-						"default-route": "10.0.1.205"
+						"name": "enp0s25",
+						"network-name": "blue",
+						"type": "test"
 					},
 					{
-						"name": "dev2",
-						"type": "control",
-						"ip-address": "10.0.1.1",
-						"default-route": "10.0.1.205"
+						"default-route": "10.0.1.205",
+						"ip-address": "10.1.1.1",
+						"name": "enp3s2",
+						"network-name": "control",
+						"type": "control"
 					}
 				]
 			},
@@ -44,14 +48,22 @@
 				"user":        "koppa",
 				"interfaces": [
 					{
+						"ip-address": "10.0.0.205",
 						"name": "enp3s2",
-						"type": "test",
-						"ip-address": "10.0.0.205"
+						"network-name": "red",
+						"type": "test"
 					},
 					{
-						"type": "control",
+						"ip-address": "10.0.1.205",
 						"name": "enp0s25",
-						"ip-address": "10.0.1.205"
+						"network-name": "blue",
+						"type": "control"
+					},
+					{
+						"ip-address": "10.1.0.205",
+						"name": "enp3s0",
+						"network-name": "control",
+						"type": "control"
 					}
 				]
 			}

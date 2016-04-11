@@ -51,7 +51,8 @@ Notes:
 - After ssh key distribution, the machine in question has to be restarted (or
 a logout has to happen).
 - Every host which wishes to connect to another at some point in time has to be
-on it's known hosts file
+on it's known hosts file (IMPORTANT, e.g. if the main controller is alpha, even
+beta has to be able to ssh inti itself and alpha!)
 - The rsa identity path is hard coded to /home/[USER]/.ssh/id_rsa (default path)
 
 ```
@@ -81,101 +82,16 @@ Notes:
 - These changes will be lost on a restart
 - The test networks are expected to use a /24 net-mask
 - The direct network is expected to us a /16 net-mask
+- If an outer host, which is uninvolved in the tests (except for controlling) is
+used, make sure every host has ip forwarding enabled, so that the status of the
+test interfaces of the test hosts can be checked
 
 ```
-[on alpha]
-[sudo] ip link set dev enp4s0 down
-[sudo] ip a add 10.0.0.1/24 dev enp4s0
-[sudo] ip r add default via 10.0.0.205
-[sudo] ip link set dev enp4s0 up
-
-[on beta]
-[sudo] ip link set dev eth0 down
-[sudo] ip a add 10.0.1.1/24 dev eth0
-[sudo] ip r add default via 10.0.1.205
-[sudo] ip link set dev eth0 down
-
-[on koppa]
-[sudo] ip link set dev left down
-[sudo] ip link set dev right down
-[sudo] ip a add 10.0.0.205/24 dev left
-[sudo] ip a add 10.0.1.205/24 dev right
-[sudo] ip link set dev left up
-[sudo] ip link set dev right up
-[sudo] echo 1 > /proc/sys/net/ipv4/ip_forward
+look at "Configuration"
 ```
 
 
 # Helpful hints #
-
-## Configuration ##
-
-Normally, routing information is lost after a shutdown. One possible solution
-is to enable ssh access via ssh on os startup, then use ssh for further
-customization. An example workflow for Ubuntu 15.10 is the following:
-
-```
-- PREVENT OS FROM OVERWRITING CHANGES:
-    E.g. Ubuntu has a weird habit to sometimes override manual changes on layer 3.
-    To prevent this, go to Network Settings and open "Edit Connections...".
-    Select the interface(s) in question and open "Edit". Uncheck "Automatically
-    connect to this network when it is available".
-
-
-[on alpha]
-[network.sh]
-#!/bin/bash
-sudo ifconfig enp4s0 down
-sleep 1
-sudo ip a add 10.0.0.1/24 dev enp4s0
-sleep 1
-sudo ifconfig enp4s0 up
-sleep 1
-sudo ip r add default via 10.0.0.205
-[/network.sh]
-sudo bash /home/alpha/network.sh
-
-[on beta]
-sudo touch /etc/init.d/startup.sh
-sudo vim /etc/init.d/startup.sh
-[startup.sh]
-#!/bin/bash
-echo "Configuring Network parameters..."
-sleep 10
-sudo ip link set dev enp3s2 down
-sudo ip link set dev enp0s25 down
-sleep 1
-sudo ip a add 10.0.1.1/24 dev enp0s25
-sleep 1
-sudo ip link set dev enp0s25 up
-sleep 1
-sudo ip r add default via 10.0.1.205
-echo "Configuring network parameters done!"
-[/startup.sh]
-sudo chmod ugo+x /etc/init.d/startup.sh
-sudo update-rc.d myscript defaults
-
-[on koppa]
-...
-[startup.sh]
-#!/bin/bash
-echo "Configuring Network parameters..."
-sleep 10
-sudo ip link set dev enp3s2 down
-sudo ip link set dev enp0s25 down
-sleep 1
-sudo ip a add 10.0.0.205/24 dev enp3s2
-sudo ip a add 10.0.1.205/24 dev enp0s25
-sleep 1
-sudo ip link set dev enp3s2 up
-sudo ip link set dev enp0s25 up
-sudo echo 1 > /proc/sys/net/ipv4/ip_forward
-echo "Configuring network parameters done!"
-[/startup.sh]
-...
-
-Now every interface in question should be able to ping any.
-```
 
 ## Configuration ##
 
@@ -190,6 +106,89 @@ this is not advised. Still, every host needs to have at least one control type
 interface and one test type interface specified in the conf.json. These might specify the
 same interface, if separated interfaces are not available.
 
+Normally, routing information is lost after a shutdown. One possible solution
+is to enable ssh access via ssh on os startup, then use ssh for further
+customization. An example workflow for Ubuntu 15.10 is the following:
+
+```
+- PREVENT OS FROM OVERWRITING CHANGES:
+    E.g. Ubuntu has a weird habit to sometimes override manual changes on layer 3.
+    To prevent this, go to Network Settings and open "Edit Connections...".
+    Select the interface(s) in question and open "Edit". Uncheck "Automatically
+    connect to this network when it is available".
+
+
+[on alpha]
+sudo touch /etc/init.d/startup.sh
+sudo vim /etc/init.d/startup.sh
+[startup.sh]
+#!/bin/bash
+echo "Configuring Network parameters..."
+sleep 15
+sudo ip link set dev enp4s0 down
+sudo ip link set dev enp5s5 down
+sleep 1
+sudo ip a add 10.0.0.1/24 dev enp4s0
+sudo ip a add 10.1.0.1/16 dev enp5s5
+sleep 1
+sudo ip link set dev enp4s0 up
+sudo ip link set dev enp5s5 up
+sleep 1
+sudo ip r add default via 10.0.0.205
+sudo sysctl -w /net/ipv4/ip_forward="1"
+echo "Configuring network parameters done!"
+[/startup.sh]
+sudo chmod ugo+x /etc/init.d/startup.sh
+sudo update-rc.d startup.sh defaults
+
+
+[on koppa]
+...
+[startup.sh]
+#!/bin/bash
+echo "Configuring Network parameters..."
+sleep 15
+sudo ip link set dev enp0s25 down
+sudo ip link set dev enp3s0 down
+sudo ip link set dev enp3s2 down
+sleep 1
+sudo ip a add 10.0.0.205/24 dev enp0s25
+sudo ip a add 10.1.0.205/16 dev enp3s0
+sudo ip a add 10.0.1.205/24 dev enp3s2
+sleep 1
+sudo ip link set dev enp0s25 up
+sudo ip link set dev enp3s0 up
+sudo ip link set dev enp3s2 up
+sudo sysctl -w /net/ipv4/ip_forward="1"
+echo "Configuring network parameters done!"
+[/startup.sh]
+...
+
+
+[on beta]
+...
+[startup.sh]
+#!/bin/bash
+echo "Configuring Network parameters..."
+sleep 15
+sudo ip link set dev enp0s25 down
+sudo ip link set dev enp3s2 down
+sleep 1
+sudo ip a add 10.0.1.1/24 dev enp0s25
+sudo ip a add 10.1.1.1/16 dev enp3s22
+sleep 1
+sudo ip link set dev enp0s25 up
+sudo ip link set dev enp3s2 up
+sleep 1
+sudo ip r add default via 10.0.1.205
+sudo sysctl -w /net/ipv4/ip_forward="1"
+echo "Configuring network parameters done!"
+[/startup.sh]
+...
+
+
+Now every interface in question should be able to ping any.
+```
 
 
 # Examples #
@@ -224,4 +223,3 @@ python3.5 ./nas.py -v exec-campaign 001-netperf-data-exchange
 # ToDo #
 
 * Ethernet Offloading on/off applet
-* The configuration must be splitted into all interfaces per node (middlebox has two interfaces)

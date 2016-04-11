@@ -1,4 +1,6 @@
 # usage: exec 102-metrics-save [host] route-metrics-save:[enabled|disabled]
+# Check success:
+#  sysctl /net/ipv4/tcp_no_metrics_save
 
 
 def set_metric_save(x, user, ip, route_metric):

@@ -12,10 +12,17 @@ def main(x):
     x.exec('001-alive beta')
     x.exec('001-alive koppa')
 
-    # clean tmp data as well
-    # /tmp/net-applet-shuffler/*
+    # clean running interfering processes
+    # clean tmp data /tmp/net-applet-shuffler/*
+    # clean possible qdiscs
     x.exec('007-kill alpha')
     x.exec('007-kill beta')
+    # only qdisc logs should be on koppa
+    x.exec('007-kill koppa')
+
+    # make sure the indirect configuration is active
+    # also sets up basic routing (default gateways)
+    x.exec('009-network setup:indirect alpha beta')
 
     # save syscall, no-op when already done
     x.exec('002-save-sysctls alpha')
@@ -34,6 +41,30 @@ def main(x):
     # - mode:start -> the local-file-name is ignored
     # usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
     x.exec('006-tcpdump beta id:0001 mode:start local-file-name:"ignored" filter:"tcp and dst port 30000"')
+
+    # netem
+    # add delay to left and right outgoing interfaces for the upcoming test
+    x.exec('104-netem-cmd koppa control:part change:add to-network:red command:"delay 10ms"')
+    x.exec('104-netem-cmd koppa control:part change:add to-network:blue command:"delay 10ms"')
+
+    # min rto
+    # usage: [host] min-rto:[time] change:[add|del]
+    # restoration is covered by 009-network
+    # or by using the standard 200ms
+    x.exec('103-tcp-min-rto alpha min-rto:10ms')
+    x.exec('103-tcp-min-rto beta min-rto:10ms')
+
+    # tcp iw
+    # usage: [host] initcwnd:[number] initrwnd:[number]
+    # restoration is covered by 009-network
+    x.exec('101-tcp-iw alpha initcwnd:20 initrwnd:20')
+    x.exec('101-tcp-iw beta initcwnd:20 initrwnd:20')
+
+    # tcp route metrics save
+    # usage: [host] route-metrics-save:[enabled|disabled]
+    # restoration is covered by 003-restore-sysctls
+    x.exec('102-tcp-route-metrics-save alpha route-metrics-save:disabled')
+    x.exec('102-tcp-route-metrics-save beta route-metrics-save:disabled')
 
     # netperf
     # start netperf sink, connect to it from host (source) and start a transfer
@@ -59,6 +90,12 @@ def main(x):
     # - one host can have several running ids, but one (unique) id can have only one host
     # usage: interval_time:[seconds] [name_1]:[id_1] [name_1]:[id_2] [name_2]:[id_3] ...
     x.exec('008-wait-for-completion interval_time:5 alpha:0001 beta:0002')
+
+    # netem
+    # manual cleanup, remove the added delays
+    # not mandatory due to being covered by 007-kill
+    x.exec('104-netem-cmd koppa control:part change:del to-network:red command:""')
+    x.exec('104-netem-cmd koppa control:part change:del to-network:blue command:""')
 
     # tcpdump
     # stop tcpdump on host, which also collects the dumpfile

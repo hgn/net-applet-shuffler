@@ -4,10 +4,16 @@ import subprocess
 import sys
 import time
 
+from time import strftime
+
 
 class NetworkController:
 
+    output_redirected = False
+
     def __init__(self, arguments_dictionary):
+        self.stdout_save = sys.stdout
+        self.stderr_save = sys.stderr
         self.arg_d = arguments_dictionary
 
     def demonize_program(self):
@@ -44,11 +50,29 @@ class NetworkController:
         os.dup2(std_out.fileno(), sys.stdin.fileno())
         os.dup2(std_err.fileno(), sys.stdin.fileno())
 
+    def redirect_console_output(self, start):
+        if start:
+            time_now = strftime("%H_%M_%S")
+            self.file_out = open("/tmp/net-applet-shuffler/logs/network_"
+                                 "controller_stdout_{}".format(time_now), "w")
+            self.file_err = open("/tmp/net-applet-shuffler/logs/network_"
+                                 "controller_stderr_{}".format(time_now), "w")
+            self.output_redirected = True
+            sys.stdout = self.file_out
+            sys.stderr = self.file_err
+        if not start and self.output_redirected:
+            self.file_out.close()
+            self.file_err.close()
+            sys.stdout = self.stdout_save
+            sys.stderr = self.stderr_save
+
     def execute(self, cmd):
         command = "sudo {}".format(cmd)
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        return stdout, stderr, process.returncode
+        exit_code = process.returncode
+        print(" - exit code: {} - ".format(exit_code) + command)
+        return stdout, stderr, exit_code
 
     def establish_direct_setup(self):
         self.execute("ip link set dev {} down".format(arg_d["interface"]))
@@ -70,15 +94,25 @@ class NetworkController:
 
     def main(self):
         self.demonize_program()
+        # make sure necessary dirs exist, local and remote
+        self.execute("mkdir /tmp/net-applet-shuffler")
+        self.execute("mkdir /tmp/net-applet-shuffler/logs")
+        # redirect output to file
+        self.redirect_console_output(True)
         # wait, so every instance can be started before the network goes down
-        time.sleep(6)
+        time.sleep(4)
         if arg_d["setup"] == "direct":
+            print(" - establishing direct setup")
             self.establish_direct_setup()
         elif arg_d["setup"] == "indirect":
+            print(" - establishing indirect setup")
             self.establish_indirect_setup()
         else:
             # this should not happen
             sys.exit(1)
+        print(" - network-controller ended gracefully")
+        self.redirect_console_output(False)
+        sys.exit(0)
 
 
 if __name__ == '__main__':

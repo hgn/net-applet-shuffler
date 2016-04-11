@@ -1,5 +1,4 @@
 # usage: exec 009-network setup:direct host1 host2 host3 ...
-# obviously, also the physical replug hast to happen as well
 
 import os
 import subprocess
@@ -7,9 +6,10 @@ import time
 
 from threading import Thread
 
+CONTR_NAME = "network-controller.py"
 LOCAL_CONT_PATH = os.path.dirname(os.path.realpath(__file__))
 REMOTE_CONT_PATH = "/tmp/net-applet-shuffler"
-CONTR_NAME = "network-controller.py"
+TIMEOUT = 60
 
 
 class ControllerStart(Thread):
@@ -20,7 +20,6 @@ class ControllerStart(Thread):
 
     def __init__(self, user, ip, arguments):
         Thread.__init__(self)
-        self.daemon = True
         self.host_user = user
         self.host_ip_control = ip
         self.arguments = arguments
@@ -76,10 +75,30 @@ def main(x, conf, args):
         arguments = "{} {} {} {}".format(setup, host_interface, host_ip_test,
                                          host_def_route)
         host_thread = ControllerStart(host_user, host_ip_control, arguments)
+        host_thread.daemon = True
         host_thread.start()
-    # sleep a minimum of 24 (network controller sleeps) + 2 (safety margin)
-    # seconds, unfortunately this is necessary
-    time.sleep(26)
-    x.p.msg("direct setup (hopefully) completed\n")
+    # minimum time a network controller needs before the network is reachable
+    start_time = round(time.time())
+    x.p.msg("waiting for all hosts to be reachable again\n")
+    time.sleep(16)
+    # wait for the controllers on their respective hosts to complete the setup
+    x.p.msg("starting periodical reachability test\n")
+    responding_hosts = list()
+    while len(host_list) > 0:
+        time.sleep(1)
+        for host in host_list:
+            host_ip = conf.get_test_ip(host)
+            if x.ping(host_ip):
+                responding_hosts.append(host)
+        for responding_host in responding_hosts:
+            host_list.remove(responding_host)
+            responding_hosts.remove(responding_host)
+        # timeout
+        if (start_time + TIMEOUT) < round(time.time()):
+            x.p.err("error: timeout occurred\n")
+            x.p.err("is the network still up?\n")
+            return False
+
+    x.p.msg("setup completed and hosts responding\n")
 
     return True

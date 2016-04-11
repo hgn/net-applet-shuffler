@@ -3,8 +3,17 @@ import os
 import sys
 import subprocess
 
+from time import strftime
+
 
 class NetperfController:
+
+    output_redirected = False
+
+    def __init__(self, arguments_dictionary):
+        self.stdout_save = sys.stdout
+        self.stderr_save = sys.stderr
+        self.arg_d = arguments_dictionary
 
     def demonize_program(self):
         # https://gist.github.com/andreif/cbb71b0498589dac93cb
@@ -40,23 +49,44 @@ class NetperfController:
         os.dup2(std_out.fileno(), sys.stdin.fileno())
         os.dup2(std_err.fileno(), sys.stdin.fileno())
 
-    def __init__(self, arguments_dictionary):
-        self.arg_d = arguments_dictionary
+    def redirect_console_output(self, start):
+        if start:
+            time_now = strftime("%H_%M_%S")
+            self.file_out = open("/tmp/net-applet-shuffler/logs/netperf_"
+                                 "controller_stdout_{}".format(time_now), "w")
+            self.file_err = open("/tmp/net-applet-shuffler/logs/netperf_"
+                                 "controller_stderr_{}".format(time_now), "w")
+            self.output_redirected = True
+            sys.stdout = self.file_out
+            sys.stderr = self.file_err
+        if not start and self.output_redirected:
+            self.file_out.close()
+            self.file_err.close()
+            sys.stdout = self.stdout_save
+            sys.stderr = self.stderr_save
+            self.output_redirected = False
 
     def ssh_exec(self, ip, remote_user, local_user, cmd):
-        # use the -i identity file option due to ssh forwarding
-        # note: for debugging purposes use: "-E /[file_path]"
-        ssh_command = "ssh -i /home/{}/.ssh/id_rsa {}@{} sudo {}".format(
-                                            local_user, remote_user, ip, cmd)
+        # due to demonized root program execution, ssh uses root user parameters
+        # use the -i identity file option for the user file
+        # use the -o known_hosts file option for the same reason
+        # note: for debugging purposes use: "-vvv -E /[file_path]"
+        ssh_command = "ssh -i /home/{}/.ssh/id_rsa -o UserKnownHostsFile=" \
+                      "/home/{}/.ssh/known_hosts {}@{} sudo {}"\
+            .format(local_user, local_user, remote_user, ip, cmd)
         process = subprocess.Popen(ssh_command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        return stdout, stderr, process.returncode
+        exit_code = process.returncode
+        print(" - exit code: {} - ".format(exit_code) + ssh_command)
+        return stdout, stderr, exit_code
 
-    def exec(self, cmd):
-        command = "sudo {} 1>/dev/null 2>&1".format(cmd)
+    def execute(self, cmd):
+        command = "sudo {}".format(cmd)
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        return stdout, stderr, process.returncode
+        exit_code = process.returncode
+        print(" - exit code: {} - ".format(exit_code) + command)
+        return stdout, stderr, exit_code
 
     def netserver_end(self):
         # try graceful end
@@ -69,9 +99,9 @@ class NetperfController:
                       .format(self.arg_d["netserver_pid"]))
         # remove pid file
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
-                      self.arg_d["user_source"], "rm /tmp/net-applet-shuffler/#"
-                        "netserver_{}".format(self.arg_d["applet_id"],
-                                              self.arg_d["netserver_pid"]))
+                      self.arg_d["user_source"], "rm /tmp/net-applet-shuffler/"
+                      "netserver_{}".format(self.arg_d["applet_id"],
+                                            self.arg_d["netserver_pid"]))
         return True
 
     def netserver_start(self):
@@ -121,10 +151,10 @@ class NetperfController:
             try:
                 # while the following file exists, there is a ongoing transfer
                 if starting:
-                    self.exec("touch /tmp/net-applet-shuffler/running_{}"
+                    self.execute("touch /tmp/net-applet-shuffler/running_{}"
                               .format(self.arg_d["applet_id"]))
                 if not starting:
-                    self.exec("rm /tmp/net-applet-shuffler/running_{}"
+                    self.execute("rm /tmp/net-applet-shuffler/running_{}"
                               .format(self.arg_d["applet_id"]))
                 return True
             except subprocess.SubprocessError:
@@ -134,12 +164,10 @@ class NetperfController:
         # demonize program
         self.demonize_program()
         # make sure necessary dirs exist, local and remote
-        self.exec("mkdir /tmp/net-applet-shuffler")
+        self.execute("mkdir /tmp/net-applet-shuffler")
+        self.execute("mkdir /tmp/net-applet-shuffler/logs")
         # redirect output to file
-        sys.stdout = open("/tmp/net-applet-shuffler/netperf_controller_stdout",
-                          "w")
-        sys.stderr = open("/tmp/net-applet-shuffler/netperf_controller_stderr",
-                          "w")
+        self.redirect_console_output(True)
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
                       self.arg_d["user_source"],
                       "mkdir /tmp/net-applet-shuffler")
@@ -163,6 +191,7 @@ class NetperfController:
         amount_tries = 0
         netperf_start_failed = True
         while amount_tries < 10:
+            print(" - trying to start netperf")
             netperf_cmd = "netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {}" \
                           ",{} -T TCP -4".format(self.arg_d["ip_dest_test"],
                                                  self.arg_d["ip_source_test"],
@@ -171,7 +200,7 @@ class NetperfController:
                                                  self.arg_d["flow_offset"],
                                                  self.arg_d["port_source"],
                                                  self.arg_d["port_dest"])
-            _, _, exit_code = self.exec(netperf_cmd)
+            _, _, exit_code = self.execute(netperf_cmd)
             if exit_code == 0:
                 netperf_start_failed = False
                 break
@@ -182,14 +211,19 @@ class NetperfController:
                   "failed params:\n")
             print("netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {},{} -T "
                   "TCP -4\n".format(self.arg_d["ip_dest_test"],
-                    self.arg_d["ip_source_test"], self.arg_d["netserver_port"],
-                    self.arg_d["test_length"], self.arg_d["flow_offset"],
-                    self.arg_d["port_source"], self.arg_d["port_dest"]))
+                                    self.arg_d["ip_source_test"],
+                                    self.arg_d["netserver_port"],
+                                    self.arg_d["test_length"],
+                                    self.arg_d["flow_offset"],
+                                    self.arg_d["port_source"],
+                                    self.arg_d["port_dest"]))
             sys.exit(3)
 
+        print(" - netperf ended")
         self.test_running(False)
         self.netserver_end()
-        print("netperf-controller ended gracefully")
+        print(" - netperf-controller ended gracefully")
+        self.redirect_console_output(False)
         sys.exit(0)
 
 
