@@ -79,9 +79,10 @@ def main(x, conf, args):
         host_thread.start()
     # minimum time a network controller needs before the network is reachable
     start_time = round(time.time())
+    x.p.msg("waiting for all hosts to be reachable again\n")
     time.sleep(16)
     # wait for the controllers on their respective hosts to complete the setup
-    x.p.msg("waiting for all hosts to be reachable again\n")
+    x.p.msg("starting periodical reachability test\n")
     responding_hosts = list()
     while len(host_list) > 0:
         time.sleep(1)
