@@ -9,6 +9,8 @@ from time import strftime
 
 class NetworkController:
 
+    output_redirected = False
+
     def __init__(self, arguments_dictionary):
         self.stdout_save = sys.stdout
         self.stderr_save = sys.stderr
@@ -55,16 +57,17 @@ class NetworkController:
                                  "controller_stdout_{}".format(time_now), "w")
             self.file_err = open("/tmp/net-applet-shuffler/logs/network_"
                                  "controller_stderr_{}".format(time_now), "w")
+            self.output_redirected = True
             sys.stdout = self.file_out
             sys.stderr = self.file_err
-        if not start:
+        if not start and self.output_redirected:
             self.file_out.close()
             self.file_err.close()
             sys.stdout = self.stdout_save
             sys.stderr = self.stderr_save
 
     def execute(self, cmd):
-        command = "sudo {} 1>/dev/null 2>&1".format(cmd)
+        command = "sudo {}".format(cmd)
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
         exit_code = process.returncode

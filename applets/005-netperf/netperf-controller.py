@@ -8,6 +8,8 @@ from time import strftime
 
 class NetperfController:
 
+    output_redirected = False
+
     def __init__(self, arguments_dictionary):
         self.stdout_save = sys.stdout
         self.stderr_save = sys.stderr
@@ -54,25 +56,32 @@ class NetperfController:
                                  "controller_stdout_{}".format(time_now), "w")
             self.file_err = open("/tmp/net-applet-shuffler/logs/netperf_"
                                  "controller_stderr_{}".format(time_now), "w")
+            self.output_redirected = True
             sys.stdout = self.file_out
             sys.stderr = self.file_err
-        if not start:
+        if not start and self.output_redirected:
             self.file_out.close()
             self.file_err.close()
             sys.stdout = self.stdout_save
             sys.stderr = self.stderr_save
+            self.output_redirected = False
 
     def ssh_exec(self, ip, remote_user, local_user, cmd):
-        # use the -i identity file option due to ssh forwarding
-        # note: for debugging purposes use: "-E /[file_path]"
-        ssh_command = "ssh -i /home/{}/.ssh/id_rsa {}@{} sudo {}".format(
-                                            local_user, remote_user, ip, cmd)
+        # due to demonized root program execution, ssh uses root user parameters
+        # use the -i identity file option for the user file
+        # use the -o known_hosts file option for the same reason
+        # note: for debugging purposes use: "-vvv -E /[file_path]"
+        ssh_command = "ssh -i /home/{}/.ssh/id_rsa -o UserKnownHostsFile=" \
+                      "/home/{}/.ssh/known_hosts {}@{} sudo {}"\
+            .format(local_user, local_user, remote_user, ip, cmd)
         process = subprocess.Popen(ssh_command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        return stdout, stderr, process.returncode
+        exit_code = process.returncode
+        print(" - exit code: {} - ".format(exit_code) + ssh_command)
+        return stdout, stderr, exit_code
 
-    def exec(self, cmd):
-        command = "sudo {} 1>/dev/null 2>&1".format(cmd)
+    def execute(self, cmd):
+        command = "sudo {}".format(cmd)
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
         exit_code = process.returncode
@@ -142,10 +151,10 @@ class NetperfController:
             try:
                 # while the following file exists, there is a ongoing transfer
                 if starting:
-                    self.exec("touch /tmp/net-applet-shuffler/running_{}"
+                    self.execute("touch /tmp/net-applet-shuffler/running_{}"
                               .format(self.arg_d["applet_id"]))
                 if not starting:
-                    self.exec("rm /tmp/net-applet-shuffler/running_{}"
+                    self.execute("rm /tmp/net-applet-shuffler/running_{}"
                               .format(self.arg_d["applet_id"]))
                 return True
             except subprocess.SubprocessError:
@@ -155,8 +164,8 @@ class NetperfController:
         # demonize program
         self.demonize_program()
         # make sure necessary dirs exist, local and remote
-        self.exec("mkdir /tmp/net-applet-shuffler")
-        self.exec("mkdir /tmp/net-applet-shuffler/logs")
+        self.execute("mkdir /tmp/net-applet-shuffler")
+        self.execute("mkdir /tmp/net-applet-shuffler/logs")
         # redirect output to file
         self.redirect_console_output(True)
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
@@ -191,7 +200,7 @@ class NetperfController:
                                                  self.arg_d["flow_offset"],
                                                  self.arg_d["port_source"],
                                                  self.arg_d["port_dest"])
-            _, _, exit_code = self.exec(netperf_cmd)
+            _, _, exit_code = self.execute(netperf_cmd)
             if exit_code == 0:
                 netperf_start_failed = False
                 break
