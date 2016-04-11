@@ -91,12 +91,6 @@ def main(x):
     # usage: interval_time:[seconds] [name_1]:[id_1] [name_1]:[id_2] [name_2]:[id_3] ...
     x.exec('008-wait-for-completion interval_time:5 alpha:0001 beta:0002')
 
-    # netem
-    # manual cleanup, remove the added delays
-    # not mandatory due to being covered by 007-kill
-    x.exec('104-netem-cmd koppa control:part change:del to-network:red command:""')
-    x.exec('104-netem-cmd koppa control:part change:del to-network:blue command:""')
-
     # tcpdump
     # stop tcpdump on host, which also collects the dumpfile
     # notes:
@@ -104,3 +98,9 @@ def main(x):
     # - id and host MUST match the id of the started tcpdump
     # usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
     x.exec('006-tcpdump beta id:0001 mode:stop local-file-name:"../../dumps/001_netperf_alpha_to_beta.pcap" filter:"ignored"')
+
+    # netem
+    # manual cleanup, remove the added delays
+    # not mandatory due to being covered by 007-kill
+    x.exec('104-netem-cmd koppa control:part change:del to-network:red command:""')
+    x.exec('104-netem-cmd koppa control:part change:del to-network:blue command:""')
