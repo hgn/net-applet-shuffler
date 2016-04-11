@@ -1,4 +1,4 @@
-# usage: exec 101-tcp-iw [host]  initcwnd:[number] initrwnd:[number]
+# usage: exec 101-tcp-iw [host] initcwnd:[number] initrwnd:[number]
 
 
 def set_iw(x, arg_d):
