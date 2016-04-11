@@ -186,11 +186,22 @@ class Conf():
             if host_name == host:
                 interfaces = self.data["boxes"][host_name]["interfaces"]
                 for interface in interfaces:
-                    if interface["network-name"] == "network":
+                    if interface["network-name"] == network:
                         return interface["name"]
         print("error: get_middle_box_iface_name_by_network_name not found for "
               "host {} and network name {}\n".format(host_name, network))
         sys.exit(1)
+
+    def get_all_iface_names(self, host_name):
+        for host in self.data["boxes"]:
+            if host_name == host:
+                interfaces = self.data["boxes"][host_name]["interfaces"]
+                interface_list = list()
+                for interface in interfaces:
+                    interface_list.append(interface["name"])
+                return interface_list
+        print("error: get_all_iface_names not possible for host {}"
+              .format(host_name))
 
     def get_user(self, host_name):
         for host in self.data["boxes"]:
