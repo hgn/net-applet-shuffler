@@ -34,7 +34,7 @@ def set_offloading(x, conf, dic):
             cmd = "ethtool -K {} tso off ufo off gso off gro off lro off"\
                 .format(device)
         else:
-            x.p.err("error: wrong usage")
+            x.p.err("error: wrong usage\n")
             return False
         # unfortunately, error handling does not work, since ethtool sometimes
         # even exits with code 1 on success

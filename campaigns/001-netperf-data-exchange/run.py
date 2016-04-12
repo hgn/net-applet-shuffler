@@ -61,8 +61,8 @@ def main(x):
     # interface offloading
     # usage: [host] command:"[command]"
     # restoration has to be covered manually (see end of run)
-    x.exec('105-offloading alpha command:"tso off ufo off gso off gro off lro off"')
-    x.exec('105-offloading alpha command:"tso off ufo off gso off gro off lro off"')
+    x.exec('105-offloading alpha offloading:off')
+    x.exec('105-offloading beta offloading:off')
 
     # tcpdump
     # start tcpdump on host
@@ -113,5 +113,5 @@ def main(x):
 
     # interface offloading
     # enable interface offloading again
-    x.exec('105-offloading alpha command:"tso on ufo on gso on gro on lro on"')
-    x.exec('105-offloading alpha command:"tso on ufo on gso on gro on lro on"')
+    x.exec('105-offloading alpha offloading:on')
+    x.exec('105-offloading beta offloading:on')
