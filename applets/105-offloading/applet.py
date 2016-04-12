@@ -24,7 +24,7 @@ def print_usage(x):
 
 
 def set_offloading(x, conf, dic):
-    device_list = conf.get_all_test_iface_names(dic["host"])
+    device_list = conf.get_all_data_iface_names(dic["host"])
     for device in device_list:
         cmd = str()
         if dic["offloading"] == "on":

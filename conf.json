@@ -10,7 +10,7 @@
 						"ip-address": "10.0.0.1",
 						"name": "enp4s0",
 						"network-name": "red",
-						"type": "test"
+						"type": "data"
 					},
 					{
 						"default-route": "10.0.0.205",
@@ -31,7 +31,7 @@
 						"ip-address": "10.0.1.1",
 						"name": "enp0s25",
 						"network-name": "blue",
-						"type": "test"
+						"type": "data"
 					},
 					{
 						"default-route": "10.0.1.205",
@@ -51,13 +51,13 @@
 						"ip-address": "10.0.0.205",
 						"name": "enp3s2",
 						"network-name": "red",
-						"type": "test"
+						"type": "data"
 					},
 					{
 						"ip-address": "10.0.1.205",
 						"name": "enp0s25",
 						"network-name": "blue",
-						"type": "test"
+						"type": "data"
 					},
 					{
 						"ip-address": "10.1.0.205",

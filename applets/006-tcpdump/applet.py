@@ -182,7 +182,7 @@ def main(x, conf, args):
         return False
     # retrieve: host ip, host user name
     arg_d["host_ip_control"] = conf.get_control_ip(arg_d["host_name"])
-    arg_d["host_interface"] = conf.get_test_iface_name(arg_d["host_name"])
+    arg_d["host_interface"] = conf.get_data_iface_name(arg_d["host_name"])
     arg_d["host_user"] = conf.get_user(arg_d["host_name"])
     # applet mode:
     # start: start the tcpdump

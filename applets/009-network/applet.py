@@ -68,11 +68,11 @@ def main(x, conf, args):
     # start the network controllers
     for host_name in host_list:
         host_user = conf.get_user(host_name)
-        host_ip_test = conf.get_test_ip(host_name)
+        host_ip_data = conf.get_data_ip(host_name)
         host_ip_control = conf.get_control_ip(host_name)
-        host_interface = conf.get_test_iface_name(host_name)
-        host_def_route = conf.get_test_default_route(host_name)
-        arguments = "{} {} {} {}".format(setup, host_interface, host_ip_test,
+        host_interface = conf.get_data_iface_name(host_name)
+        host_def_route = conf.get_data_default_route(host_name)
+        arguments = "{} {} {} {}".format(setup, host_interface, host_ip_data,
                                          host_def_route)
         host_thread = ControllerStart(host_user, host_ip_control, arguments)
         host_thread.daemon = True
@@ -87,7 +87,7 @@ def main(x, conf, args):
     while len(host_list) > 0:
         time.sleep(1)
         for host in host_list:
-            host_ip = conf.get_test_ip(host)
+            host_ip = conf.get_data_ip(host)
             if x.ping(host_ip):
                 responding_hosts.append(host)
         for responding_host in responding_hosts:

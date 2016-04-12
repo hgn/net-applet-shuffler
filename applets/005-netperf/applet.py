@@ -12,11 +12,11 @@ def controller_thread(x, arg_d):
     # 1. applet_id
     # 2. name_source
     # 3. user_source
-    # 4. ip_source_test
+    # 4. ip_source_data
     # 5. port_source
     # 6. name_dest
     # 7. user_dest
-    # 8. ip_dest_test
+    # 8. ip_dest_data
     # 9. port_dest
     # 10. netserver_port
     # 11. flow_length
@@ -24,8 +24,8 @@ def controller_thread(x, arg_d):
     # 13. ip_source_control
     # 14. ip_dest_control
     arguments_string = " ".join((arg_d["applet_id"], arg_d["name_source"],
-            arg_d["user_source"], arg_d["ip_source_test"], arg_d["port_source"],
-            arg_d["name_dest"], arg_d["user_dest"], arg_d["ip_dest_test"],
+            arg_d["user_source"], arg_d["ip_source_data"], arg_d["port_source"],
+            arg_d["name_dest"], arg_d["user_dest"], arg_d["ip_dest_data"],
             arg_d["port_dest"], arg_d["netserver_port"], arg_d["flow_length"],
             arg_d["flow_offset"], arg_d["ip_source_control"],
             arg_d["ip_dest_control"]))
@@ -68,10 +68,10 @@ def main(x, conf, args):
         return False
     # retrieve: source ip, source user name, destination ip, destination user
     # name
-    arg_d["ip_source_test"] = conf.get_test_ip(arg_d["name_source"])
+    arg_d["ip_source_data"] = conf.get_data_ip(arg_d["name_source"])
     arg_d["ip_source_control"] = conf.get_control_ip(arg_d["name_source"])
     arg_d["user_source"] = conf.get_user(arg_d["name_source"])
-    arg_d["ip_dest_test"] = conf.get_test_ip(arg_d["name_dest"])
+    arg_d["ip_dest_data"] = conf.get_data_ip(arg_d["name_dest"])
     arg_d["ip_dest_control"] = conf.get_control_ip(arg_d["name_dest"])
     arg_d["user_dest"] = conf.get_user(arg_d["name_dest"])
 

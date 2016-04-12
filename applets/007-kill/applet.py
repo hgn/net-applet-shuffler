@@ -10,7 +10,7 @@ def clean_directory(x, host_name, host_user, host_ip):
 
 
 def clean_qdiscs(x, conf, host_name, host_user, host_ip):
-    interface_list = conf.get_all_test_iface_names(host_name)
+    interface_list = conf.get_all_data_iface_names(host_name)
     for interface in interface_list:
         cmd = "tc qdisc del dev {} root netem".format(interface)
         # try, since this should only work for an active qdisc

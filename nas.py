@@ -118,14 +118,14 @@ class Conf():
     def __getitem__(self, item):
         pass
 
-    def get_test_ip(self, host_name):
+    def get_data_ip(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
                 interfaces = self.data["boxes"][host_name]["interfaces"]
                 for interface in interfaces:
-                    if interface["type"] == "test":
+                    if interface["type"] == "data":
                         return interface["ip-address"]
-        print("error: get_test_ip not found for {}\n".format(host_name))
+        print("error: get_data_ip not found for {}\n".format(host_name))
         sys.exit(1)
 
     def get_control_ip(self, host_name):
@@ -138,14 +138,14 @@ class Conf():
         print("error: get_control_ip not found for {}\n".format(host_name))
         sys.exit(1)
 
-    def get_test_iface_name(self, host_name):
+    def get_data_iface_name(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
                 interfaces = self.data["boxes"][host_name]["interfaces"]
                 for interface in interfaces:
-                    if interface["type"] == "test":
+                    if interface["type"] == "data":
                         return interface["name"]
-        print("error: get_test_iface_name not found for {}\n".format(host_name))
+        print("error: get_data_iface_name not found for {}\n".format(host_name))
         sys.exit(1)
 
     def get_control_iface_name(self, host_name):
@@ -159,14 +159,14 @@ class Conf():
               .format(host_name))
         sys.exit(1)
 
-    def get_test_default_route(self, host_name):
+    def get_data_default_route(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
                 interfaces = self.data["boxes"][host_name]["interfaces"]
                 for interface in interfaces:
-                    if interface["type"] == "test":
+                    if interface["type"] == "data":
                         return interface["default-route"]
-        print("error: get_test_default_route not found for {}\n"
+        print("error: get_data_default_route not found for {}\n"
               .format(host_name))
         sys.exit(1)
 
@@ -192,19 +192,19 @@ class Conf():
               "host {} and network name {}\n".format(host_name, network))
         sys.exit(1)
 
-    def get_all_test_iface_names(self, host_name):
+    def get_all_data_iface_names(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
                 interfaces = self.data["boxes"][host_name]["interfaces"]
                 interface_list = list()
                 for interface in interfaces:
-                    if interface["type"] == "test":
+                    if interface["type"] == "data":
                         interface_list.append(interface["name"])
                 if not interface_list:
-                    print("warning: get_all_test_iface_names empty for {}"
+                    print("warning: get_all_data_iface_names empty for {}"
                           .format(host_name))
                 return interface_list
-        print("error: get_all_test_iface_names not possible for host {}"
+        print("error: get_all_data_iface_names not possible for host {}"
               .format(host_name))
         sys.exit(1)
 
