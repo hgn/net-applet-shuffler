@@ -93,6 +93,14 @@ look at "Configuration"
 
 # Helpful hints #
 
+
+## Getting started ##
+
+As a starter, it is advised to have a look at the 001-netperf-data-exchange campaign.
+It acts as an example campaign of a possible (simple) workflow. Also, a lot of information
+can be found in it concerning campaign setup, applet usage and hints.
+
+
 ## Configuration ##
 
 The setup is stored in a file called conf.json in the nas directory root.
@@ -218,8 +226,3 @@ Execute netperf data exchange campaign:
 ```
 python3.5 ./nas.py -v exec-campaign 001-netperf-data-exchange
 ```
-
-
-# ToDo #
-
-* Ethernet Offloading on/off applet
