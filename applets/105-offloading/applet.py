@@ -32,12 +32,14 @@ def set_offloading(x, conf, dic):
     device_list = conf.get_all_test_iface_names(dic["host"])
     for device in device_list:
         cmd = "ethtool -K {} {}".format(device, dic["cmd"])
+        # unfortunately, error handling does not work, since ethtool sometimes
+        # even exits with code 1 on success
         _, _, exit_code = x.ssh.exec(dic["ip_control"], dic["user"], cmd)
-        if exit_code != 0:
-            x.p.err("error: offloading could not be set for host {} device {}\n"
-                    .format(dic["host"], device))
-            x.p.err("failed cmd: \"{}\"".format(cmd))
-            return False
+        #if exit_code != 0:
+        #    x.p.err("error: offloading could not be set for host {} device {}\n"
+        #            .format(dic["host"], device))
+        #    x.p.err("failed cmd: \"{}\"\n".format(cmd))
+        #    return False
 
     return True
 
