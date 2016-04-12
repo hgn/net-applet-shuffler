@@ -34,14 +34,6 @@ def main(x):
     x.exec('003-restore-sysctls beta')
     x.exec('003-restore-sysctls koppa')
 
-    # tcpdump
-    # start tcpdump on host
-    # notes:
-    # - [id] should be a self specified unique id string
-    # - mode:start -> the local-file-name is ignored
-    # usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
-    x.exec('006-tcpdump beta id:0001 mode:start local-file-name:"ignored" filter:"tcp and dst port 30000"')
-
     # netem
     # add delay to left and right outgoing interfaces for the upcoming test
     x.exec('104-netem-cmd koppa control:part change:add to-network:red command:"delay 10ms"')
@@ -65,6 +57,14 @@ def main(x):
     # restoration is covered by 003-restore-sysctls
     x.exec('102-tcp-route-metrics-save alpha route-metrics-save:disabled')
     x.exec('102-tcp-route-metrics-save beta route-metrics-save:disabled')
+
+    # tcpdump
+    # start tcpdump on host
+    # notes:
+    # - [id] should be a self specified unique id string
+    # - mode:start -> the local-file-name is ignored
+    # usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
+    x.exec('006-tcpdump beta id:0001 mode:start filter:"tcp and dst port 30000"')
 
     # netperf
     # start netperf sink, connect to it from host (source) and start a transfer
@@ -97,10 +97,10 @@ def main(x):
     # - mode:stop -> the filter is ignored
     # - id and host MUST match the id of the started tcpdump
     # usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
-    x.exec('006-tcpdump beta id:0001 mode:stop local-file-name:"../../dumps/001_netperf_alpha_to_beta.pcap" filter:"ignored"')
+    x.exec('006-tcpdump beta id:0001 mode:stop local-file-name:"../../dumps/001_netperf_alpha_to_beta.pcap"')
 
     # netem
     # manual cleanup, remove the added delays
     # not mandatory due to being covered by 007-kill
-    x.exec('104-netem-cmd koppa control:part change:del to-network:red command:""')
-    x.exec('104-netem-cmd koppa control:part change:del to-network:blue command:""')
+    x.exec('104-netem-cmd koppa control:part change:del to-network:red')
+    x.exec('104-netem-cmd koppa control:part change:del to-network:blue')
