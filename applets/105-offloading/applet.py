@@ -10,8 +10,7 @@
 # Hints:
 #  - "Cannot change [...]" messages probably mean that the value can not be
 #    changed (is fixed)
-#  - ethtool feedback seems to be faulty, so even a seemingly error message can
-#    mean success
+#  - ethtool feedbacks fail when nothing was changed
 
 
 def print_usage(x):
@@ -36,8 +35,8 @@ def set_offloading(x, conf, dic):
         else:
             x.p.err("error: wrong usage\n")
             return False
-        # unfortunately, error handling does not work, since ethtool sometimes
-        # even exits with code 1 on success
+        # unfortunately, error handling does not work, since ethtool feedbacks
+        # fail when nothing was done
         _, _, exit_code = x.ssh.exec(dic["ip_control"], dic["user"], cmd)
         #if exit_code != 0:
         #    x.p.err("error: offloading could not be set for host {} device {}\n"
