@@ -20,7 +20,8 @@ def print_usage(x):
     x.p.msg("\n check success:\n", False)
     x.p.msg(" - ethtool -k [interface]\n", False)
     x.p.msg("\nexample:\n", False)
-    x.p.msg(" - alpha command:\"tso off ufo off gso off gro off lro off\"\n",
+    x.p.msg(" - exec-applet 105-offloading alpha command:"
+            "\"tso off ufo off gso off gro off lro off\"\n",
             False)
 
     return False
