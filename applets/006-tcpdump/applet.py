@@ -186,7 +186,7 @@ def main(x, conf, args):
     # start: start the tcpdump
     # black voodoo magic: arg_d["applet_mode"] is "start" does not work
     if arg_d["applet_mode"] == "start":
-        x.p.err("starting tcpdump at host {}\n".format(arg_d["host_name"]))
+        x.p.msg("starting tcpdump at host {}\n".format(arg_d["host_name"]))
         if tcpdump_start(x, arg_d):
             return True
         return False
@@ -194,7 +194,7 @@ def main(x, conf, args):
     # stop: stop the tcpdump
     # blocks until file is transferred
     elif arg_d["applet_mode"] == "stop":
-        x.p.err("stopping tcpdump at host {}\n".format(arg_d["host_name"]))
+        x.p.msg("stopping tcpdump at host {}\n".format(arg_d["host_name"]))
         if tcpdump_stop(x, arg_d):
             return True
         return False
