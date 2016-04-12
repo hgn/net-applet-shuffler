@@ -192,21 +192,6 @@ class Conf():
               "host {} and network name {}\n".format(host_name, network))
         sys.exit(1)
 
-    def get_all_iface_names(self, host_name):
-        for host in self.data["boxes"]:
-            if host_name == host:
-                interfaces = self.data["boxes"][host_name]["interfaces"]
-                interface_list = list()
-                for interface in interfaces:
-                    interface_list.append(interface["name"])
-                if not interface_list:
-                    print("warning: get_all_iface_names empty for {}"
-                          .format(host_name))
-                return interface_list
-        print("error: get_all_iface_names not possible for host {}"
-              .format(host_name))
-        sys.exit(1)
-
     def get_all_test_iface_names(self, host_name):
         for host in self.data["boxes"]:
             if host_name == host:
