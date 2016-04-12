@@ -58,6 +58,12 @@ def main(x):
     x.exec('102-tcp-route-metrics-save alpha route-metrics-save:disabled')
     x.exec('102-tcp-route-metrics-save beta route-metrics-save:disabled')
 
+    # interface offloading
+    # usage: [host] command:"[command]"
+    # restoration has to be covered manually (see end of run)
+    x.exec('105-offloading alpha command:"tso off ufo off gso off gro off lro off"')
+    x.exec('105-offloading alpha command:"tso off ufo off gso off gro off lro off"')
+
     # tcpdump
     # start tcpdump on host
     # notes:
@@ -104,3 +110,8 @@ def main(x):
     # not mandatory due to being covered by 007-kill
     x.exec('104-netem-cmd koppa control:part change:del to-network:red')
     x.exec('104-netem-cmd koppa control:part change:del to-network:blue')
+
+    # interface offloading
+    # enable interface offloading again
+    x.exec('105-offloading alpha command:"tso on ufo on gso on gro on lro on"')
+    x.exec('105-offloading alpha command:"tso on ufo on gso on gro on lro on"')
