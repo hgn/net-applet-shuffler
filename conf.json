@@ -57,7 +57,7 @@
 						"ip-address": "10.0.1.205",
 						"name": "enp0s25",
 						"network-name": "blue",
-						"type": "control"
+						"type": "test"
 					},
 					{
 						"ip-address": "10.1.0.205",
