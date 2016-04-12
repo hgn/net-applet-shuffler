@@ -3,8 +3,8 @@
 
 def set_iw(x, arg_d):
     iw_set_command = "ip route change default via {} proto static dev {} init" \
-                     "cwnd {} initrwnd {}".format(arg_d["default_route_test"],
-                                                  arg_d["interface_test"],
+                     "cwnd {} initrwnd {}".format(arg_d["default_route_data"],
+                                                  arg_d["interface_data"],
                                                   arg_d["initcwnd"],
                                                   arg_d["initrwnd"])
     _, _, exit_code = x.ssh.exec(arg_d["ip_control"], arg_d["host_user"],
@@ -35,8 +35,8 @@ def main(x, conf, args):
         return False
     arg_d["host_user"] = conf.get_user(arg_d["host_name"])
     arg_d["ip_control"] = conf.get_control_ip(arg_d["host_name"])
-    arg_d["default_route_test"] = conf.get_test_default_route(arg_d["host_name"])
-    arg_d["interface_test"] = conf.get_test_iface_name(arg_d["host_name"])
+    arg_d["default_route_data"] = conf.get_data_default_route(arg_d["host_name"])
+    arg_d["interface_data"] = conf.get_data_iface_name(arg_d["host_name"])
     # set iw on host
     if not set_iw(x, arg_d):
         return False

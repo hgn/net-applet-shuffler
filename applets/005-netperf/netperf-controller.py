@@ -193,8 +193,8 @@ class NetperfController:
         while amount_tries < 10:
             print(" - trying to start netperf")
             netperf_cmd = "netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {}" \
-                          ",{} -T TCP -4".format(self.arg_d["ip_dest_test"],
-                                                 self.arg_d["ip_source_test"],
+                          ",{} -T TCP -4".format(self.arg_d["ip_dest_data"],
+                                                 self.arg_d["ip_source_data"],
                                                  self.arg_d["netserver_port"],
                                                  self.arg_d["test_length"],
                                                  self.arg_d["flow_offset"],
@@ -210,8 +210,8 @@ class NetperfController:
             print("error: netperf performance test could not be executed\n"
                   "failed params:\n")
             print("netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {},{} -T "
-                  "TCP -4\n".format(self.arg_d["ip_dest_test"],
-                                    self.arg_d["ip_source_test"],
+                  "TCP -4\n".format(self.arg_d["ip_dest_data"],
+                                    self.arg_d["ip_source_data"],
                                     self.arg_d["netserver_port"],
                                     self.arg_d["test_length"],
                                     self.arg_d["flow_offset"],
@@ -234,11 +234,11 @@ if __name__ == '__main__':
     arg_d["applet_id"] = sys.argv[1]
     arg_d["name_source"] = sys.argv[2]
     arg_d["user_source"] = sys.argv[3]
-    arg_d["ip_source_test"] = sys.argv[4]
+    arg_d["ip_source_data"] = sys.argv[4]
     arg_d["port_source"] = sys.argv[5]
     arg_d["name_dest"] = sys.argv[6]
     arg_d["user_dest"] = sys.argv[7]
-    arg_d["ip_dest_test"] = sys.argv[8]
+    arg_d["ip_dest_data"] = sys.argv[8]
     arg_d["port_dest"] = sys.argv[9]
     arg_d["netserver_port"] = sys.argv[10]
     arg_d["test_length"] = sys.argv[11]

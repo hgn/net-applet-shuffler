@@ -8,7 +8,7 @@
 
 def set_rto(x, dic):
     rto_set_command = "ip route change default via {} dev {} rto_min {}"\
-        .format(dic["default_route_test"], dic["iface_test"], dic["min_rto"])
+        .format(dic["default_route_data"], dic["iface_data"], dic["min_rto"])
     _, _, exit_code = x.ssh.exec(dic["ip_control"], dic["user"],
                                  rto_set_command)
     if exit_code != 0:
@@ -32,8 +32,8 @@ def main(x, conf, args):
         return False
     dic["user"] = conf.get_user(dic["host_name"])
     dic["ip_control"] = conf.get_control_ip(dic["host_name"])
-    dic["iface_test"] = conf.get_test_iface_name(dic["host_name"])
-    dic["default_route_test"] = conf.get_test_default_route(dic["host_name"])
+    dic["iface_data"] = conf.get_data_iface_name(dic["host_name"])
+    dic["default_route_data"] = conf.get_data_default_route(dic["host_name"])
     # manipulate rto
     if not set_rto(x, dic):
         return False

@@ -50,9 +50,13 @@ def set_netem_full(x, dic):
 
 
 def set_netem_part(x, dic):
-    cmd = "tc qdisc {} dev {} root netem {}".format(dic["change"],
-                                                    dic["device"],
-                                                    dic["netem_cmd"])
+    cmd = str()
+    if dic["change"] == "del":
+        cmd = "tc qdisc del dev {} root netem".format(dic["device"])
+    else:
+        cmd = "tc qdisc {} dev {} root netem {}".format(dic["change"],
+                                                        dic["device"],
+                                                        dic["netem_cmd"])
     _, _, exit_code = x.ssh.exec(dic["ip_control"], dic["user"], cmd)
     if exit_code != 0:
         qdisc_log(x, dic, "FAILED sudo " + cmd)
@@ -96,17 +100,18 @@ def netem_part_handler(x, conf, args, dic):
         to_network = args[3].split(":")[1]
         dic["device"] = conf.get_middle_box_iface_name_by_network_name\
             (dic["host_name"], to_network)
-        # command
-        position = 4
-        netem_cmd = args[position].split(":")[1]
-        # this part is for argument handling when called from exec-campaign
-        try:
-            while True:
-                position += 1
-                netem_cmd += " " + args[position]
-        except IndexError:
-            pass
-        dic["netem_cmd"] = netem_cmd.strip("\"")
+        if dic["change"] != "del":
+            # command
+            position = 4
+            netem_cmd = args[position].split(":")[1]
+            # this part is for argument handling when called from exec-campaign
+            try:
+                while True:
+                    position += 1
+                    netem_cmd += " " + args[position]
+            except IndexError:
+                pass
+            dic["netem_cmd"] = netem_cmd.strip("\"")
     except IndexError:
         x.p.err("error: wrong usage\n")
         return False
