@@ -103,7 +103,7 @@ def main(x):
     # - mode:stop -> the filter is ignored
     # - id and host MUST match the id of the started tcpdump
     # usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
-    x.exec('006-tcpdump beta id:0001 mode:stop local-file-name:"../../dumps/001_netperf_alpha_to_beta.pcap"')
+    x.exec('006-tcpdump beta id:0001 mode:stop local-file-name:"./dumps/001_netperf_alpha_to_beta.pcap"')
 
     # netem
     # manual cleanup, remove the added delays

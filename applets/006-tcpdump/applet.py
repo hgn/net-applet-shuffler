@@ -68,9 +68,11 @@ def transfer_dumpfile(x, arg_d):
     # relative file path logic
     file_path = ""
     local_file_path_split = ""
+    # note: the current file path is two levels below nas
     if arg_d["path_usage"] == "relative":
         current_file_dir = os.path.dirname(__file__)
-        file_path = os.path.join(current_file_dir, arg_d["filter_or_file"])
+        file_path = os.path.join(current_file_dir, "../../" +
+                                 arg_d["filter_or_file"])
         # make local directories
         try:
             os.makedirs(file_path)
@@ -85,7 +87,7 @@ def transfer_dumpfile(x, arg_d):
         except os.error:
             # path/file exists
             pass
-        local_file_path_split = arg_d["filter_or_file"].split("/")
+        local_file_path_split = ("../../" + arg_d["filter_or_file"]).split("/")
 
     # path and file name shuffling magic
     local_file_name = local_file_path_split[len(local_file_path_split)-1]
