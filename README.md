@@ -100,6 +100,8 @@ As a starter, it is advised to have a look at the 001-netperf-data-exchange camp
 It acts as an example campaign of a possible (simple) workflow. Also, a lot of information
 can be found in it concerning campaign setup, applet usage and hints.
 
+Help on applet level is available for some applet by adding an "?" to the applet arguments.
+
 
 ## Configuration ##
 
