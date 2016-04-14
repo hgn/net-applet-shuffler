@@ -40,8 +40,8 @@ def main(x):
     # netem
     # add delay to left and right outgoing interfaces for the upcoming test
     # restoration is covered by 007-kill
-    x.exec('104-netem-cmd koppa control:part change:add to-network:red command:"delay 10ms"')
-    x.exec('104-netem-cmd koppa control:part change:add to-network:blue command:"delay 10ms"')
+    x.exec('104-netem-cmd koppa control:partial change:add to-network:red command:"delay 10ms"')
+    x.exec('104-netem-cmd koppa control:partial change:add to-network:blue command:"delay 10ms"')
 
     # min rto
     # usage: [host] min-rto:[time] change:[add|del]
@@ -112,8 +112,8 @@ def main(x):
     # netem
     # manual cleanup, remove the added delays
     # not mandatory due to being covered by 007-kill
-    x.exec('104-netem-cmd koppa control:part change:del to-network:red')
-    x.exec('104-netem-cmd koppa control:part change:del to-network:blue')
+    x.exec('104-netem-cmd koppa control:partial change:del to-network:red')
+    x.exec('104-netem-cmd koppa control:partial change:del to-network:blue')
 
     # interface offloading
     # enable interface offloading again

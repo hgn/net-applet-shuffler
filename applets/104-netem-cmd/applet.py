@@ -1,6 +1,6 @@
-# usage: exec [host] control:"[full|part]"
+# usage: exec [host] control:"[full|partial]"
 #  exec [host] control:full netem:"[command]"
-#  exec [host] control:part change:[add|del|change|replace] to-network:[name]
+#  exec [host] control:partial change:[add|del|change|replace] to-network:[name]
 #   command:"[command]"
 # Check success:
 #  - tc -s qdisc ls dev [interface]
@@ -12,9 +12,9 @@ from time import strftime
 
 def print_usage(x):
     x.p.msg("\n usage:\n", False)
-    x.p.msg(" - exec 104-netem-cmd [host] control:\"[full|part]\"\n", False)
+    x.p.msg(" - exec 104-netem-cmd [host] control:\"[full|partial]\"\n", False)
     x.p.msg(" - [host] control:full netem:\"[command]\"\n", False)
-    x.p.msg(" - [host] control:part change:[add|del|change|replace] "
+    x.p.msg(" - [host] control:partial change:[add|del|change|replace] "
             "to-network:[name] command:\"[command]\"\n", False)
     x.p.msg("\n check success:\n", False)
     x.p.msg(" - tc -s qdisc ls dev [interface]\n", False)
@@ -137,7 +137,7 @@ def main(x, conf, args):
     if dic["control"] == "full":
         return netem_full_handler(x, conf, args, dic)
     # partial control
-    elif dic["control"] == "part":
+    elif dic["control"] == "partial":
         return netem_part_handler(x, conf, args, dic)
     else:
         x.p.err("error: wrong usage\n")
