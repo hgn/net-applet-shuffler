@@ -373,9 +373,10 @@ class CampaignExecuter():
     def execute_applet(self, applet):
         applet_name = applet.split()[0]
         applet_args = applet.split()[1:]
-        sys.stdout.write("[{}/{}] {}\n".format(self.current_campaign_applet,
-                                               self.campaign_length,
-                                               applet_name))
+        sys.stdout.write(" - {}\n".format(applet_name))
+        #sys.stdout.write("[{}/{}] {}\n".format(self.current_campaign_applet,
+        #                                       self.campaign_length,
+        #                                       applet_name))
         self.current_campaign_applet += 1
         app_executer = AppletExecuter(external_controlled=True,
                                       verbose=self.verbose)
