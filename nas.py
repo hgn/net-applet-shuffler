@@ -2,22 +2,19 @@
 #
 # Email: Hagen Paul Pfeifer <hagen@jauu.net>
 
-
-import sys
-import os
-import re
-import optparse
-import pprint
-import time
 import importlib.util
 import json
+import optparse
+import os
+import pprint
 import subprocess
+import sys
 
 
 pp = pprint.PrettyPrinter(indent=4)
 
-__programm__ = "net-applet-shuffler"
-__version__  = "1"
+__program__ = "net-applet-shuffler"
+__version__ = "1"
 
 
 class Printer:
@@ -32,10 +29,10 @@ class Printer:
         sys.stderr.write(msg)
 
     def msg(self, msg, level=VERBOSE, underline=False):
-        if level == Printer.VERBOSE and self.verbose == False:
+        if level == Printer.VERBOSE and not self.verbose:
             return
         prefix = "  #   " if level == Printer.VERBOSE else ""
-        if underline == False:
+        if not underline:
             return sys.stdout.write(prefix + msg) - 1
         else:
             str_len = len(prefix + msg)
@@ -46,7 +43,7 @@ class Printer:
         pass
 
 
-class Ssh():
+class Ssh:
 
     def __init__(self):
         pass
@@ -102,7 +99,8 @@ class Ssh():
         # places directly
         # 1. temp copy to tmp
         stdout, stderr, exit_code = self._copy(user, ip, "/tmp/tmp_f",
-                   (from_path + "/" + source_filename), False)
+                                               (from_path + "/" +
+                                                source_filename), False)
         # 2. make target dir
         self.exec(ip, user, "mkdir -p {}".format(to_path))
         # 3. copy to target location
@@ -113,7 +111,7 @@ class Ssh():
         return stdout, stderr, exit_code
 
 
-class Exchange():
+class Exchange:
 
     def __init__(self):
         self.ssh = Ssh()
@@ -126,7 +124,7 @@ class Exchange():
         return False
 
 
-class Conf():
+class Conf:
 
     def __init__(self):
         hp = os.path.dirname(os.path.realpath(__file__))
@@ -165,7 +163,8 @@ class Conf():
                 for interface in interfaces:
                     if interface["type"] == "data":
                         return interface["name"]
-        print("error: get_data_iface_name not found for {}\n".format(host_name))
+        print("error: get_data_iface_name not found for {}\n"
+              .format(host_name))
         sys.exit(1)
 
     def get_control_iface_name(self, host_name):
@@ -236,7 +235,7 @@ class Conf():
         sys.exit(1)
 
 
-class AppletExecuter():
+class AppletExecuter:
 
     def __init__(self, external_controlled=False, verbose=False):
         self.verbose = verbose
@@ -264,7 +263,7 @@ class AppletExecuter():
     def parse_local_options(self):
         parser = optparse.OptionParser()
         parser.usage = "Executer"
-        parser.add_option( "-v", "--verbose", dest="verbose", default=False,
+        parser.add_option("-v", "--verbose", dest="verbose", default=False,
                           action="store_true", help="show verbose")
         self.opts, args = parser.parse_args(sys.argv[0:])
 
@@ -284,7 +283,8 @@ class AppletExecuter():
     def import_applet_module(self):
         ffp, ok = self.applet_path(self.applet_name)
         if not ok:
-            self.p.err("Applet ({}) not available, call list\n".format(self.applet_name))
+            self.p.err("Applet ({}) not available, call list\n"
+                       .format(self.applet_name))
             sys.exit(1)
 
         spec = importlib.util.spec_from_file_location("applet", ffp)
@@ -300,21 +300,21 @@ class AppletExecuter():
         xchange = Exchange()
         xchange.p = self.p
         # the status is used later for campaigns:
-        # if the status is false the campaing must be
+        # if the status is false the campaign must be
         # stopped, if true everything is fine!
         self.p.msg("{}\n".format(self.applet_args),
                    level=Printer.VERBOSE)
         status = self.applet.main(xchange, Conf(), self.applet_args)
-        if status == True:
+        if status:
             return True
-        elif status == False:
+        elif not status:
             return False
         else:
             print("Applet defect: MUST return True or False")
             return False
 
 
-class AppletLister():
+class AppletLister:
 
     def __init__(self, verbose=False):
         self.verbose = verbose
@@ -332,13 +332,7 @@ class AppletLister():
             self.p.msg("  {}\n".format(d), level=Printer.STD)
 
 
-class CampaignExecuter():
-
-    current_campaign_applet = 1
-    campaign_length = int()
-    OPCODE_CMD_EXEC = 1
-    OPCODE_CMD_SLEEP = 2
-    OPCODE_CMD_PRINT = 3
+class CampaignExecuter:
 
     def __init__(self, verbose=False):
         self.verbose = verbose
@@ -358,7 +352,7 @@ class CampaignExecuter():
     def parse_local_options(self):
         parser = optparse.OptionParser()
         parser.usage = "Executer"
-        parser.add_option( "-v", "--verbose", dest="verbose", default=False,
+        parser.add_option("-v", "--verbose", dest="verbose", default=False,
                           action="store_true", help="show verbose")
         self.opts, args = parser.parse_args(sys.argv[0:])
 
@@ -374,10 +368,6 @@ class CampaignExecuter():
         applet_name = applet.split()[0]
         applet_args = applet.split()[1:]
         sys.stdout.write(" - {}\n".format(applet_name))
-        #sys.stdout.write("[{}/{}] {}\n".format(self.current_campaign_applet,
-        #                                       self.campaign_length,
-        #                                       applet_name))
-        self.current_campaign_applet += 1
         app_executer = AppletExecuter(external_controlled=True,
                                       verbose=self.verbose)
         app_executer.set_applet_data(applet_name, applet_args)
@@ -385,96 +375,6 @@ class CampaignExecuter():
         if not app_status:
             print("Applet returned negative return code, stopping campaign now")
             sys.exit(1)
-
-    def read_campaign_file(self, path):
-        data = list()
-        with open(path, "rt") as fd:
-            while True:
-                line = fd.readline()
-                if not line:
-                    break
-                line = line.strip()
-                if not line:
-                    # ignore lines with only with spaces
-                    continue
-                if line.startswith("#"):
-                    # ignore comment lines
-                    continue
-                data.append(line)
-        return data
-
-    def transform_exec_statement(self, chunks, ret):
-        d = dict()
-        if not len(chunks) > 0:
-            # need a second value
-            return
-        d['cmd'] = CampaignExecuter.OPCODE_CMD_EXEC
-        d['name'] = chunks[0]
-        d['args'] = chunks[1:]
-        ret.append(d)
-
-    def transform_sleep_statement(self, chunks, ret):
-        d = dict()
-        if not len(chunks) > 0:
-            # need a second value
-            return
-        d['cmd'] = CampaignExecuter.OPCODE_CMD_SLEEP
-        d['time'] = chunks[0]
-        ret.append(d)
-
-    def transform_print_statement(self, chunks, ret):
-        d = dict()
-        if not len(chunks) > 0:
-            # need a second value
-            return
-        d['cmd'] = CampaignExecuter.OPCODE_CMD_PRINT
-        d['msg'] = chunks[:]
-        ret.append(d)
-
-    def transform(self, content):
-        data = list()
-        for c in content:
-            chunks = c.split()
-            if len(chunks) < 1:
-                print("Command ({}) not known, only exec and sleep allowed".format(c))
-                return None, False
-            if chunks[0] == "exec":
-                self.transform_exec_statement(chunks[1:], data)
-            elif chunks[0] == "sleep":
-                self.transform_sleep_statement(chunks[1:], data)
-            elif chunks[0] == "print":
-                self.transform_print_statement(chunks[1:], data)
-            else:
-                self.p.err("Command \"{}\" not known, only exec, sleep and "
-                           "print allowed".format(chunks[0]))
-                return None, False
-        return data, True
-
-    def execute_campaign(self, data):
-        test_no = len(data)
-        run_no = 1
-        for d in data:
-            ret = True
-            cmd = "unknown"
-            #if d['cmd'] == CampaignExecuter.OPCODE_CMD_EXEC:
-            cmd = "exec {}".format(d['name'])
-            self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
-                                             cmd), level=Printer.STD)
-            ret = self.execute_applet(d['name'] + " " + d['args'])
-            # elif
-            if d['cmd'] == CampaignExecuter.OPCODE_CMD_SLEEP:
-                cmd = "sleep {}".format(d['time'])
-                self.p.msg("  [{}/{}] {}\n".format(run_no, test_no,
-                                                 cmd), level=Printer.STD)
-                time.sleep(int(d['time']))
-            elif d['cmd'] == CampaignExecuter.OPCODE_CMD_PRINT:
-                # when we print we do not print the print
-                self.p.msg("  # {}\n".format(" ".join(d['msg'])), level=Printer.STD)
-
-            if ret == False:
-                print("Applet returned negative return code, stop campaign now")
-                return
-            run_no += 1
 
     def import_campaign_module(self):
         ffp, ok = self.campaign_path(self.campaign_name)
@@ -495,30 +395,13 @@ class CampaignExecuter():
             return None, False
         return True, True
 
-    def parse_campaign_size(self, ffp):
-        campaign_file = open(ffp)
-        campaign_string = campaign_file.read()
-        campaign_file.close()
-        # two whitespaces for not counting comments
-        campaign_length = 0
-        # if there is a campaign size available, take its
-        regex = re.search(r'CAMPAIGN_LENGTH = [0-9]+', campaign_string)
-        if regex:
-            campaign_length = regex.group(0).split()[2]
-        # else count the amount of execs, which will be false if there are loops
-        else:
-            # two whitespaces for not counting comments
-            campaign_length = campaign_string.count("  x.exec")
-        return campaign_length
-
     def run(self):
         data, ok = self.parse_campaign()
         if not ok:
             sys.exit(1)
         self.p.msg("Execute Campaign \"{}\"\n".format(self.campaign_name),
                    level=Printer.STD)
-        ffp = self.import_campaign_module()
-        self.campaign_length = self.parse_campaign_size(ffp)
+        self.import_campaign_module()
         # ssh class and ping
         xchange = Exchange()
         # printer (p.msg)
@@ -529,7 +412,7 @@ class CampaignExecuter():
         self.campaign.main(xchange)
 
 
-class CampaignLister():
+class CampaignLister:
 
     def __init__(self, verbose=False):
         self.verbose = verbose
@@ -550,10 +433,10 @@ class CampaignLister():
 class NetAppletShuffler:
 
     modes = {
-       "exec-applet":    [ "AppletExecuter",   "Execute applets" ],
-       "list-applets":   [ "AppletLister",     "List all applets" ],
-       "exec-campaign":  [ "CampaignExecuter", "Execute campaign" ],
-       "list-campaigns": [ "CampaignLister",   "List all campaigns" ]
+       "exec-applet":    ["AppletExecuter",   "Execute applets"],
+       "list-applets":   ["AppletLister",     "List all applets"],
+       "exec-campaign":  ["CampaignExecuter", "Execute campaign"],
+       "list-campaigns": ["CampaignLister",   "List all campaigns"]
             }
 
     def __init__(self):
@@ -582,7 +465,8 @@ class NetAppletShuffler:
     def args_contains(self, argv, *cmds):
         for cmd in cmds:
             for arg in argv:
-                if arg == cmd: return True
+                if arg == cmd:
+                    return True
         return False
 
     def parse_global_otions(self):
@@ -620,8 +504,8 @@ class NetAppletShuffler:
         submodule = sys.argv[1].lower()
         if submodule not in NetAppletShuffler.modes:
             self.print_usage()
-            sys.stderr.write("Modules \"%s\" not known, available modules are:\n" %
-                             (submodule))
+            sys.stderr.write("Modules \"%s\" not known, available modules "
+                             "are:\n" % submodule)
             self.print_modules()
             return None
 
