@@ -1,11 +1,14 @@
 
+import timetracker
 import time
 
 
 def main(x):
 
+    tt = timetracker.TimeTracker("001-netperf-data-exchange")
     # print('message')
     print('Starting campaign 001-netperf-data-exchange')
+    print(tt.get_campaign_runtime()[0])
 
     # check if all required nodes are up, if at least one fails test will stop
     x.exec('001-alive alpha')
@@ -116,3 +119,5 @@ def main(x):
     # enable interface offloading again
     x.exec('105-offloading alpha offloading:on')
     x.exec('105-offloading beta offloading:on')
+
+    print(tt.update_campaign_runtime()[0])
