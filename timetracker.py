@@ -43,7 +43,7 @@ class TimeTracker:
         self.CAMPAIGN_NAME = campaign_name
         self.file_dir = os.path.dirname(__file__)
         # set trackfile.json path
-        self.file_path = os.path.join(self.file_dir, self.FILE_NAME)
+        self.trackfile_path = os.path.join(self.file_dir, self.FILE_NAME)
         # create trackfile if there is none
         self._handle_track_file()
         # create sha1 from campaign
@@ -64,7 +64,7 @@ class TimeTracker:
             self.CAMPAIGN_FOUND = False
 
     def _handle_track_file(self):
-        if not os.path.exists(self.file_path):
+        if not os.path.exists(self.trackfile_path):
             file = open(self.FILE_NAME, "w")
             file.write("{\n}")
             file.close()
@@ -77,13 +77,13 @@ class TimeTracker:
         return False
 
     def _load_track_file_as_json(self):
-        file = open(self.file_path, "r")
+        file = open(self.trackfile_path, "r")
         trackfile_str = file.read()
         file.close()
         return json.loads(trackfile_str)
 
     def _save_track_file_as_json(self, trackfile_string):
-        file = open(self.file_path, "w")
+        file = open(self.trackfile_path, "w")
         file.write(json.dumps(trackfile_string, indent=4))
         file.close()
 
@@ -94,7 +94,7 @@ class TimeTracker:
                                      "campaign_name": self.CAMPAIGN_NAME}]})
         self._save_track_file_as_json(trackfile_json)
 
-    def _convert_hms_to_int(self, hms_string):
+    def _hms_to_int(self, hms_string):
         hms_list = hms_string.split(":")
         return int(hms_list[0]) * 3600 + int(hms_list[1]) * 60 + int(hms_list[2])
 
@@ -129,9 +129,9 @@ class TimeTracker:
         if not self.ESTIMATE_AVAILABLE:
             return "Estimated remaining campaign runtime: unavailable", "-1"
         _, expected_runtime = self.get_campaign_runtime()
-        expected_runtime_seconds = self._convert_hms_to_int(expected_runtime)
+        expected_runtime_seconds = self._hms_to_int(expected_runtime)
         _, elapsed_time = self.get_elapsed_runtime()
-        elapsed_time_seconds = self._convert_hms_to_int(elapsed_time)
+        elapsed_time_seconds = self._hms_to_int(elapsed_time)
         remaining_runtime = expected_runtime_seconds - elapsed_time_seconds
         if remaining_runtime < 0:
             return "Estimated remaining campaign runtime: unavailable", "-1"
