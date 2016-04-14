@@ -43,7 +43,7 @@ def distribute_network_controller(x, host_user, host_ip_control):
 
 def main(x, conf, args):
     if not len(args) > 1:
-        x.p.msg("wrong usage. use: setup:[direct|indirect] host1 host2 "
+        x.p.msg("wrong usage. use: setup:[direct|dumbbell] host1 host2 "
                 "host3...\n")
         return False
 
