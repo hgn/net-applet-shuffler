@@ -19,7 +19,7 @@ def tcpdump_start_thread(x, arg_d):
 
 def tcpdump_start(x, arg_d):
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-               "mkdir /tmp/net-applet-shuffler 1>/dev/null 2>&1")
+               "mkdir -p /tmp/net-applet-shuffler")
     tcp_thread = Thread(target=tcpdump_start_thread, args=(x, arg_d, ))
     tcp_thread.daemon = True
     tcp_thread.start()
@@ -66,38 +66,35 @@ def tcpdump_start(x, arg_d):
 
 def transfer_dumpfile(x, arg_d):
     # relative file path logic
-    file_path = ""
-    local_file_path_split = ""
+    file_path = str()
+    file_name = str()
     # note: the current file path is two levels below nas
+    # path and file name shuffling magic
     if arg_d["path_usage"] == "relative":
         current_file_dir = os.path.dirname(__file__)
-        file_path = os.path.join(current_file_dir, "../../" +
+        # nas file path + dir and filename to dst file
+        file_path_full = os.path.join(current_file_dir + "/../../",
                                  arg_d["filter_or_file"])
         # make local directories
-        try:
-            os.makedirs(file_path)
-        except os.error:
-            # path/file exists
-            pass
-        local_file_path_split = file_path.split("/")
+        file_path_split = file_path_full.split("/")
+        file_name = file_path_split[len(file_path_split)-1]
+        file_path_split.pop(len(file_path_split)-1)
+        file_path = "/".join(file_path_split)
     elif arg_d["path_usage"] == "absolute":
         # make local directories
+        file_path_split = arg_d["filter_or_file"].split("/")
+        file_name = file_path_split[len(file_path_split)-1]
         try:
-            os.makedirs(arg_d["filter_or_file"])
-        except os.error:
-            # path/file exists
-            pass
-        local_file_path_split = ("../../" + arg_d["filter_or_file"]).split("/")
-
-    # path and file name shuffling magic
-    local_file_name = local_file_path_split[len(local_file_path_split)-1]
-    local_file_path_split.pop(len(local_file_path_split)-1)
-    local_file_path = "/".join(local_file_path_split)
+            file_path_split.pop(len(file_path_split)-1)
+            file_path = "/".join(file_path_split)
+        except IndexError:
+            # this means the top directory is used
+            # will throw a permission denied anyways
+            file_path = "/"
     # retrieve dump file and block until it's done
     _, _, exit_code = x.ssh.copy_from(arg_d["host_user"],
             arg_d["host_ip_control"], "/tmp/net-applet-shuffler",
-            local_file_path, "tcpdump_{}.pcap".format(arg_d["applet_id"]),
-            local_file_name)
+            file_path, "tcpdump_{}.pcap".format(arg_d["applet_id"]), file_name)
     if exit_code != 0:
         x.p.msg("error transferring the dumpfile tcpdump_{}.pcap from host {}\n"
                 .format(arg_d["applet_id"], arg_d["host_name"]))

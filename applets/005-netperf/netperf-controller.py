@@ -164,13 +164,13 @@ class NetperfController:
         # demonize program
         self.demonize_program()
         # make sure necessary dirs exist, local and remote
-        self.execute("mkdir /tmp/net-applet-shuffler")
-        self.execute("mkdir /tmp/net-applet-shuffler/logs")
+        self.execute("mkdir -p /tmp/net-applet-shuffler")
+        self.execute("mkdir -p /tmp/net-applet-shuffler/logs")
         # redirect output to file
         self.redirect_console_output(True)
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
                       self.arg_d["user_source"],
-                      "mkdir /tmp/net-applet-shuffler")
+                      "mkdir -p /tmp/net-applet-shuffler")
         # write test in progress file
         # to be checked if there are ongoing transfers
         self.test_running(True)

@@ -25,12 +25,12 @@ def qdisc_log(x, dic, cmd):
     time_now = strftime("%H:%M:%S")
     time_cmd = time_now + " \t" + cmd
     # make sure directories and logfile exist
-    x.ssh.exec(dic["ip_control"], dic["user"], "mkdir /tmp/net-applet-shuffler "
-                                               "1>/dev/null 2>&1")
+    x.ssh.exec(dic["ip_control"], dic["user"], "mkdir -p "
+                                               "/tmp/net-applet-shuffler")
     x.ssh.exec(dic["ip_control"], dic["user"],
-               "mkdir /tmp/net-applet-shuffler/logs 1>/dev/null 2>&1")
+               "mkdir -p /tmp/net-applet-shuffler/logs")
     x.ssh.exec(dic["ip_control"], dic["user"],
-               "touch /tmp/net-applet-shuffler/logs/qdisc_log 1>/dev/null 2>&1")
+               "touch /tmp/net-applet-shuffler/logs/qdisc_log")
     x.ssh.exec(dic["ip_control"], dic["user"], "sh -c \"echo '{}' >> "
                "/tmp/net-applet-shuffler/logs/qdisc_log\"".format(time_cmd))
     return True

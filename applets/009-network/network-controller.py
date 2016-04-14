@@ -95,8 +95,8 @@ class NetworkController:
     def main(self):
         self.demonize_program()
         # make sure necessary dirs exist, local and remote
-        self.execute("mkdir /tmp/net-applet-shuffler")
-        self.execute("mkdir /tmp/net-applet-shuffler/logs")
+        self.execute("mkdir -p /tmp/net-applet-shuffler")
+        self.execute("mkdir -p /tmp/net-applet-shuffler/logs")
         # redirect output to file
         self.redirect_console_output(True)
         # wait, so every instance can be started before the network goes down
