@@ -5,6 +5,7 @@
 
 import sys
 import os
+import re
 import optparse
 import pprint
 import time
@@ -68,28 +69,47 @@ class Ssh():
         stdout, stderr = p.communicate()
         return stdout, stderr, p.returncode
 
+    def _exec_locally(self, cmd):
+        cmd = "sudo " + cmd
+        process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        return stdout, stderr, process.returncode
+
     # e.g. path: "/tmp/net-applet-shuffler"
     # filename: "tcp_dump.file"
-    def copy_from(self, user, ip, from_path, to_path, source_filename,
-                  dest_filename):
-        stdout, stderr, exit_code = self._copy(user, ip, from_path + "/" +
-                source_filename, to_path + "/" + dest_filename, True)
+    def copy_from(self, remote_user, remote_ip, from_path, to_path,
+                  source_filename, dest_filename):
+        # due to permission restrictions, scp can't copy to not user owned
+        # places directly
+        # note: the local user and ip are not known here
+        # 1. temp copy to /tmp
+        stdout, stderr, exit_code = self._copy(remote_user, remote_ip,
+                os.path.join(from_path, source_filename), "/tmp/temp_f", True)
+        # 2. make target dir
+        cmd = "mkdir -p {}".format(to_path)
+        self._exec_locally(cmd)
+        # 3. copy to target location
+        cmd = "cp /tmp/temp_f {}/{}".format(to_path, dest_filename)
+        self._exec_locally(cmd)
+        # 4. remove temp copy
+        cmd = "rm -f /tmp/temp_f"
+        self._exec_locally(cmd)
         return stdout, stderr, exit_code
 
     def copy_to(self, user, ip, from_path, to_path, source_filename,
                 dest_filename):
         # due to permission restrictions, scp can't copy to not user owned
         # places directly
-        # 1. temp copy to user home
-        stdout, stderr, exit_code = self._copy(user, ip, "/home/{}/tmp_f".format(user),
+        # 1. temp copy to tmp
+        stdout, stderr, exit_code = self._copy(user, ip, "/tmp/tmp_f",
                    (from_path + "/" + source_filename), False)
         # 2. make target dir
-        self.exec(ip, user, "mkdir {} 1>/dev/null 2>&1".format(to_path))
+        self.exec(ip, user, "mkdir -p {}".format(to_path))
         # 3. copy to target location
-        self.exec(ip, user, "cp /home/{}/tmp_f {}/{}".format(user, to_path,
-                                                             dest_filename))
+        self.exec(ip, user, "cp /tmp/tmp_f {}/{}".format(to_path,
+                                                         dest_filename))
         # 4. remove temp copy
-        self.exec(ip, user, "rm -f /home/{}/tmp_f".format(user))
+        self.exec(ip, user, "rm -f /tmp/tmp_f")
         return stdout, stderr, exit_code
 
 
@@ -479,8 +499,16 @@ class CampaignExecuter():
         campaign_string = campaign_file.read()
         campaign_file.close()
         # two whitespaces for not counting comments
-        amount_execs = campaign_string.count("  x.exec")
-        return amount_execs
+        campaign_length = 0
+        # if there is a campaign size available, take its
+        regex = re.search(r'CAMPAIGN_LENGTH = [0-9]+', campaign_string)
+        if regex:
+            campaign_length = regex.group(0).split()[2]
+        # else count the amount of execs, which will be false if there are loops
+        else:
+            # two whitespaces for not counting comments
+            campaign_length = campaign_string.count("  x.exec")
+        return campaign_length
 
     def run(self):
         data, ok = self.parse_campaign()
