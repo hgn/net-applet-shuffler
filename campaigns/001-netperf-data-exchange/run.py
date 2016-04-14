@@ -23,9 +23,9 @@ def main(x):
     # only qdisc logs should be on koppa
     x.exec('007-kill koppa')
 
-    # make sure the indirect configuration is active
+    # make sure the dumbbell configuration is active
     # also sets up basic routing (default gateways)
-    x.exec('009-network setup:indirect alpha beta')
+    x.exec('009-network setup:dumbbell alpha beta')
 
     # save syscall, no-op when already done
     x.exec('002-save-sysctls alpha')
