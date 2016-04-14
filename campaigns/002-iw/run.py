@@ -55,7 +55,7 @@ def main(x):
         # test transfer
         x.exec('005-netperf alpha sink:beta id:21 source_port:20000 sink_port:30000 flow_length:-30000 flow_offset:1 netserver:29999')
 
-        x.exec('008-wait-for-completion interval_time:2 alpha:21')
+        x.exec('008-wait-for-id-completion interval_time:2 alpha:21')
 
         x.exec('006-tcpdump beta id:20 mode:stop local-file-name:"./iw/iw_{}.pcap"'.format(iw_value))
 
