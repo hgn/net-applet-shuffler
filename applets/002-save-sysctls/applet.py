@@ -7,6 +7,7 @@ def main(x, conf, args):
     hostname = args[0]
     ip = conf.get_control_ip(hostname)
     user = conf.get_user(hostname)
+    x.ssh.exec(ip, user, "mkdir /tmp")
     # check if file exist already, if we break here
     # the following four lines are probably obsolete
     _, _, exit_code = x.ssh.exec(ip, user, "test -f /tmp/sysctl.save")
