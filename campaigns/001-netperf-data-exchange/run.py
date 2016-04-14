@@ -99,7 +99,7 @@ def main(x):
     # - every host:id tuple actively participating in the test should be specified here
     # - one host can have several running ids, but one (unique) id can have only one host
     # usage: interval_time:[seconds] [name_1]:[id_1] [name_1]:[id_2] [name_2]:[id_3] ...
-    x.exec('008-wait-for-completion interval_time:5 alpha:0002 beta:0003')
+    x.exec('008-wait-for-id-completion interval_time:5 alpha:0002 beta:0003')
 
     # tcpdump
     # stop tcpdump on host, which also collects the dumpfile
