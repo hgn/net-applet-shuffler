@@ -40,9 +40,9 @@ def main(x):
 
         x.exec('009-network setup:dumbbell alpha beta')
 
-        x.exec('102-tcp-route-metrics-save alpha route-metrics-save:disabled')
-        x.exec('102-tcp-route-metrics-save beta route-metrics-save:disabled')
-        x.exec('102-tcp-route-metrics-save koppa route-metrics-save:disabled')
+        x.exec('102-tcp-route-metrics alpha route-metrics-save:disabled')
+        x.exec('102-tcp-route-metrics beta route-metrics-save:disabled')
+        x.exec('102-tcp-route-metrics koppa route-metrics-save:disabled')
 
         #x.exec('104-netem-cmd koppa control:partial change:add to-network:red command:"rate 10kbit"')
         #x.exec('104-netem-cmd koppa control:partial change:add to-network:blue command:"rate 10kbit"')
