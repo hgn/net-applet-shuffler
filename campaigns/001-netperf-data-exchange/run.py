@@ -59,8 +59,8 @@ def main(x):
     # tcp route metrics save
     # usage: [host] route-metrics-save:[enabled|disabled]
     # restoration is covered by 003-restore-sysctls
-    x.exec('102-tcp-route-metrics-save alpha route-metrics-save:disabled')
-    x.exec('102-tcp-route-metrics-save beta route-metrics-save:disabled')
+    x.exec('102-tcp-route-metrics alpha route-metrics-save:disabled')
+    x.exec('102-tcp-route-metrics beta route-metrics-save:disabled')
 
     # interface offloading
     # usage: [host] command:"[command]"
