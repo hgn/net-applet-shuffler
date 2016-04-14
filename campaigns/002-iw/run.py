@@ -38,7 +38,7 @@ def main(x):
         x.exec('007-kill beta')
         x.exec('007-kill koppa')
 
-        x.exec('009-network setup:indirect alpha beta')
+        x.exec('009-network setup:dumbbell alpha beta')
 
         x.exec('102-tcp-route-metrics-save alpha route-metrics-save:disabled')
         x.exec('102-tcp-route-metrics-save beta route-metrics-save:disabled')

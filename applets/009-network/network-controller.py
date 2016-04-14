@@ -82,7 +82,7 @@ class NetworkController:
         time.sleep(6)
         self.execute("ip link set dev {} up".format(arg_d["interface"]))
 
-    def establish_indirect_setup(self):
+    def establish_dumbbell_setup(self):
         self.execute("ip link set dev {} down".format(arg_d["interface"]))
         time.sleep(6)
         self.execute("ip a add {}/24 dev {}".format(arg_d["ip"],
@@ -104,9 +104,9 @@ class NetworkController:
         if arg_d["setup"] == "direct":
             print(" - establishing direct setup")
             self.establish_direct_setup()
-        elif arg_d["setup"] == "indirect":
-            print(" - establishing indirect setup")
-            self.establish_indirect_setup()
+        elif arg_d["setup"] == "dumbbell":
+            print(" - establishing dumbbell setup")
+            self.establish_dumbbell_setup()
         else:
             # this should not happen
             sys.exit(1)
