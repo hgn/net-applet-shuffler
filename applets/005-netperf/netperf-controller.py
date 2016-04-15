@@ -192,7 +192,7 @@ class NetperfController:
         netperf_start_failed = True
         while amount_tries < 10:
             print(" - trying to start netperf")
-            netperf_cmd = "netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {}" \
+            netperf_cmd = "netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {}"\
                           ",{} -T TCP -4".format(self.arg_d["ip_dest_data"],
                                                  self.arg_d["ip_source_data"],
                                                  self.arg_d["netserver_port"],
