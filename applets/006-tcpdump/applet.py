@@ -145,7 +145,6 @@ def main(x, conf, args):
         return False
     # arguments dictionary
     arg_d = dict()
-    print(args)
     try:
         arg_d["host_name"] = args[0]
         arg_d["applet_id"] = args[1].split(":")[1]
