@@ -45,7 +45,7 @@ def tcpdump_start(x, arg_d):
         time.sleep(1)
 
     if no_pid_found:
-        x.p.msg("error: tcpdump pid on host {} could not be "
+        x.p.err("error: tcpdump pid on host {} could not be "
                 "retrieved\n".format(arg_d["host_name"]))
         return False
 
@@ -58,8 +58,8 @@ def tcpdump_start(x, arg_d):
                                    "sh -c \"echo '{}' > {}\""
                                    .format(pid_tcpdump, path_to_tcpdump_pid))
     if (exit_code_1 or exit_code_2) != 0:
-        x.p.msg("problem (no abort): tcpdump pid could not be saved to file on "
-                "host {}\n".format(arg_d["name_host"]))
+        x.p.msg("problem (no abort): tcpdump pid could not be saved to file on"
+                " host {}\n".format(arg_d["name_host"]))
 
     return True
 
@@ -96,7 +96,7 @@ def transfer_dumpfile(x, arg_d):
             arg_d["host_ip_control"], "/tmp/net-applet-shuffler",
             file_path, "tcpdump_{}.pcap".format(arg_d["applet_id"]), file_name)
     if exit_code != 0:
-        x.p.msg("error transferring the dumpfile tcpdump_{}.pcap from host {}\n"
+        x.p.err("error transferring the dumpfile tcpdump_{}.pcap from host {}\n"
                 .format(arg_d["applet_id"], arg_d["host_name"]))
         return False
     # clean up dumpfile on host
@@ -114,9 +114,9 @@ def tcpdump_stop(x, arg_d):
                                 "\"".format(arg_d["applet_id"]))
 
     if exit_code != 0:
-        x.p.msg("error: tcpdump pid at host {} could not be retrieved\n"
+        x.p.err("error: tcpdump pid at host {} could not be retrieved\n"
                 "failed params: ".format(arg_d["host_name"]))
-        x.p.msg("echo \"$(</tmp/net-applet-shuffler/tcpdump_{})\"\n"
+        x.p.err("echo \"$(</tmp/net-applet-shuffler/tcpdump_{})\"\n"
                 .format(arg_d["applet_id"]))
         return False
 
@@ -145,6 +145,7 @@ def main(x, conf, args):
         return False
     # arguments dictionary
     arg_d = dict()
+    print(args)
     try:
         arg_d["host_name"] = args[0]
         arg_d["applet_id"] = args[1].split(":")[1]
@@ -161,10 +162,8 @@ def main(x, conf, args):
         # 'filter:tcp and dst port 20000'
         # tcpdumps filter via exec-campaign:
         # 'filter:"tcp', 'and', 'dst', 'port', '30000"'
-        filter_or_file = args[3].split(":")[1]
-        arg_d["filter_or_file"] = filter_or_file.strip("\"")
+        filter_or_file_str = args[3].split(":")[1]
         position = 3
-        filter_or_file_str = str()
         # this part is for argument handling when called from exec-campaign
         try:
             while True:
@@ -173,7 +172,7 @@ def main(x, conf, args):
         except IndexError:
             pass
         # cut beginning and trailing "
-        arg_d["filter"] = filter_or_file_str.strip("\"")
+        arg_d["filter_or_file"] = filter_or_file_str.strip("\"")
     except IndexError:
         x.p.err("error: wrong usage\n")
         return False
