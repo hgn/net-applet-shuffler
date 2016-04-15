@@ -73,6 +73,7 @@ def main(x):
     # notes:
     # - [id] should be a self specified unique id string
     # - mode:start -> the local-file-name is ignored
+    # - make sure the filter is valid, otherwise tcpdump won't create a file
     # usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
     x.exec('006-tcpdump beta id:0001 mode:start filter:"tcp and dst port 30000"')
 
