@@ -1,5 +1,6 @@
 """timetracker.py
 
+Email: Daniel Metz <dmetz@mytum.de>
 Module for keeping track of the estimated time a campaign requires to be run.
 
 Use at the beginning of a campaign:
