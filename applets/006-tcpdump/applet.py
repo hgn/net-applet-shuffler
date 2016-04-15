@@ -10,11 +10,10 @@ def tcpdump_start_thread(x, arg_d):
     # https://wiki.ubuntuusers.de/tcpdump/
     # tcpdump -i [interface] [protocol] -n -s 0 -w
     # /tmp/net-applet-shuffler/[filename] '[filter(e.g. dst port 20000)]
-    _, _, exit_code = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-            "tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/tcpdump_{}.pcap "
-            "'{}' 1>/dev/null 2>&1".format(arg_d["host_interface"],
-                                           arg_d["applet_id"],
-                                           arg_d["filter_or_file"]))
+    x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"], "tcpdump -i {} -n"
+               " -s 0 -w /tmp/net-applet-shuffler/tcpdump_{}.pcap '{}'"
+               .format(arg_d["host_interface"], arg_d["applet_id"],
+                       arg_d["filter_or_file"]))
 
 
 def tcpdump_start(x, arg_d):
@@ -31,8 +30,9 @@ def tcpdump_start(x, arg_d):
     no_pid_found = True
     tcp_pid_fetch_tries = 5
     while tcp_pid_fetch_tries > 0 and no_pid_found:
-        stdout, _, _ = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-                                  "ps -ef | grep tcpdump")
+        stdout, _, _ = x.ssh.exec_verbose(arg_d["host_ip_control"],
+                                          arg_d["host_user"],
+                                          "ps -ef | grep tcpdump")
         stdout_decoded = stdout.decode("utf-8")
         for line in stdout_decoded.splitlines():
             # unique identifier
@@ -52,11 +52,11 @@ def tcpdump_start(x, arg_d):
     # save pid to file
     path_to_tcpdump_pid = "/tmp/net-applet-shuffler/tcpdump_{}"\
                           .format(arg_d["applet_id"])
-    _, _, exit_code_1 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-                                   "touch {}".format(path_to_tcpdump_pid))
-    _, _, exit_code_2 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-                                   "sh -c \"echo '{}' > {}\""
-                                   .format(pid_tcpdump, path_to_tcpdump_pid))
+    exit_code_1 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
+                             "touch {}".format(path_to_tcpdump_pid))
+    exit_code_2 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
+                             "sh -c \"echo '{}' > {}\""
+                             .format(pid_tcpdump, path_to_tcpdump_pid))
     if (exit_code_1 or exit_code_2) != 0:
         x.p.msg("problem (no abort): tcpdump pid could not be saved to file on"
                 " host {}\n".format(arg_d["name_host"]))
@@ -92,12 +92,14 @@ def transfer_dumpfile(x, arg_d):
             # will throw a permission denied anyways
             file_path = "/"
     # retrieve dump file and block until it's done
-    _, _, exit_code = x.ssh.copy_from(arg_d["host_user"],
-            arg_d["host_ip_control"], "/tmp/net-applet-shuffler",
-            file_path, "tcpdump_{}.pcap".format(arg_d["applet_id"]), file_name)
+    exit_code = x.ssh.copy_from(arg_d["host_user"],
+                                arg_d["host_ip_control"],
+                                "/tmp/net-applet-shuffler",
+                                file_path, "tcpdump_{}.pcap"
+                                .format(arg_d["applet_id"]), file_name)
     if exit_code != 0:
-        x.p.err("error transferring the dumpfile tcpdump_{}.pcap from host {}\n"
-                .format(arg_d["applet_id"], arg_d["host_name"]))
+        x.p.err("error transferring the dumpfile tcpdump_{}.pcap from host "
+                "{}\n".format(arg_d["applet_id"], arg_d["host_name"]))
         return False
     # clean up dumpfile on host
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
@@ -109,9 +111,9 @@ def transfer_dumpfile(x, arg_d):
 
 def tcpdump_stop(x, arg_d):
     # retrieve pid
-    stdout, _, exit_code = x.ssh.exec(arg_d["host_ip_control"],
-            arg_d["host_user"], "echo \"$(</tmp/net-applet-shuffler/tcpdump_{})"
-                                "\"".format(arg_d["applet_id"]))
+    stdout, _, exit_code = x.ssh.exec_verbose(arg_d["host_ip_control"],
+            arg_d["host_user"], "echo \"$(</tmp/net-applet-shuffler/tcpdump_{}"
+                                ")\"".format(arg_d["applet_id"]))
 
     if exit_code != 0:
         x.p.err("error: tcpdump pid at host {} could not be retrieved\n"

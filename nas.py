@@ -49,6 +49,12 @@ class Ssh:
         pass
 
     def exec(self, ip, user, cmd):
+        full = "ssh {}@{} sudo {} 1>/dev/null 2>&1".format(user, ip, cmd)
+        p = subprocess.Popen(full.split(), stdout=subprocess.PIPE)
+        p.communicate()
+        return p.returncode
+
+    def exec_verbose(self, ip, user, cmd):
         full = "ssh {}@{} sudo {}".format(user, ip, cmd)
         p = subprocess.Popen(full.split(), stdout=subprocess.PIPE)
         stdout, stderr = p.communicate()
@@ -67,7 +73,7 @@ class Ssh:
         return stdout, stderr, p.returncode
 
     def _exec_locally(self, cmd):
-        cmd = "sudo " + cmd
+        cmd = "sudo " + cmd + " 1>/dev/null 2>&1"
         process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
         return stdout, stderr, process.returncode
@@ -83,7 +89,7 @@ class Ssh:
         stdout, stderr, exit_code = self._copy(remote_user, remote_ip,
                 os.path.join(from_path, source_filename), "/tmp/temp_f", True)
         # 2. make target dir
-        cmd = "mkdir -p {} 1>/dev/null 2>&1".format(to_path)
+        cmd = "mkdir -p {}".format(to_path)
         self._exec_locally(cmd)
         # 3. copy to target location
         cmd = "cp /tmp/temp_f {}/{}".format(to_path, dest_filename)
