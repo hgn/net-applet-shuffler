@@ -195,7 +195,7 @@ sudo sysctl -w /net/ipv4/ip_forward="1"
 echo "Configuring network parameters done!"
 [/startup.sh]
 ...
-
+```
 
 Now every interface in question should be able to ping any.
 
