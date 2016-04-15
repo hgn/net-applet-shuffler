@@ -83,7 +83,7 @@ class Ssh:
         stdout, stderr, exit_code = self._copy(remote_user, remote_ip,
                 os.path.join(from_path, source_filename), "/tmp/temp_f", True)
         # 2. make target dir
-        cmd = "mkdir -p {}".format(to_path)
+        cmd = "mkdir -p {} 1>/dev/null 2>&1".format(to_path)
         self._exec_locally(cmd)
         # 3. copy to target location
         cmd = "cp /tmp/temp_f {}/{}".format(to_path, dest_filename)
