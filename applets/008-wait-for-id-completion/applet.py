@@ -6,8 +6,9 @@ import time
 def is_id_running(x, host_ip, host_user, applet_id):
     # due to active tests, the host might seem to be unavailable (congestion)
     try:
-        _, _, exit_code = x.ssh.exec(host_ip, host_user, "test -f "
-                "/tmp/net-applet-shuffler/running_{}".format(applet_id))
+        exit_code = x.ssh.exec(host_ip, host_user, "test -f "
+                               "/tmp/net-applet-shuffler/running_{}"
+                               .format(applet_id))
         # with exit code == 0: file exists -> process is running
         if exit_code == 0:
             return True
@@ -21,7 +22,7 @@ def is_id_running(x, host_ip, host_user, applet_id):
 
 def main(x, conf, args):
     if len(args) < 1:
-        x.p.msg("wrong usage: first specify the interval check time "
+        x.p.err("wrong usage: first specify the interval check time "
                 "interval_time:[seconds], then 1...n host:id tuples for which "
                 "to wait, e.g. [name1]:[id1] [name2]:[id2] ...\n")
         return False
@@ -41,7 +42,7 @@ def main(x, conf, args):
             if not name_host == "interval_time":
                 ent_d[applet_id] = name_host
     except IndexError:
-        x.p.msg("error: wrong usage\n")
+        x.p.err("error: wrong usage\n")
         return False
     # iter through all dict entries, and test them one in an interval
     # remove items which are not running anymore

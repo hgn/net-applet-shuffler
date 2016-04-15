@@ -33,8 +33,8 @@ class ControllerStart(Thread):
 
 
 def distribute_network_controller(x, host_user, host_ip_control):
-    _, _, exit_code = x.ssh.exec(host_ip_control, host_user, "test -f {}/{}"
-                                 .format(REMOTE_CONT_PATH, CONTR_NAME))
+    exit_code = x.ssh.exec(host_ip_control, host_user, "test -f {}/{}"
+                           .format(REMOTE_CONT_PATH, CONTR_NAME))
     # if exit_code != 0 -> does not exist on host
     if not exit_code == 0:
         x.ssh.copy_to(host_user, host_ip_control, LOCAL_CONT_PATH,
@@ -43,14 +43,14 @@ def distribute_network_controller(x, host_user, host_ip_control):
 
 def main(x, conf, args):
     if not len(args) > 1:
-        x.p.msg("wrong usage. use: setup:[direct|dumbbell] host1 host2 "
+        x.p.err("wrong usage. use: setup:[direct|dumbbell] host1 host2 "
                 "host3...\n")
         return False
 
     try:
         setup = args[0].split(":")[1]
     except IndexError:
-        x.p.msg("error: wrong usage\n")
+        x.p.err("error: wrong usage\n")
         return False
     # arguments for controller on hosts
     host_list = list()
