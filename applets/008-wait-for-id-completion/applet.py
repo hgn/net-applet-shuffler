@@ -16,7 +16,7 @@ def is_id_running(x, host_ip, host_user, applet_id):
         return False
     # try again after sleep
     except subprocess.SubprocessError:
-        x.p.msg("check got lost in congestion\n")
+        x.p.msg("check got lost\n")
         return False
 
 

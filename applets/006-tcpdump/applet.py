@@ -92,11 +92,11 @@ def transfer_dumpfile(x, arg_d):
             # will throw a permission denied anyways
             file_path = "/"
     # retrieve dump file and block until it's done
-    exit_code = x.ssh.copy_from(arg_d["host_user"],
-                                arg_d["host_ip_control"],
-                                "/tmp/net-applet-shuffler",
-                                file_path, "tcpdump_{}.pcap"
-                                .format(arg_d["applet_id"]), file_name)
+    _, _, exit_code = x.ssh.copy_from(arg_d["host_user"],
+                                      arg_d["host_ip_control"],
+                                      "/tmp/net-applet-shuffler",
+                                      file_path, "tcpdump_{}.pcap"
+                                      .format(arg_d["applet_id"]), file_name)
     if exit_code != 0:
         x.p.err("error transferring the dumpfile tcpdump_{}.pcap from host "
                 "{}\n".format(arg_d["applet_id"], arg_d["host_name"]))

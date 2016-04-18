@@ -37,8 +37,7 @@ def qdisc_log(x, dic, cmd):
 
 
 def set_netem_full(x, dic):
-    _, _, exit_code = x.ssh.exec(dic["ip_control"], dic["user"],
-                                 dic["netem_cmd"])
+    exit_code = x.ssh.exec(dic["ip_control"], dic["user"], dic["netem_cmd"])
     if exit_code != 0:
         qdisc_log(x, dic, "FAILED sudo " + dic["netem_cmd"])
         x.p.err("error: netem could not be set\n")
@@ -57,7 +56,7 @@ def set_netem_part(x, dic):
         cmd = "tc qdisc {} dev {} root netem {}".format(dic["change"],
                                                         dic["device"],
                                                         dic["netem_cmd"])
-    _, _, exit_code = x.ssh.exec(dic["ip_control"], dic["user"], cmd)
+    exit_code = x.ssh.exec(dic["ip_control"], dic["user"], cmd)
     if exit_code != 0:
         qdisc_log(x, dic, "FAILED sudo " + cmd)
         x.p.err("error: netem could not be set\n")

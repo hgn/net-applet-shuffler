@@ -24,11 +24,13 @@ def controller_thread(x, arg_d):
     # 13. ip_source_control
     # 14. ip_dest_control
     arguments_string = " ".join((arg_d["applet_id"], arg_d["name_source"],
-            arg_d["user_source"], arg_d["ip_source_data"], arg_d["port_source"],
-            arg_d["name_dest"], arg_d["user_dest"], arg_d["ip_dest_data"],
-            arg_d["port_dest"], arg_d["netserver_port"], arg_d["flow_length"],
-            arg_d["flow_offset"], arg_d["ip_source_control"],
-            arg_d["ip_dest_control"]))
+                                 arg_d["user_source"], arg_d["ip_source_data"],
+                                 arg_d["port_source"], arg_d["name_dest"],
+                                 arg_d["user_dest"], arg_d["ip_dest_data"],
+                                 arg_d["port_dest"], arg_d["netserver_port"],
+                                 arg_d["flow_length"], arg_d["flow_offset"],
+                                 arg_d["ip_source_control"],
+                                 arg_d["ip_dest_control"]))
     # check if netperf controller is already on source
     exit_code = x.ssh.exec(arg_d["ip_source_control"], arg_d["user_source"],
                            "test -f {}/netperf-controller.py"

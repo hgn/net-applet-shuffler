@@ -1,7 +1,7 @@
 
 def main(x, conf, args):
     if not len(args) > 0:
-        x.p.msg("no hostname argument given, like \"alpha\" "
+        x.p.err("no hostname argument given, like \"alpha\" "
                 "(can be looked up in conf.json)\n")
         return False
 

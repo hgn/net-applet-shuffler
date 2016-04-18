@@ -10,15 +10,15 @@ def set_metric_save(x, user, ip, route_metric):
         route_m = 1
     metric_set_command = "sysctl -w /net/ipv4/tcp_no_metrics_save=\"{}\" " \
                          "".format(route_m)
-    _, _, exit_code = x.ssh.exec(ip, user, metric_set_command)
+    exit_code = x.ssh.exec(ip, user, metric_set_command)
     if exit_code != 0:
-        x.p.msg("error: route metric could not be set\n")
+        x.p.err("error: route metric could not be set\n")
         return False
     # 2. flush route metric cache if metrics save shall be disabled
     if route_metric == "disabled":
-        _, _, exit_code = x.ssh.exec(ip, user, "ip tcp_metrics flush")
+        exit_code = x.ssh.exec(ip, user, "ip tcp_metrics flush")
         if exit_code != 0:
-            x.p.msg("error: route metric cache could not be flushed\n")
+            x.p.err("error: route metric cache could not be flushed\n")
             return False
 
     return True
@@ -26,7 +26,7 @@ def set_metric_save(x, user, ip, route_metric):
 
 def main(x, conf, args):
     if not len(args) == 2:
-        x.p.msg("wrong usage. use: [host] route-metrics-save:[enabled|disabled]"
+        x.p.err("wrong usage. use: [host] route-metrics-save:[enabled|disabled]"
                 "\n")
         return False
     # arguments dictionary
@@ -35,7 +35,7 @@ def main(x, conf, args):
         dic["host_name"] = args[0]
         dic["m_save"] = args[1].split(":")[1]
     except IndexError:
-        x.p.msg("error: wrong usage\n")
+        x.p.err("error: wrong usage\n")
         return False
     dic["user"] = conf.get_user(dic["host_name"])
     dic["ip_control"] = conf.get_control_ip(dic["host_name"])

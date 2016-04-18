@@ -9,10 +9,10 @@
 def set_rto(x, dic):
     rto_set_command = "ip route change default via {} dev {} rto_min {}"\
         .format(dic["default_route_data"], dic["iface_data"], dic["min_rto"])
-    _, _, exit_code = x.ssh.exec(dic["ip_control"], dic["user"],
-                                 rto_set_command)
+    exit_code = x.ssh.exec(dic["ip_control"], dic["user"],
+                           rto_set_command)
     if exit_code != 0:
-        x.p.msg("error: min rto could not be set\n")
+        x.p.err("error: min rto could not be set\n")
         return False
 
     return True
@@ -20,7 +20,7 @@ def set_rto(x, dic):
 
 def main(x, conf, args):
     if not len(args) == 2:
-        x.p.msg("wrong usage. use: [host] min-rto:[time]\n")
+        x.p.err("wrong usage. use: [host] min-rto:[time]\n")
         return False
     # arguments dictionary
     dic = dict()
@@ -28,7 +28,7 @@ def main(x, conf, args):
         dic["host_name"] = args[0]
         dic["min_rto"] = args[1].split(":")[1]
     except IndexError:
-        x.p.msg("error: wrong usage\n")
+        x.p.err("error: wrong usage\n")
         return False
     dic["user"] = conf.get_user(dic["host_name"])
     dic["ip_control"] = conf.get_control_ip(dic["host_name"])
