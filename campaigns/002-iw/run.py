@@ -26,7 +26,7 @@ def main(x):
     x.exec('105-offloading alpha offloading:off')
     x.exec('105-offloading beta offloading:off')
 
-    for current_value in range(3, 4):
+    for current_value in range(1, 21):
         iw_value = str(current_value)
 
     #for iw_value_list_position in range(0, len(iw_value_list)):
@@ -39,6 +39,9 @@ def main(x):
         x.exec('007-kill koppa')
 
         x.exec('009-network setup:dumbbell alpha beta')
+
+        x.exec('104-netem-cmd koppa control:partial change:add to_network:red command:"delay 100ms"')
+        x.exec('104-netem-cmd koppa control:partial change:add to_network:blue command:"delay 100ms"')
 
         x.exec('102-tcp-route-metrics alpha route-metrics-save:disabled')
         x.exec('102-tcp-route-metrics beta route-metrics-save:disabled')
@@ -57,7 +60,7 @@ def main(x):
 
         x.exec('008-wait-for-id-completion interval_time:2 alpha:21')
 
-        x.exec('006-tcpdump beta id:20 mode:stop local-file-name:"/tmp/iw_{}.pcap"'.format(iw_value))
+        x.exec('006-tcpdump beta id:20 mode:stop local-file-name:"./campaigns/002-iw/dumps/iw_{}.pcap"'.format(iw_value))
 
         print(tt.get_elapsed_runtime()[0])
         print(tt.get_remaining_runtime()[0])
@@ -65,5 +68,9 @@ def main(x):
     # reset offloading
     x.exec('105-offloading alpha offloading:on')
     x.exec('105-offloading beta offloading:on')
+
+    # reset qdiscs
+    x.exec('104-netem-cmd koppa control:partial change:del to_network:red')
+    x.exec('104-netem-cmd koppa control:partial change:del to_network:blue')
 
     print(tt.update_campaign_runtime()[0])
