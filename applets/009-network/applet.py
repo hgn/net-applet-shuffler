@@ -6,7 +6,7 @@ import time
 
 from threading import Thread
 
-CONTR_NAME = "network-controller.py"
+CONT_NAME = "network-controller.py"
 LOCAL_CONT_PATH = os.path.dirname(os.path.realpath(__file__))
 REMOTE_CONT_PATH = "/tmp/net-applet-shuffler"
 TIMEOUT = 60
