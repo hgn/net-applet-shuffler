@@ -40,8 +40,8 @@ def main(x):
 
         x.exec('009-network setup:dumbbell alpha beta')
 
-        x.exec('104-netem-cmd koppa control:partial change:add to_network:red command:"delay 100ms"')
-        x.exec('104-netem-cmd koppa control:partial change:add to_network:blue command:"delay 100ms"')
+        x.exec('104-netem-cmd koppa control:partial change:add to_network:red command:"delay 10ms"')
+        x.exec('104-netem-cmd koppa control:partial change:add to_network:blue command:"delay 10ms"')
 
         x.exec('102-tcp-route-metrics alpha route-metrics-save:disabled')
         x.exec('102-tcp-route-metrics beta route-metrics-save:disabled')
