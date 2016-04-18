@@ -40,7 +40,7 @@ def clean_service(x, host_name, host_user, host_ip, service_name):
 
 def main(x, conf, args):
     if not len(args) == 1:
-        x.p.msg("wrong usage. use: [hostname]")
+        x.p.err("wrong usage. use: [hostname]")
         return False
 
     # retrieve host information

@@ -67,7 +67,7 @@ class NetperfController:
             self.output_redirected = False
 
     def ssh_exec(self, ip, remote_user, local_user, cmd):
-        # due to demonized root program execution, ssh uses root user parameters
+        # due to demonized root program execution, ssh uses root user params
         # use the -i identity file option for the user file
         # use the -o known_hosts file option for the same reason
         # note: for debugging purposes use: "-vvv -E /[file_path]"

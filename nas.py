@@ -61,19 +61,19 @@ class Ssh:
         return stdout, stderr, p.returncode
 
     def _copy(self, remote_user, remote_ip, remote_path, local_path, to_local):
-        command = str()
+        cmd = str()
         if to_local:
-            command = "scp {}@{}:{} {}".format(remote_user, remote_ip,
-                                               remote_path, local_path)
+            cmd = "scp {}@{}:{} {}".format(remote_user, remote_ip,
+                                           remote_path, local_path)
         else:
-            command = "scp {} {}@{}:{}".format(local_path, remote_user,
-                                               remote_ip, remote_path)
-        p = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+            cmd = "scp {} {}@{}:{}".format(local_path, remote_user,
+                                           remote_ip, remote_path)
+        p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
         stdout, stderr = p.communicate()
         return stdout, stderr, p.returncode
 
     def _exec_locally(self, cmd):
-        cmd = "sudo " + cmd + " 1>/dev/null 2>&1"
+        cmd = "sudo " + cmd
         process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
         stdout, stderr = process.communicate()
         return stdout, stderr, process.returncode
@@ -110,10 +110,10 @@ class Ssh:
         # 2. make target dir
         self.exec(ip, user, "mkdir -p {}".format(to_path))
         # 3. copy to target location
-        self.exec(ip, user, "cp /tmp/tmp_f {}/{}".format(to_path,
-                                                         dest_filename))
+        self.exec(ip, user, "cp '/tmp/tmp_f' '{}/{}'".format(to_path,
+                                                             dest_filename))
         # 4. remove temp copy
-        self.exec(ip, user, "rm -f /tmp/tmp_f")
+        self.exec(ip, user, "rm -f '/tmp/tmp_f'")
         return stdout, stderr, exit_code
 
 
