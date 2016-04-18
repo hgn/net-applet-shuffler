@@ -26,7 +26,7 @@ class ControllerStart(Thread):
 
     def run(self):
         ssh_command = "ssh {}@{} sudo python3.5 {}/{} {}".format(
-            self.host_user, self.host_ip_control, REMOTE_CONT_PATH, CONTR_NAME,
+            self.host_user, self.host_ip_control, REMOTE_CONT_PATH, CONT_NAME,
             self.arguments)
         process = subprocess.Popen(ssh_command.split(), stdout=subprocess.PIPE)
         process.communicate()
@@ -34,11 +34,11 @@ class ControllerStart(Thread):
 
 def distribute_network_controller(x, host_user, host_ip_control):
     exit_code = x.ssh.exec(host_ip_control, host_user, "test -f {}/{}"
-                           .format(REMOTE_CONT_PATH, CONTR_NAME))
+                           .format(REMOTE_CONT_PATH, CONT_NAME))
     # if exit_code != 0 -> does not exist on host
     if not exit_code == 0:
         x.ssh.copy_to(host_user, host_ip_control, LOCAL_CONT_PATH,
-                      REMOTE_CONT_PATH, CONTR_NAME, CONTR_NAME)
+                      REMOTE_CONT_PATH, CONT_NAME, CONT_NAME)
 
 
 def main(x, conf, args):
