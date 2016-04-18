@@ -64,7 +64,18 @@ def tcpdump_start(x, arg_d):
     return True
 
 
-def transfer_dumpfile(x, arg_d):
+def dumpfile_is_empty(x, arg_d):
+    file_statistics = os.stat(os.path.join(arg_d["file_path"],
+                                           arg_d["file_name"]))
+    if file_statistics.st_size == 0:
+        x.p.err("error: dumpfile {}/{} has size 0\n"
+                .format(arg_d["file_path"], arg_d["file_name"]))
+        return True
+
+    return False
+
+
+def create_file_path(x, arg_d):
     # relative file path logic
     file_path = str()
     file_name = str()
@@ -80,6 +91,7 @@ def transfer_dumpfile(x, arg_d):
         file_name = file_path_split[len(file_path_split)-1]
         file_path_split.pop(len(file_path_split)-1)
         file_path = "/".join(file_path_split)
+    # absolute file path logic
     elif arg_d["path_usage"] == "absolute":
         # make local directories
         file_path_split = arg_d["filter_or_file"].split("/")
@@ -91,20 +103,41 @@ def transfer_dumpfile(x, arg_d):
             # this means the top directory is used
             # will throw a permission denied anyways
             file_path = "/"
+
+    if not (file_path or file_name):
+        x.p.err("error: file path and/or name is/are empty\n")
+        return False
+    arg_d["file_path"] = file_path
+    arg_d["file_name"] = file_name
+
+    return True
+
+
+def transfer_dumpfile(x, arg_d):
+    # create file path
+    if not create_file_path(x, arg_d):
+        x.p.err("error: file path could not be created\n")
+        return False
     # retrieve dump file and block until it's done
     _, _, exit_code = x.ssh.copy_from(arg_d["host_user"],
                                       arg_d["host_ip_control"],
                                       "/tmp/net-applet-shuffler",
-                                      file_path, "tcpdump_{}.pcap"
-                                      .format(arg_d["applet_id"]), file_name)
+                                      arg_d["file_path"], "tcpdump_{}.pcap"
+                                      .format(arg_d["applet_id"]),
+                                      arg_d["file_name"])
     if exit_code != 0:
-        x.p.err("error transferring the dumpfile tcpdump_{}.pcap from host "
+        x.p.err("error: transferring the dumpfile tcpdump_{}.pcap from host "
                 "{}\n".format(arg_d["applet_id"], arg_d["host_name"]))
         return False
     # clean up dumpfile on host
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
                "rm /tmp/net-applet-shuffler/tcpdump_{}.pcap"
                .format(arg_d["applet_id"]))
+    # Check if the dumpfile is empty -> error
+    if dumpfile_is_empty(x, arg_d):
+        x.p.err("error: tcpdump file is empty, either the filter is bad or "
+                "something went wrong\n")
+        return False
 
     return True
 

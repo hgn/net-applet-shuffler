@@ -29,7 +29,7 @@ def main(x):
     for current_value in range(1, 21):
         iw_value = str(current_value)
 
-    #for iw_value_list_position in range(0, len(iw_value_list)):
+        #for iw_value_list_position in range(0, len(iw_value_list)):
         #iw_value = str(iw_value_list[iw_value_list_position])
         print('Current iw-value tested: {}'.format(iw_value))
 

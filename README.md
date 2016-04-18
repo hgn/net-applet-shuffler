@@ -102,6 +102,9 @@ can be found in it concerning campaign setup, applet usage and hints.
 
 Help on applet level is available for some applet by adding an "?" to the applet arguments.
 
+Be careful with the naming conventions of your test results.
+Already existing files will be overwritten!
+
 
 ## Configuration ##
 
