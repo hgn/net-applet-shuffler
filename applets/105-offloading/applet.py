@@ -35,7 +35,7 @@ def set_offloading(x, conf, dic):
         else:
             x.p.err("error: wrong usage\n")
             return False
-        # unfortunately, error handling does not work, since ethtool feedbacks
+        # unfortunately, error handling does not work, since ethtool's feedback
         # fails when nothing was done
         x.ssh.exec(dic["ip_control"], dic["user"], cmd)
 
