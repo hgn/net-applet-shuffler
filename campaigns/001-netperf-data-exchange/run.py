@@ -1,6 +1,7 @@
 
-import timetracker
+import random
 import time
+import timetracker
 
 
 def main(x):
@@ -93,9 +94,6 @@ def main(x):
     x.exec('005-netperf alpha sink:beta id:0002 source_port:20000 sink_port:30000 flow_length:6 flow_offset:1 netserver:29999')
     x.exec('005-netperf beta sink:alpha id:0003 source_port:20001 sink_port:30001 flow_length:6 flow_offset:3 netserver:29998')
 
-    # sleep seconds
-    time.sleep(2)
-
     # blocker
     # waits for all processes to complete
     # notes:
@@ -125,5 +123,8 @@ def main(x):
     # enable interface offloading again
     x.exec('105-offloading alpha offloading:on')
     x.exec('105-offloading beta offloading:on')
+
+    # sleep seconds
+    time.sleep(random.randrange(10))
 
     print(tt.update_campaign_runtime()[0])

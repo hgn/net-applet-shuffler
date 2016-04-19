@@ -29,6 +29,7 @@ class TimeTracker:
     CAMPAIGN_START_TIME = int()
     ESTIMATE_AVAILABLE = False
     FILE_NAME = "times.json"
+    POI_DICT = dict()
 
     def __init__(self, campaign_name):
         """Creates TimeTracker instance.
@@ -66,10 +67,14 @@ class TimeTracker:
             file.close()
             return
 
-    def _info_available(self, parsed_json):
+    def _campaign_runtime_available(self, parsed_json):
         for sha1 in parsed_json:
             if sha1 == self.CAMPAIGN_SHA1:
-                return True
+                try:
+                    if parsed_json[sha1][0]["length"]:
+                        return True
+                except KeyError:
+                    return False
         return False
 
     def _load_track_file_as_json(self):
@@ -83,11 +88,32 @@ class TimeTracker:
         file.write(json.dumps(trackfile_string, indent=4))
         file.close()
 
-    def _set_campaign_runtime(self, time_seconds):
+    def _set_campaign_runtime(self, time_hms):
         trackfile_json = self._load_track_file_as_json()
-        trackfile_json.update({self.CAMPAIGN_SHA1:
-                                   [{"length": str(time_seconds),
-                                     "campaign_name": self.CAMPAIGN_NAME}]})
+        trackfile_updated = False
+        # case 1: trackfile contains sha1 and corresponding time
+        # -> old pois should be preserved
+        try:
+            campaign_entry = trackfile_json[self.CAMPAIGN_SHA1][0]
+            if campaign_entry["length"]:
+                for entry in campaign_entry:
+                    # preserve all previous entries except for length and
+                    # campaign name, and override if newer information is
+                    # available
+                    if entry != "length" and entry != "campaign_name":
+                        self.POI_DICT[entry] = campaign_entry[entry]
+                self.POI_DICT["length"] = time_hms
+                self.POI_DICT["campaign_name"] = self.CAMPAIGN_NAME
+                trackfile_json.update({self.CAMPAIGN_SHA1: [self.POI_DICT]})
+                trackfile_updated = True
+        # key not found in dict
+        except KeyError:
+            pass
+        # case 2: trackfile is empty or no length is set
+        if not trackfile_updated:
+            self.POI_DICT["length"] = time_hms
+            self.POI_DICT["campaign_name"] = self.CAMPAIGN_NAME
+            trackfile_json.update({self.CAMPAIGN_SHA1: [self.POI_DICT]})
         self._save_track_file_as_json(trackfile_json)
 
     def _hms_to_int(self, hms_string):
@@ -113,7 +139,7 @@ class TimeTracker:
         if not self.CAMPAIGN_FOUND:
             return "\nerror: wrong campaign path/name\n"
         trackfile_json = self._load_track_file_as_json()
-        if self._info_available(trackfile_json):
+        if self._campaign_runtime_available(trackfile_json):
             time_formatted = trackfile_json[self.CAMPAIGN_SHA1][0]["length"]
             self.ESTIMATE_AVAILABLE = True
             return "Estimated campaign runtime: {}".format(time_formatted), \
@@ -154,12 +180,9 @@ class TimeTracker:
         Returns elapsed campaign runtime sentence string at position [0],
         returns elapsed campaign runtime string at position [1].
         """
-        time_now = int(round(time.time()))
-        time_elapsed = time_now - self.CAMPAIGN_START_TIME
-        elapsed_runtime_formatted = self._sec_to_hms(time_elapsed)
-        return "Elapsed campaign runtime: {}"\
-               .format(elapsed_runtime_formatted), \
-               elapsed_runtime_formatted
+        elapsed_time_hms = self._elapsed_time_hms()
+        return "Elapsed campaign runtime: {}".format(elapsed_time_hms), \
+               elapsed_time_hms
 
     def add_poi(self, name_string):
         """Public method used to add a poi and the time it took to reach it.
@@ -172,10 +195,7 @@ class TimeTracker:
         start to now. Both together create a point of interest (poi) and are
         stored in the FILE_NAME under the campaign sha1.
         """
-        trackfile_json = self._load_track_file_as_json()
-        trackfile_json.update({self.CAMPAIGN_SHA1:
-                                   [{name_string: self._elapsed_time_hms()}]})
-        self._save_track_file_as_json(trackfile_json)
+        self.POI_DICT[name_string] = self._elapsed_time_hms()
 
     def update_campaign_runtime(self):
         """Update the campaign runtime estimate.
@@ -189,8 +209,7 @@ class TimeTracker:
         if not self.CAMPAIGN_FOUND:
             return "\nerror: wrong campaign path/name\n", \
                    "\nerror: wrong campaign path/name\n"
-        time_now = int(round(time.time()))
-        time_elapsed = time_now - self.CAMPAIGN_START_TIME
-        time_converted = self._sec_to_hms(time_elapsed)
-        self._set_campaign_runtime(time_converted)
-        return "Campaign runtime: {}".format(time_converted), time_converted
+        elapsed_time_hms = self._elapsed_time_hms()
+        self._set_campaign_runtime(elapsed_time_hms)
+        return "Campaign runtime: {}".format(elapsed_time_hms), \
+               elapsed_time_hms
