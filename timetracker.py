@@ -100,8 +100,8 @@ class TimeTracker:
     def get_campaign_runtime(self):
         """Public method used to get the campaign runtime.
 
-        Returns campaign runtime sentence string at position [0], returns campaign
-        runtime string at position [1].
+        Returns campaign runtime sentence string at position [0], returns
+        campaign runtime string at position [1].
         """
         if not self.CAMPAIGN_FOUND:
             return "\nerror: wrong campaign path/name\n"
@@ -117,8 +117,8 @@ class TimeTracker:
     def get_remaining_runtime(self):
         """Public method used to get the remaining campaign runtime.
 
-        Returns remaining campaign runtime sentence string at position [0], returns
-        remaining campaign runtime string at position [1].
+        Returns remaining campaign runtime sentence string at position [0],
+        returns remaining campaign runtime string at position [1].
         """
         if not self.CAMPAIGN_FOUND:
             return "\nerror: wrong campaign path/name\n", \
@@ -140,8 +140,8 @@ class TimeTracker:
     def get_elapsed_runtime(self):
         """Public method used to get the elapsed campaign runtime.
 
-        Returns elapsed campaign runtime sentence string at position [0], returns
-        elapsed campaign runtime string at position [1].
+        Returns elapsed campaign runtime sentence string at position [0],
+        returns elapsed campaign runtime string at position [1].
         """
         time_now = int(round(time.time()))
         time_elapsed = time_now - self.CAMPAIGN_START_TIME

@@ -457,7 +457,7 @@ class NetAppletShuffler:
         return None
 
     def print_version(self):
-        sys.stdout.write("%s\n" % (__version__))
+        sys.stdout.write("%s\n" % __version__)
 
     def print_usage(self):
         sys.stderr.write("Usage: nas [-h | --help]" +
@@ -475,7 +475,7 @@ class NetAppletShuffler:
                     return True
         return False
 
-    def parse_global_otions(self):
+    def parse_global_options(self):
         if len(sys.argv) <= 1:
             self.print_usage()
             sys.stderr.write("Available applets:\n")
@@ -485,7 +485,7 @@ class NetAppletShuffler:
         self.binary_path = sys.argv[-1]
 
         # --version can be placed somewhere in the
-        # command line and will evalutated always: it is
+        # command line and will evaluated always: it is
         # a global option
         if self.args_contains(sys.argv, "--version"):
             self.print_version()
@@ -519,7 +519,7 @@ class NetAppletShuffler:
         return classname
 
     def run(self):
-        classtring = self.parse_global_otions()
+        classtring = self.parse_global_options()
         if not classtring:
             return 1
 

@@ -24,7 +24,7 @@ test boxes, the tests are executed and the results are downloaded to the local
 machine.
 
 What do you need? Probably you need as many as required hardware machines. If you
-want to test within a typical bumbbell topology you need probably 5 machines.
+want to test within a typical dumbbell topology you need probably 5 machines.
 Simple request/reply test can be done on one machine too.
 
 
