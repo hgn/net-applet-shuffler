@@ -1,6 +1,9 @@
 """timetracker.py
 
+<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
 Email: Daniel Metz <dmetz@mytum.de>
+=======
+>>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
 Module for keeping track of the estimated time a campaign requires to be run.
 
 Use at the beginning of a campaign:
@@ -43,7 +46,11 @@ class TimeTracker:
         self.CAMPAIGN_NAME = campaign_name
         self.file_dir = os.path.dirname(__file__)
         # set trackfile.json path
+<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
         self.trackfile_path = os.path.join(self.file_dir, self.FILE_NAME)
+=======
+        self.file_path = os.path.join(self.file_dir, self.FILE_NAME)
+>>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
         # create trackfile if there is none
         self._handle_track_file()
         # create sha1 from campaign
@@ -64,7 +71,11 @@ class TimeTracker:
             self.CAMPAIGN_FOUND = False
 
     def _handle_track_file(self):
+<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
         if not os.path.exists(self.trackfile_path):
+=======
+        if not os.path.exists(self.file_path):
+>>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
             file = open(self.FILE_NAME, "w")
             file.write("{\n}")
             file.close()
@@ -77,13 +88,21 @@ class TimeTracker:
         return False
 
     def _load_track_file_as_json(self):
+<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
         file = open(self.trackfile_path, "r")
+=======
+        file = open(self.file_path, "r")
+>>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
         trackfile_str = file.read()
         file.close()
         return json.loads(trackfile_str)
 
     def _save_track_file_as_json(self, trackfile_string):
+<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
         file = open(self.trackfile_path, "w")
+=======
+        file = open(self.file_path, "w")
+>>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
         file.write(json.dumps(trackfile_string, indent=4))
         file.close()
 
@@ -94,7 +113,11 @@ class TimeTracker:
                                      "campaign_name": self.CAMPAIGN_NAME}]})
         self._save_track_file_as_json(trackfile_json)
 
+<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
     def _hms_to_int(self, hms_string):
+=======
+    def _convert_hms_to_int(self, hms_string):
+>>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
         hms_list = hms_string.split(":")
         return int(hms_list[0]) * 3600 + int(hms_list[1]) * 60 + int(hms_list[2])
 
@@ -129,9 +152,15 @@ class TimeTracker:
         if not self.ESTIMATE_AVAILABLE:
             return "Estimated remaining campaign runtime: unavailable", "-1"
         _, expected_runtime = self.get_campaign_runtime()
+<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
         expected_runtime_seconds = self._hms_to_int(expected_runtime)
         _, elapsed_time = self.get_elapsed_runtime()
         elapsed_time_seconds = self._hms_to_int(elapsed_time)
+=======
+        expected_runtime_seconds = self._convert_hms_to_int(expected_runtime)
+        _, elapsed_time = self.get_elapsed_runtime()
+        elapsed_time_seconds = self._convert_hms_to_int(elapsed_time)
+>>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
         remaining_runtime = expected_runtime_seconds - elapsed_time_seconds
         if remaining_runtime < 0:
             return "Estimated remaining campaign runtime: unavailable", "-1"
