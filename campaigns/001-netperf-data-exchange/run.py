@@ -4,7 +4,6 @@ import time
 
 
 def main(x):
-
     tt = timetracker.TimeTracker("001-netperf-data-exchange")
     # print('message')
     print('Starting campaign 001-netperf-data-exchange')
