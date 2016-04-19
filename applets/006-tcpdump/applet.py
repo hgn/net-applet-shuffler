@@ -118,7 +118,7 @@ def transfer_dumpfile(x, arg_d):
     if not create_file_path(x, arg_d):
         x.p.err("error: file path could not be created\n")
         return False
-    # tcpdump process run autonomously and it seems it might take some time,
+    # tcpdump process runs autonomously and it seems it might take some time,
     # before the dumpfile is filled with data
     # thus, the perfect solution would be a join with the tcpdump thread
     # here: poor mans solution
