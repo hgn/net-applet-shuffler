@@ -39,6 +39,8 @@ def main(x):
     # netem
     # add delay to left and right outgoing interfaces for the upcoming test
     # restoration is covered by 007-kill
+    # notes:
+    # - careful with the delete qdisc command, it will stop the campaign with an error if there is no qdisc to be deleted
     x.exec('104-netem-cmd koppa control:partial change:add to-network:red command:"delay 10ms"')
     x.exec('104-netem-cmd koppa control:partial change:add to-network:blue command:"delay 10ms"')
 
