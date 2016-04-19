@@ -11,7 +11,7 @@ def tcpdump_start_thread(x, arg_d):
     # tcpdump -i [interface] [protocol] -n -s 0 -w
     # /tmp/net-applet-shuffler/[filename] '[filter(e.g. dst port 20000)]
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"], "tcpdump -i {} -n"
-               " -s 0 -w /tmp/net-applet-shuffler/tcpdump_{}.pcap '{}'"
+               " -s 0 -U -w /tmp/net-applet-shuffler/tcpdump_{}.pcap '{}'"
                .format(arg_d["host_interface"], arg_d["applet_id"],
                        arg_d["filter_or_file"]))
 
@@ -36,7 +36,7 @@ def tcpdump_start(x, arg_d):
         stdout_decoded = stdout.decode("utf-8")
         for line in stdout_decoded.splitlines():
             # unique identifier
-            if "sudo tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/" \
+            if "sudo tcpdump -i {} -n -s 0 -U -w /tmp/net-applet-shuffler/" \
                     "tcpdump_{}.pcap '{}'".format(arg_d["host_interface"],
                     arg_d["applet_id"], arg_d["filter_or_file"]) in line:
                 pid_tcpdump = line.split()[1]
@@ -57,7 +57,7 @@ def tcpdump_start(x, arg_d):
     exit_code_2 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
                              "sh -c \"echo '{}' > {}\""
                              .format(pid_tcpdump, path_to_tcpdump_pid))
-    if (exit_code_1 or exit_code_2) != 0:
+    if exit_code_1 != 0 or exit_code_2 != 0:
         x.p.msg("problem (no abort): tcpdump pid could not be saved to file on"
                 " host {}\n".format(arg_d["name_host"]))
 
