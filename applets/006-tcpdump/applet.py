@@ -10,16 +10,15 @@ def tcpdump_start_thread(x, arg_d):
     # https://wiki.ubuntuusers.de/tcpdump/
     # tcpdump -i [interface] [protocol] -n -s 0 -w
     # /tmp/net-applet-shuffler/[filename] '[filter(e.g. dst port 20000)]
-    _, _, exit_code = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-            "tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/tcpdump_{}.pcap "
-            "'{}' 1>/dev/null 2>&1".format(arg_d["host_interface"],
-                                           arg_d["applet_id"],
-                                           arg_d["filter_or_file"]))
+    x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"], "tcpdump -i {} -n"
+               " -s 0 -U -w /tmp/net-applet-shuffler/tcpdump_{}.pcap '{}'"
+               .format(arg_d["host_interface"], arg_d["applet_id"],
+                       arg_d["filter_or_file"]))
 
 
 def tcpdump_start(x, arg_d):
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-               "mkdir /tmp/net-applet-shuffler 1>/dev/null 2>&1")
+               "mkdir -p /tmp/net-applet-shuffler")
     tcp_thread = Thread(target=tcpdump_start_thread, args=(x, arg_d, ))
     tcp_thread.daemon = True
     tcp_thread.start()
@@ -31,12 +30,13 @@ def tcpdump_start(x, arg_d):
     no_pid_found = True
     tcp_pid_fetch_tries = 5
     while tcp_pid_fetch_tries > 0 and no_pid_found:
-        stdout, _, _ = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-                                  "ps -ef | grep tcpdump")
+        stdout, _, _ = x.ssh.exec_verbose(arg_d["host_ip_control"],
+                                          arg_d["host_user"],
+                                          "ps -ef | grep tcpdump")
         stdout_decoded = stdout.decode("utf-8")
         for line in stdout_decoded.splitlines():
             # unique identifier
-            if "sudo tcpdump -i {} -n -s 0 -w /tmp/net-applet-shuffler/" \
+            if "sudo tcpdump -i {} -n -s 0 -U -w /tmp/net-applet-shuffler/" \
                     "tcpdump_{}.pcap '{}'".format(arg_d["host_interface"],
                     arg_d["applet_id"], arg_d["filter_or_file"]) in line:
                 pid_tcpdump = line.split()[1]
@@ -45,81 +45,118 @@ def tcpdump_start(x, arg_d):
         time.sleep(1)
 
     if no_pid_found:
-        x.p.msg("error: tcpdump pid on host {} could not be "
+        x.p.err("error: tcpdump pid on host {} could not be "
                 "retrieved\n".format(arg_d["host_name"]))
         return False
 
     # save pid to file
     path_to_tcpdump_pid = "/tmp/net-applet-shuffler/tcpdump_{}"\
                           .format(arg_d["applet_id"])
-    _, _, exit_code_1 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-                                   "touch {}".format(path_to_tcpdump_pid))
-    _, _, exit_code_2 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-                                   "sh -c \"echo '{}' > {}\""
-                                   .format(pid_tcpdump, path_to_tcpdump_pid))
-    if (exit_code_1 or exit_code_2) != 0:
-        x.p.msg("problem (no abort): tcpdump pid could not be saved to file on "
-                "host {}\n".format(arg_d["name_host"]))
+    exit_code_1 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
+                             "touch {}".format(path_to_tcpdump_pid))
+    exit_code_2 = x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
+                             "sh -c \"echo '{}' > {}\""
+                             .format(pid_tcpdump, path_to_tcpdump_pid))
+    if exit_code_1 != 0 or exit_code_2 != 0:
+        x.p.msg("problem (no abort): tcpdump pid could not be saved to file on"
+                " host {}\n".format(arg_d["name_host"]))
+
+    return True
+
+
+def dumpfile_is_empty(x, arg_d):
+    file_statistics = os.stat(os.path.join(arg_d["file_path"],
+                                           arg_d["file_name"]))
+    if file_statistics.st_size == 0:
+        x.p.err("error: dumpfile {}/{} has size 0\n"
+                .format(arg_d["file_path"], arg_d["file_name"]))
+        return True
+
+    return False
+
+
+def create_file_path(x, arg_d):
+    # relative file path logic
+    file_path = str()
+    file_name = str()
+    # note: the current file path is two levels below nas
+    # path and file name shuffling magic
+    if arg_d["path_usage"] == "relative":
+        current_file_dir = os.path.dirname(__file__)
+        # nas file path + dir and filename to dst file
+        file_path_full = os.path.join(current_file_dir + "/../../",
+                                 arg_d["filter_or_file"])
+        # make local directories
+        file_path_split = file_path_full.split("/")
+        file_name = file_path_split[len(file_path_split)-1]
+        file_path_split.pop(len(file_path_split)-1)
+        file_path = "/".join(file_path_split)
+    # absolute file path logic
+    elif arg_d["path_usage"] == "absolute":
+        # make local directories
+        file_path_split = arg_d["filter_or_file"].split("/")
+        file_name = file_path_split[len(file_path_split)-1]
+        try:
+            file_path_split.pop(len(file_path_split)-1)
+            file_path = "/".join(file_path_split)
+        except IndexError:
+            # this means the top directory is used
+            # will throw a permission denied anyways
+            file_path = "/"
+
+    if not (file_path or file_name):
+        x.p.err("error: file path and/or name is/are empty\n")
+        return False
+    arg_d["file_path"] = file_path
+    arg_d["file_name"] = file_name
 
     return True
 
 
 def transfer_dumpfile(x, arg_d):
-    # relative file path logic
-    file_path = ""
-    local_file_path_split = ""
-    # note: the current file path is two levels below nas
-    if arg_d["path_usage"] == "relative":
-        current_file_dir = os.path.dirname(__file__)
-        file_path = os.path.join(current_file_dir, "../../" +
-                                 arg_d["filter_or_file"])
-        # make local directories
-        try:
-            os.makedirs(file_path)
-        except os.error:
-            # path/file exists
-            pass
-        local_file_path_split = file_path.split("/")
-    elif arg_d["path_usage"] == "absolute":
-        # make local directories
-        try:
-            os.makedirs(arg_d["filter_or_file"])
-        except os.error:
-            # path/file exists
-            pass
-        local_file_path_split = ("../../" + arg_d["filter_or_file"]).split("/")
-
-    # path and file name shuffling magic
-    local_file_name = local_file_path_split[len(local_file_path_split)-1]
-    local_file_path_split.pop(len(local_file_path_split)-1)
-    local_file_path = "/".join(local_file_path_split)
+    # create file path
+    if not create_file_path(x, arg_d):
+        x.p.err("error: file path could not be created\n")
+        return False
+    # tcpdump process runs autonomously and it seems it might take some time,
+    # before the dumpfile is filled with data
+    # thus, the perfect solution would be a join with the tcpdump thread
+    # here: poor mans solution
+    time.sleep(2)
     # retrieve dump file and block until it's done
     _, _, exit_code = x.ssh.copy_from(arg_d["host_user"],
-            arg_d["host_ip_control"], "/tmp/net-applet-shuffler",
-            local_file_path, "tcpdump_{}.pcap".format(arg_d["applet_id"]),
-            local_file_name)
+                                      arg_d["host_ip_control"],
+                                      "/tmp/net-applet-shuffler",
+                                      arg_d["file_path"], "tcpdump_{}.pcap"
+                                      .format(arg_d["applet_id"]),
+                                      arg_d["file_name"])
     if exit_code != 0:
-        x.p.msg("error transferring the dumpfile tcpdump_{}.pcap from host {}\n"
-                .format(arg_d["applet_id"], arg_d["host_name"]))
+        x.p.err("error: transferring the dumpfile tcpdump_{}.pcap from host "
+                "{}\n".format(arg_d["applet_id"], arg_d["host_name"]))
         return False
     # clean up dumpfile on host
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
                "rm /tmp/net-applet-shuffler/tcpdump_{}.pcap"
                .format(arg_d["applet_id"]))
+    # Check if the dumpfile is empty -> error
+    if dumpfile_is_empty(x, arg_d):
+        x.p.err("error: tcpdump file is empty, either the filter is bad or "
+                "something went wrong\n")
+        return False
 
     return True
 
 
 def tcpdump_stop(x, arg_d):
     # retrieve pid
-    stdout, _, exit_code = x.ssh.exec(arg_d["host_ip_control"],
-            arg_d["host_user"], "echo \"$(</tmp/net-applet-shuffler/tcpdump_{})"
-                                "\"".format(arg_d["applet_id"]))
+    stdout, _, exit_code = x.ssh.exec_verbose(arg_d["host_ip_control"],
+            arg_d["host_user"], "echo \"$(</tmp/net-applet-shuffler/tcpdump_{}"
+                                ")\"".format(arg_d["applet_id"]))
 
     if exit_code != 0:
-        x.p.msg("error: tcpdump pid at host {} could not be retrieved\n"
+        x.p.err("error: tcpdump pid at host {} could not be retrieved\n"
                 "failed params: ".format(arg_d["host_name"]))
-        x.p.msg("echo \"$(</tmp/net-applet-shuffler/tcpdump_{})\"\n"
+        x.p.err("echo \"$(</tmp/net-applet-shuffler/tcpdump_{})\"\n"
                 .format(arg_d["applet_id"]))
         return False
 
@@ -164,10 +201,8 @@ def main(x, conf, args):
         # 'filter:tcp and dst port 20000'
         # tcpdumps filter via exec-campaign:
         # 'filter:"tcp', 'and', 'dst', 'port', '30000"'
-        filter_or_file = args[3].split(":")[1]
-        arg_d["filter_or_file"] = filter_or_file.strip("\"")
+        filter_or_file_str = args[3].split(":")[1]
         position = 3
-        filter_or_file_str = str()
         # this part is for argument handling when called from exec-campaign
         try:
             while True:
@@ -176,7 +211,7 @@ def main(x, conf, args):
         except IndexError:
             pass
         # cut beginning and trailing "
-        arg_d["filter"] = filter_or_file_str.strip("\"")
+        arg_d["filter_or_file"] = filter_or_file_str.strip("\"")
     except IndexError:
         x.p.err("error: wrong usage\n")
         return False

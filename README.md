@@ -24,7 +24,7 @@ test boxes, the tests are executed and the results are downloaded to the local
 machine.
 
 What do you need? Probably you need as many as required hardware machines. If you
-want to test within a typical bumbbell topology you need probably 5 machines.
+want to test within a typical dumbbell topology you need probably 5 machines.
 Simple request/reply test can be done on one machine too.
 
 
@@ -101,6 +101,9 @@ It acts as an example campaign of a possible (simple) workflow. Also, a lot of i
 can be found in it concerning campaign setup, applet usage and hints.
 
 Help on applet level is available for some applet by adding an "?" to the applet arguments.
+
+Be careful with the naming conventions of your test results.
+Already existing files will be overwritten!
 
 
 ## Configuration ##
@@ -195,10 +198,10 @@ sudo sysctl -w /net/ipv4/ip_forward="1"
 echo "Configuring network parameters done!"
 [/startup.sh]
 ...
-
+```
 
 Now every interface in question should be able to ping any.
-```
+
 
 
 # Examples #

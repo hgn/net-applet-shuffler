@@ -7,8 +7,8 @@ def set_iw(x, arg_d):
                                                   arg_d["interface_data"],
                                                   arg_d["initcwnd"],
                                                   arg_d["initrwnd"])
-    _, _, exit_code = x.ssh.exec(arg_d["ip_control"], arg_d["host_user"],
-                                 iw_set_command)
+    exit_code = x.ssh.exec(arg_d["ip_control"], arg_d["host_user"],
+                           iw_set_command)
     if exit_code != 0:
         return False
     return True
@@ -16,7 +16,7 @@ def set_iw(x, arg_d):
 
 def main(x, conf, args):
     if not len(args) == 3:
-        x.p.msg("wrong usage. use: [host] initcwnd:[number] initrwnd:[number]"
+        x.p.err("wrong usage. use: [host] initcwnd:[number] initrwnd:[number]"
                 "\n")
         return False
 
@@ -31,7 +31,7 @@ def main(x, conf, args):
         # advertised receive congestion window
         arg_d["initrwnd"] = args[2].split(":")[1]
     except IndexError:
-        x.p.msg("error: wrong usage\n")
+        x.p.err("error: wrong usage\n")
         return False
     arg_d["host_user"] = conf.get_user(arg_d["host_name"])
     arg_d["ip_control"] = conf.get_control_ip(arg_d["host_name"])

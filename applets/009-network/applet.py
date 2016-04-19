@@ -6,7 +6,7 @@ import time
 
 from threading import Thread
 
-CONTR_NAME = "network-controller.py"
+CONT_NAME = "network-controller.py"
 LOCAL_CONT_PATH = os.path.dirname(os.path.realpath(__file__))
 REMOTE_CONT_PATH = "/tmp/net-applet-shuffler"
 TIMEOUT = 60
@@ -26,31 +26,31 @@ class ControllerStart(Thread):
 
     def run(self):
         ssh_command = "ssh {}@{} sudo python3.5 {}/{} {}".format(
-            self.host_user, self.host_ip_control, REMOTE_CONT_PATH, CONTR_NAME,
+            self.host_user, self.host_ip_control, REMOTE_CONT_PATH, CONT_NAME,
             self.arguments)
         process = subprocess.Popen(ssh_command.split(), stdout=subprocess.PIPE)
         process.communicate()
 
 
 def distribute_network_controller(x, host_user, host_ip_control):
-    _, _, exit_code = x.ssh.exec(host_ip_control, host_user, "test -f {}/{}"
-                                 .format(REMOTE_CONT_PATH, CONTR_NAME))
+    exit_code = x.ssh.exec(host_ip_control, host_user, "test -f {}/{}"
+                           .format(REMOTE_CONT_PATH, CONT_NAME))
     # if exit_code != 0 -> does not exist on host
     if not exit_code == 0:
         x.ssh.copy_to(host_user, host_ip_control, LOCAL_CONT_PATH,
-                      REMOTE_CONT_PATH, CONTR_NAME, CONTR_NAME)
+                      REMOTE_CONT_PATH, CONT_NAME, CONT_NAME)
 
 
 def main(x, conf, args):
     if not len(args) > 1:
-        x.p.msg("wrong usage. use: setup:[direct|indirect] host1 host2 "
+        x.p.err("wrong usage. use: setup:[direct|dumbbell] host1 host2 "
                 "host3...\n")
         return False
 
     try:
         setup = args[0].split(":")[1]
     except IndexError:
-        x.p.msg("error: wrong usage\n")
+        x.p.err("error: wrong usage\n")
         return False
     # arguments for controller on hosts
     host_list = list()

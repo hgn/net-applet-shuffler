@@ -24,31 +24,33 @@ def controller_thread(x, arg_d):
     # 13. ip_source_control
     # 14. ip_dest_control
     arguments_string = " ".join((arg_d["applet_id"], arg_d["name_source"],
-            arg_d["user_source"], arg_d["ip_source_data"], arg_d["port_source"],
-            arg_d["name_dest"], arg_d["user_dest"], arg_d["ip_dest_data"],
-            arg_d["port_dest"], arg_d["netserver_port"], arg_d["flow_length"],
-            arg_d["flow_offset"], arg_d["ip_source_control"],
-            arg_d["ip_dest_control"]))
+                                 arg_d["user_source"], arg_d["ip_source_data"],
+                                 arg_d["port_source"], arg_d["name_dest"],
+                                 arg_d["user_dest"], arg_d["ip_dest_data"],
+                                 arg_d["port_dest"], arg_d["netserver_port"],
+                                 arg_d["flow_length"], arg_d["flow_offset"],
+                                 arg_d["ip_source_control"],
+                                 arg_d["ip_dest_control"]))
     # check if netperf controller is already on source
-    _, _, exit_code = x.ssh.exec(arg_d["ip_source_control"],
-                                 arg_d["user_source"],
-                                 "test -f {}/netperf-controller.py"
-                                 .format(REMOTE_NET_PATH))
+    exit_code = x.ssh.exec(arg_d["ip_source_control"], arg_d["user_source"],
+                           "test -f {}/netperf-controller.py"
+                           .format(REMOTE_NET_PATH))
     # if not, copy it to source
     if not exit_code == 0:
         x.ssh.copy_to(arg_d["user_source"], arg_d["ip_source_control"],
                       LOCAL_NET_PATH, REMOTE_NET_PATH, "netperf-controller.py",
                       "netperf-controller.py")
 
-    _, _, exit_code = x.ssh.exec(arg_d["ip_source_control"],
-            arg_d["user_source"], "python3.5 {}/{} {}".format(REMOTE_NET_PATH,
-            "netperf-controller.py", arguments_string))
+    x.ssh.exec(arg_d["ip_source_control"], arg_d["user_source"],
+               "python3.5 {}/{} {}".format(REMOTE_NET_PATH,
+                                           "netperf-controller.py",
+                                           arguments_string))
 
 
 def main(x, conf, args):
 
     if not len(args) == 8:
-        x.p.msg("wrong usage. use: [name] sink:[name] id:[id] source_port:"
+        x.p.err("wrong usage. use: [name] sink:[name] id:[id] source_port:"
                 "[port] sink_port:[port] length:[bytes|seconds] "
                 "flow_offset:[seconds] netserver:[port]\n")
         return False
@@ -64,7 +66,7 @@ def main(x, conf, args):
         arg_d["flow_offset"] = args[6].split(":")[1]
         arg_d["netserver_port"] = args[7].split(":")[1]
     except IndexError:
-        x.p.msg("error: wrong usage\n")
+        x.p.err("error: wrong usage\n")
         return False
     # retrieve: source ip, source user name, destination ip, destination user
     # name

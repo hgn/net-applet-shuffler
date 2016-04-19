@@ -67,7 +67,7 @@ class NetperfController:
             self.output_redirected = False
 
     def ssh_exec(self, ip, remote_user, local_user, cmd):
-        # due to demonized root program execution, ssh uses root user parameters
+        # due to demonized root program execution, ssh uses root user params
         # use the -i identity file option for the user file
         # use the -o known_hosts file option for the same reason
         # note: for debugging purposes use: "-vvv -E /[file_path]"
@@ -164,13 +164,13 @@ class NetperfController:
         # demonize program
         self.demonize_program()
         # make sure necessary dirs exist, local and remote
-        self.execute("mkdir /tmp/net-applet-shuffler")
-        self.execute("mkdir /tmp/net-applet-shuffler/logs")
+        self.execute("mkdir -p /tmp/net-applet-shuffler")
+        self.execute("mkdir -p /tmp/net-applet-shuffler/logs")
         # redirect output to file
         self.redirect_console_output(True)
         self.ssh_exec(self.arg_d["ip_dest_control"], self.arg_d["user_dest"],
                       self.arg_d["user_source"],
-                      "mkdir /tmp/net-applet-shuffler")
+                      "mkdir -p /tmp/net-applet-shuffler")
         # write test in progress file
         # to be checked if there are ongoing transfers
         self.test_running(True)
@@ -192,7 +192,7 @@ class NetperfController:
         netperf_start_failed = True
         while amount_tries < 10:
             print(" - trying to start netperf")
-            netperf_cmd = "netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {}" \
+            netperf_cmd = "netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {}"\
                           ",{} -T TCP -4".format(self.arg_d["ip_dest_data"],
                                                  self.arg_d["ip_source_data"],
                                                  self.arg_d["netserver_port"],
