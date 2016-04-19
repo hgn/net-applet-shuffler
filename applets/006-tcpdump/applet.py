@@ -118,11 +118,11 @@ def transfer_dumpfile(x, arg_d):
     if not create_file_path(x, arg_d):
         x.p.err("error: file path could not be created\n")
         return False
-    # tcpdump process writes the dumpfile after it finishes
+    # tcpdump process run autonomously and it seems it might take some time,
+    # before the dumpfile is filled with data
     # thus, the perfect solution would be a join with the tcpdump thread
-    # here: poor mans solution (when there is a lot of workload, this might
-    # still be too small)
-    time.sleep(1)
+    # here: poor mans solution
+    time.sleep(2)
     # retrieve dump file and block until it's done
     _, _, exit_code = x.ssh.copy_from(arg_d["host_user"],
                                       arg_d["host_ip_control"],
