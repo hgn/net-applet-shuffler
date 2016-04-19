@@ -97,8 +97,15 @@ class TimeTracker:
     def _sec_to_hms(self, int_sec):
         return time.strftime("%H:%M:%S", time.gmtime(int(int_sec)))
 
+    def _elapsed_time_hms(self):
+        time_now = int(round(time.time()))
+        time_elapsed = time_now - self.CAMPAIGN_START_TIME
+        return self._sec_to_hms(time_elapsed)
+
     def get_campaign_runtime(self):
         """Public method used to get the campaign runtime.
+
+        get_campaign_runtime() -> list[string, string]
 
         Returns campaign runtime sentence string at position [0], returns
         campaign runtime string at position [1].
@@ -116,6 +123,8 @@ class TimeTracker:
 
     def get_remaining_runtime(self):
         """Public method used to get the remaining campaign runtime.
+
+        get_remaining_runtime() -> list[string, string]
 
         Returns remaining campaign runtime sentence string at position [0],
         returns remaining campaign runtime string at position [1].
@@ -140,6 +149,8 @@ class TimeTracker:
     def get_elapsed_runtime(self):
         """Public method used to get the elapsed campaign runtime.
 
+        get_elapsed_runtime() -> list[string, string]
+
         Returns elapsed campaign runtime sentence string at position [0],
         returns elapsed campaign runtime string at position [1].
         """
@@ -150,8 +161,26 @@ class TimeTracker:
                .format(elapsed_runtime_formatted), \
                elapsed_runtime_formatted
 
+    def add_poi(self, name_string):
+        """Public method used to add a poi and the time it took to reach it.
+
+        add_poi(name_string: string)
+
+        :param name_string: string
+
+        This method takes a name_string and measures the time from campaign
+        start to now. Both together create a point of interest (poi) and are
+        stored in the FILE_NAME under the campaign sha1.
+        """
+        trackfile_json = self._load_track_file_as_json()
+        trackfile_json.update({self.CAMPAIGN_SHA1:
+                                   [{name_string: self._elapsed_time_hms()}]})
+        self._save_track_file_as_json(trackfile_json)
+
     def update_campaign_runtime(self):
         """Update the campaign runtime estimate.
+
+        update_campaign_runtime() -> list[string, string]
 
         Public method used to save and store the campaign runtime. Returns the
         campaign runtime sentence string at position [0], returns the campaign

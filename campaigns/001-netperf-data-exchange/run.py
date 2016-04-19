@@ -78,6 +78,8 @@ def main(x):
     # usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
     x.exec('006-tcpdump beta id:0001 mode:start filter:"tcp and dst port 30000"')
 
+    tt.add_poi("before_test")
+
     # netperf
     # start netperf sink, connect to it from host (source) and start a transfer
     # notes:
@@ -102,6 +104,8 @@ def main(x):
     # - one host can have several running ids, but one (unique) id can have only one host
     # usage: interval_time:[seconds] [name_1]:[id_1] [name_1]:[id_2] [name_2]:[id_3] ...
     x.exec('008-wait-for-id-completion interval_time:5 alpha:0002 beta:0003')
+
+    tt.add_poi("after_test")
 
     # tcpdump
     # stop tcpdump on host, which also collects the dumpfile
