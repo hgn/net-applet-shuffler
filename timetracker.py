@@ -1,10 +1,4 @@
-"""timetracker.py
-
-<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
-Email: Daniel Metz <dmetz@mytum.de>
-=======
->>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
-Module for keeping track of the estimated time a campaign requires to be run.
+"""Module for keeping track of the estimated runtime of a campaign.
 
 Use at the beginning of a campaign:
 tt = timetracker.TimeTracker("[campaign_name]")
@@ -36,21 +30,16 @@ class TimeTracker:
     ESTIMATE_AVAILABLE = False
     FILE_NAME = "times.json"
 
-    """Create TimeTracker instance
-
-    Needs the campaign name.
-    Will do nothing if the campaign name is wrong.
-    """
     def __init__(self, campaign_name):
+        """Creates TimeTracker instance.
+
+        Needs the campaign name. Will do nothing if the campaign name is wrong.
+        """
         # set campaign name
         self.CAMPAIGN_NAME = campaign_name
         self.file_dir = os.path.dirname(__file__)
         # set trackfile.json path
-<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
         self.trackfile_path = os.path.join(self.file_dir, self.FILE_NAME)
-=======
-        self.file_path = os.path.join(self.file_dir, self.FILE_NAME)
->>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
         # create trackfile if there is none
         self._handle_track_file()
         # create sha1 from campaign
@@ -71,11 +60,7 @@ class TimeTracker:
             self.CAMPAIGN_FOUND = False
 
     def _handle_track_file(self):
-<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
         if not os.path.exists(self.trackfile_path):
-=======
-        if not os.path.exists(self.file_path):
->>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
             file = open(self.FILE_NAME, "w")
             file.write("{\n}")
             file.close()
@@ -88,21 +73,13 @@ class TimeTracker:
         return False
 
     def _load_track_file_as_json(self):
-<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
         file = open(self.trackfile_path, "r")
-=======
-        file = open(self.file_path, "r")
->>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
         trackfile_str = file.read()
         file.close()
         return json.loads(trackfile_str)
 
     def _save_track_file_as_json(self, trackfile_string):
-<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
         file = open(self.trackfile_path, "w")
-=======
-        file = open(self.file_path, "w")
->>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
         file.write(json.dumps(trackfile_string, indent=4))
         file.close()
 
@@ -113,22 +90,19 @@ class TimeTracker:
                                      "campaign_name": self.CAMPAIGN_NAME}]})
         self._save_track_file_as_json(trackfile_json)
 
-<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
     def _hms_to_int(self, hms_string):
-=======
-    def _convert_hms_to_int(self, hms_string):
->>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
         hms_list = hms_string.split(":")
         return int(hms_list[0]) * 3600 + int(hms_list[1]) * 60 + int(hms_list[2])
 
     def _sec_to_hms(self, int_sec):
         return time.strftime("%H:%M:%S", time.gmtime(int(int_sec)))
 
-    """Return campaign runtime sentence string, return campaign runtime string
-
-    Public method used to get the campaign runtime.
-    """
     def get_campaign_runtime(self):
+        """Public method used to get the campaign runtime.
+
+        Returns campaign runtime sentence string at position [0], returns campaign
+        runtime string at position [1].
+        """
         if not self.CAMPAIGN_FOUND:
             return "\nerror: wrong campaign path/name\n"
         trackfile_json = self._load_track_file_as_json()
@@ -140,27 +114,21 @@ class TimeTracker:
         else:
             return "Estimated campaign runtime: not available", "not available"
 
-    """Return remaining campaign runtime sentence string,
-    return remaining campaign runtime string
-
-    Public method used to get the remaining campaign runtime.
-    """
     def get_remaining_runtime(self):
+        """Public method used to get the remaining campaign runtime.
+
+        Returns remaining campaign runtime sentence string at position [0], returns
+        remaining campaign runtime string at position [1].
+        """
         if not self.CAMPAIGN_FOUND:
             return "\nerror: wrong campaign path/name\n", \
                    "\nerror: wrong campaign path/name\n"
         if not self.ESTIMATE_AVAILABLE:
             return "Estimated remaining campaign runtime: unavailable", "-1"
         _, expected_runtime = self.get_campaign_runtime()
-<<<<<<< c8acab6738f96ed53e7ec6a63615a2f6f167f292
         expected_runtime_seconds = self._hms_to_int(expected_runtime)
         _, elapsed_time = self.get_elapsed_runtime()
         elapsed_time_seconds = self._hms_to_int(elapsed_time)
-=======
-        expected_runtime_seconds = self._convert_hms_to_int(expected_runtime)
-        _, elapsed_time = self.get_elapsed_runtime()
-        elapsed_time_seconds = self._convert_hms_to_int(elapsed_time)
->>>>>>> adding timetracker module to allow for campaign time display and more fancy stuff
         remaining_runtime = expected_runtime_seconds - elapsed_time_seconds
         if remaining_runtime < 0:
             return "Estimated remaining campaign runtime: unavailable", "-1"
@@ -169,12 +137,12 @@ class TimeTracker:
                .format(remaining_runtime_formatted), \
                remaining_runtime_formatted
 
-    """Return elapsed campaign runtime sentence string,
-    return elapsed campaign runtime string
-
-    Public method used to get the elapsed campaign runtime.
-    """
     def get_elapsed_runtime(self):
+        """Public method used to get the elapsed campaign runtime.
+
+        Returns elapsed campaign runtime sentence string at position [0], returns
+        elapsed campaign runtime string at position [1].
+        """
         time_now = int(round(time.time()))
         time_elapsed = time_now - self.CAMPAIGN_START_TIME
         elapsed_runtime_formatted = self._sec_to_hms(time_elapsed)
@@ -182,13 +150,13 @@ class TimeTracker:
                .format(elapsed_runtime_formatted), \
                elapsed_runtime_formatted
 
-    """Return the campaign runtime sentence string,
-    return the campaign runtime string
-
-    Update the campaign runtime estimate
-    Public method used to save and store the campaign runtime.
-    """
     def update_campaign_runtime(self):
+        """Update the campaign runtime estimate.
+
+        Public method used to save and store the campaign runtime. Returns the
+        campaign runtime sentence string at position [0], returns the campaign
+        runtime string at position [1].
+        """
         if not self.CAMPAIGN_FOUND:
             return "\nerror: wrong campaign path/name\n", \
                    "\nerror: wrong campaign path/name\n"
