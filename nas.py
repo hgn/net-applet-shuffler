@@ -15,6 +15,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 __program__ = "net-applet-shuffler"
 __version__ = "1"
+REQUIRED_PYTHON_VERSION = "3.5"
 
 
 class Printer:
@@ -530,8 +531,37 @@ class NetAppletShuffler:
         return 0
 
 
+def python_version_check():
+    python_version_major = sys.version_info[0]
+    python_version_minor = sys.version_info[1]
+    required_major = int(REQUIRED_PYTHON_VERSION.split(".")[0])
+    required_minor = 0
+    try:
+        required_minor = int(REQUIRED_PYTHON_VERSION.split(".")[1])
+    except IndexError:
+        pass
+    if python_version_major < required_major:
+        sys.stderr.write(" python version used: {}.{}\n"
+                         .format(python_version_major, python_version_minor))
+        sys.stderr.write(" python version required: {}.{}\n"
+                         .format(required_major, required_minor))
+        sys.stderr.write(" please try again with the required version or "
+                         "higher\n")
+        sys.exit(0)
+    elif python_version_major >= required_major and python_version_minor < \
+            required_minor:
+        sys.stderr.write(" python version used: {}.{}\n"
+                         .format(python_version_major, python_version_minor))
+        sys.stderr.write(" python version required: {}.{}\n"
+                         .format(required_major, required_minor))
+        sys.stderr.write(" please try again with the required version or "
+                         "higher\n")
+        sys.exit(0)
+
+
 if __name__ == "__main__":
     try:
+        python_version_check()
         mca = NetAppletShuffler()
         sys.exit(mca.run())
     except KeyboardInterrupt:
