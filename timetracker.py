@@ -116,11 +116,14 @@ class TimeTracker:
             trackfile_json.update({self.CAMPAIGN_SHA1: [self.POI_DICT]})
         self._save_track_file_as_json(trackfile_json)
 
-    def _hms_to_int(self, hms_string):
+    @ staticmethod
+    def _hms_to_int(hms_string):
         hms_list = hms_string.split(":")
-        return int(hms_list[0]) * 3600 + int(hms_list[1]) * 60 + int(hms_list[2])
+        return int(hms_list[0]) * 3600 + int(hms_list[1]) * 60 \
+                                       + int(hms_list[2])
 
-    def _sec_to_hms(self, int_sec):
+    @ staticmethod
+    def _sec_to_hms(int_sec):
         return time.strftime("%H:%M:%S", time.gmtime(int(int_sec)))
 
     def _elapsed_time_hms(self):
@@ -133,6 +136,8 @@ class TimeTracker:
 
         get_campaign_runtime() -> list[string, string]
 
+        :return list[string, string]
+
         Returns campaign runtime sentence string at position [0], returns
         campaign runtime string at position [1].
         """
@@ -140,10 +145,10 @@ class TimeTracker:
             return "\nerror: wrong campaign path/name\n"
         trackfile_json = self._load_track_file_as_json()
         if self._campaign_runtime_available(trackfile_json):
-            time_formatted = trackfile_json[self.CAMPAIGN_SHA1][0]["length"]
+            time_hms = trackfile_json[self.CAMPAIGN_SHA1][0]["length"]
             self.ESTIMATE_AVAILABLE = True
-            return "Estimated campaign runtime: {}".format(time_formatted), \
-                   time_formatted
+            return "Estimated campaign runtime: {}".format(time_hms), \
+                   time_hms
         else:
             return "Estimated campaign runtime: not available", "not available"
 
@@ -151,6 +156,8 @@ class TimeTracker:
         """Public method used to get the remaining campaign runtime.
 
         get_remaining_runtime() -> list[string, string]
+
+        :return list[string, string]
 
         Returns remaining campaign runtime sentence string at position [0],
         returns remaining campaign runtime string at position [1].
@@ -167,15 +174,17 @@ class TimeTracker:
         remaining_runtime = expected_runtime_seconds - elapsed_time_seconds
         if remaining_runtime < 0:
             return "Estimated remaining campaign runtime: unavailable", "-1"
-        remaining_runtime_formatted = self._sec_to_hms(remaining_runtime)
+        remaining_runtime_hms = self._sec_to_hms(remaining_runtime)
         return "Estimated remaining campaign runtime: {}"\
-               .format(remaining_runtime_formatted), \
-               remaining_runtime_formatted
+               .format(remaining_runtime_hms), \
+               remaining_runtime_hms
 
     def get_elapsed_runtime(self):
         """Public method used to get the elapsed campaign runtime.
 
         get_elapsed_runtime() -> list[string, string]
+
+        :return list[string, string]
 
         Returns elapsed campaign runtime sentence string at position [0],
         returns elapsed campaign runtime string at position [1].
@@ -193,7 +202,8 @@ class TimeTracker:
 
         This method takes a name_string and measures the time from campaign
         start to now. Both together create a point of interest (poi) and are
-        stored in the FILE_NAME under the campaign sha1.
+        stored in the FILE_NAME under the campaign sha1. The strings "length"
+        and "campaign_name" are reserved and will be overwritten.
         """
         self.POI_DICT[name_string] = self._elapsed_time_hms()
 
@@ -201,6 +211,8 @@ class TimeTracker:
         """Update the campaign runtime estimate.
 
         update_campaign_runtime() -> list[string, string]
+
+        :return list[string, string]
 
         Public method used to save and store the campaign runtime. Returns the
         campaign runtime sentence string at position [0], returns the campaign

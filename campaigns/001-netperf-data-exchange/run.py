@@ -27,6 +27,8 @@ def main(x):
     # also sets up basic routing (default gateways)
     x.exec('009-network setup:dumbbell alpha beta')
 
+    tt.add_poi("alive-kill-network_time")
+
     # save syscall, no-op when already done
     x.exec('002-save-sysctls alpha')
     x.exec('002-save-sysctls beta')
@@ -79,7 +81,7 @@ def main(x):
     # usage: host id:[string] mode:[start|stop] local-file-name:"path_and_filename" filter:"tcpdump filter string"
     x.exec('006-tcpdump beta id:0001 mode:start filter:"tcp and dst port 30000"')
 
-    tt.add_poi("before_test")
+    tt.add_poi("setup_time")
 
     # netperf
     # start netperf sink, connect to it from host (source) and start a transfer
@@ -103,7 +105,7 @@ def main(x):
     # usage: interval_time:[seconds] [name_1]:[id_1] [name_1]:[id_2] [name_2]:[id_3] ...
     x.exec('008-wait-for-id-completion interval_time:5 alpha:0002 beta:0003')
 
-    tt.add_poi("after_test")
+    tt.add_poi("test_completion_time")
 
     # tcpdump
     # stop tcpdump on host, which also collects the dumpfile
