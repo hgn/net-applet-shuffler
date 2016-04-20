@@ -7,12 +7,13 @@ print(tt.get_campaign_runtime()[0])
 Use while campaign:
 print(tt.get_elapsed_runtime()[0])
 print(tt.get_remaining_runtime()[0])
+tt.add_poi('test_setup_time')
 
 And at the end of a campaign:
 print(tt.update_campaign_runtime()[0])
 
-Alternatively, the public methods from above return the pure time at position
-[1].
+Alternatively, the public methods from above return the pure time at list
+position [1].
 """
 
 import hashlib
