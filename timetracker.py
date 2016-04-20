@@ -7,12 +7,13 @@ print(tt.get_campaign_runtime()[0])
 Use while campaign:
 print(tt.get_elapsed_runtime()[0])
 print(tt.get_remaining_runtime()[0])
+tt.add_poi('test_setup_time')
 
 And at the end of a campaign:
 print(tt.update_campaign_runtime()[0])
 
-Alternatively, the public methods from above hold the pure time at position
-[1].
+Alternatively, the public methods from above return the pure time at list
+position [1].
 """
 
 import hashlib
@@ -29,6 +30,7 @@ class TimeTracker:
     CAMPAIGN_START_TIME = int()
     ESTIMATE_AVAILABLE = False
     FILE_NAME = "times.json"
+    POI_DICT = dict()
 
     def __init__(self, campaign_name):
         """Creates TimeTracker instance.
@@ -66,10 +68,14 @@ class TimeTracker:
             file.close()
             return
 
-    def _info_available(self, parsed_json):
+    def _campaign_runtime_available(self, parsed_json):
         for sha1 in parsed_json:
             if sha1 == self.CAMPAIGN_SHA1:
-                return True
+                try:
+                    if parsed_json[sha1][0]["length"]:
+                        return True
+                except KeyError:
+                    return False
         return False
 
     def _load_track_file_as_json(self):
@@ -83,18 +89,42 @@ class TimeTracker:
         file.write(json.dumps(trackfile_string, indent=4))
         file.close()
 
-    def _set_campaign_runtime(self, time_seconds):
+    def _set_campaign_runtime(self, time_hms):
         trackfile_json = self._load_track_file_as_json()
-        trackfile_json.update({self.CAMPAIGN_SHA1:
-                                   [{"length": str(time_seconds),
-                                     "campaign_name": self.CAMPAIGN_NAME}]})
+        trackfile_updated = False
+        # case 1: trackfile contains sha1 and corresponding time
+        # -> old pois should be preserved
+        try:
+            campaign_entry = trackfile_json[self.CAMPAIGN_SHA1][0]
+            if campaign_entry["length"]:
+                for entry in campaign_entry:
+                    # preserve all previous entries except for length and
+                    # campaign name, and override if newer information is
+                    # available
+                    if entry != "length" and entry != "campaign_name":
+                        self.POI_DICT[entry] = campaign_entry[entry]
+                self.POI_DICT["length"] = time_hms
+                self.POI_DICT["campaign_name"] = self.CAMPAIGN_NAME
+                trackfile_json.update({self.CAMPAIGN_SHA1: [self.POI_DICT]})
+                trackfile_updated = True
+        # key not found in dict
+        except KeyError:
+            pass
+        # case 2: trackfile is empty or no length is set
+        if not trackfile_updated:
+            self.POI_DICT["length"] = time_hms
+            self.POI_DICT["campaign_name"] = self.CAMPAIGN_NAME
+            trackfile_json.update({self.CAMPAIGN_SHA1: [self.POI_DICT]})
         self._save_track_file_as_json(trackfile_json)
 
-    def _hms_to_int(self, hms_string):
+    @ staticmethod
+    def _hms_to_int(hms_string):
         hms_list = hms_string.split(":")
-        return int(hms_list[0]) * 3600 + int(hms_list[1]) * 60 + int(hms_list[2])
+        return int(hms_list[0]) * 3600 + int(hms_list[1]) * 60 \
+                                       + int(hms_list[2])
 
-    def _sec_to_hms(self, int_sec):
+    @ staticmethod
+    def _sec_to_hms(int_sec):
         return time.strftime("%H:%M:%S", time.gmtime(int(int_sec)))
 
     def _elapsed_time_hms(self):
@@ -107,17 +137,19 @@ class TimeTracker:
 
         get_campaign_runtime() -> list[string, string]
 
+        :return list[string, string]
+
         Returns campaign runtime sentence string at position [0], returns
         campaign runtime string at position [1].
         """
         if not self.CAMPAIGN_FOUND:
             return "\nerror: wrong campaign path/name\n"
         trackfile_json = self._load_track_file_as_json()
-        if self._info_available(trackfile_json):
-            time_formatted = trackfile_json[self.CAMPAIGN_SHA1][0]["length"]
+        if self._campaign_runtime_available(trackfile_json):
+            time_hms = trackfile_json[self.CAMPAIGN_SHA1][0]["length"]
             self.ESTIMATE_AVAILABLE = True
-            return "Estimated campaign runtime: {}".format(time_formatted), \
-                   time_formatted
+            return "Estimated campaign runtime: {}".format(time_hms), \
+                   time_hms
         else:
             return "Estimated campaign runtime: not available", "not available"
 
@@ -125,6 +157,8 @@ class TimeTracker:
         """Public method used to get the remaining campaign runtime.
 
         get_remaining_runtime() -> list[string, string]
+
+        :return list[string, string]
 
         Returns remaining campaign runtime sentence string at position [0],
         returns remaining campaign runtime string at position [1].
@@ -141,25 +175,24 @@ class TimeTracker:
         remaining_runtime = expected_runtime_seconds - elapsed_time_seconds
         if remaining_runtime < 0:
             return "Estimated remaining campaign runtime: unavailable", "-1"
-        remaining_runtime_formatted = self._sec_to_hms(remaining_runtime)
+        remaining_runtime_hms = self._sec_to_hms(remaining_runtime)
         return "Estimated remaining campaign runtime: {}"\
-               .format(remaining_runtime_formatted), \
-               remaining_runtime_formatted
+               .format(remaining_runtime_hms), \
+               remaining_runtime_hms
 
     def get_elapsed_runtime(self):
         """Public method used to get the elapsed campaign runtime.
 
         get_elapsed_runtime() -> list[string, string]
 
+        :return list[string, string]
+
         Returns elapsed campaign runtime sentence string at position [0],
         returns elapsed campaign runtime string at position [1].
         """
-        time_now = int(round(time.time()))
-        time_elapsed = time_now - self.CAMPAIGN_START_TIME
-        elapsed_runtime_formatted = self._sec_to_hms(time_elapsed)
-        return "Elapsed campaign runtime: {}"\
-               .format(elapsed_runtime_formatted), \
-               elapsed_runtime_formatted
+        elapsed_time_hms = self._elapsed_time_hms()
+        return "Elapsed campaign runtime: {}".format(elapsed_time_hms), \
+               elapsed_time_hms
 
     def add_poi(self, name_string):
         """Public method used to add a poi and the time it took to reach it.
@@ -170,17 +203,17 @@ class TimeTracker:
 
         This method takes a name_string and measures the time from campaign
         start to now. Both together create a point of interest (poi) and are
-        stored in the FILE_NAME under the campaign sha1.
+        stored in the FILE_NAME under the campaign sha1. The strings "length"
+        and "campaign_name" are reserved and will be overwritten.
         """
-        trackfile_json = self._load_track_file_as_json()
-        trackfile_json.update({self.CAMPAIGN_SHA1:
-                                   [{name_string: self._elapsed_time_hms()}]})
-        self._save_track_file_as_json(trackfile_json)
+        self.POI_DICT[name_string] = self._elapsed_time_hms()
 
     def update_campaign_runtime(self):
         """Update the campaign runtime estimate.
 
         update_campaign_runtime() -> list[string, string]
+
+        :return list[string, string]
 
         Public method used to save and store the campaign runtime. Returns the
         campaign runtime sentence string at position [0], returns the campaign
@@ -189,8 +222,7 @@ class TimeTracker:
         if not self.CAMPAIGN_FOUND:
             return "\nerror: wrong campaign path/name\n", \
                    "\nerror: wrong campaign path/name\n"
-        time_now = int(round(time.time()))
-        time_elapsed = time_now - self.CAMPAIGN_START_TIME
-        time_converted = self._sec_to_hms(time_elapsed)
-        self._set_campaign_runtime(time_converted)
-        return "Campaign runtime: {}".format(time_converted), time_converted
+        elapsed_time_hms = self._elapsed_time_hms()
+        self._set_campaign_runtime(elapsed_time_hms)
+        return "Campaign runtime: {}".format(elapsed_time_hms), \
+               elapsed_time_hms
