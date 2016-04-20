@@ -11,7 +11,7 @@ print(tt.get_remaining_runtime()[0])
 And at the end of a campaign:
 print(tt.update_campaign_runtime()[0])
 
-Alternatively, the public methods from above hold the pure time at position
+Alternatively, the public methods from above return the pure time at position
 [1].
 """
 
