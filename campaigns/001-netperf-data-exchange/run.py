@@ -57,8 +57,8 @@ def main(x):
     # tcp iw
     # usage: [host] initcwnd:[number] initrwnd:[number]
     # restoration is covered by 009-network
-    x.exec('101-tcp-iw alpha initcwnd:20 initrwnd:20')
-    x.exec('101-tcp-iw beta initcwnd:20 initrwnd:20')
+    x.exec('101-ip-options alpha initcwnd:20 initrwnd:20')
+    x.exec('101-ip-options beta initcwnd:20 initrwnd:20')
 
     # tcp route metrics save
     # usage: [host] route-metrics-save:[enabled|disabled]

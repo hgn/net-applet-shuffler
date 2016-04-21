@@ -46,8 +46,8 @@ def main(x):
         #x.exec('104-netem-cmd koppa control:partial change:add to-network:red command:"rate 10kbit"')
         #x.exec('104-netem-cmd koppa control:partial change:add to-network:blue command:"rate 10kbit"')
 
-        x.exec('101-tcp-iw alpha initcwnd:{} initrwnd:20'.format(iw_value))
-        x.exec('101-tcp-iw beta initcwnd:{} initrwnd:20'.format(iw_value))
+        x.exec('101-ip-options alpha initcwnd:{} initrwnd:{}'.format(iw_value, iw_value))
+        x.exec('101-ip-options beta initcwnd:{} initrwnd:{}'.format(iw_value, iw_value))
 
         x.exec('006-tcpdump alpha id:20 mode:start filter:"tcp and port 30000"')
 
@@ -85,8 +85,8 @@ def main(x):
         #x.exec('104-netem-cmd koppa control:partial change:add to-network:red command:"rate 10kbit"')
         #x.exec('104-netem-cmd koppa control:partial change:add to-network:blue command:"rate 10kbit"')
 
-        x.exec('101-tcp-iw alpha initcwnd:{} initrwnd:20'.format(iw_value))
-        x.exec('101-tcp-iw beta initcwnd:{} initrwnd:20'.format(iw_value))
+        x.exec('101-ip-options alpha initcwnd:{} initrwnd:{}'.format(iw_value, iw_value))
+        x.exec('101-ip-options beta initcwnd:{} initrwnd:{}'.format(iw_value, iw_value))
 
         x.exec('006-tcpdump alpha id:20 mode:start filter:"tcp and port 30000"')
 
