@@ -1,5 +1,6 @@
 
 import subprocess
+import sys
 import time
 
 
@@ -44,10 +45,17 @@ def main(x, conf, args):
     except IndexError:
         x.p.err("error: wrong usage\n")
         return False
+    # non-verbose output
+    if not x.verbose:
+        sys.stdout.write(" ")
     # iter through all dict entries, and test them one in an interval
     # remove items which are not running anymore
     # when the dict is empty, all processes are finished
     while len(ent_d) > 0:
+        # non-verbose output
+        if not x.verbose:
+            sys.stdout.write(".")
+            sys.stdout.flush()
         if intervals_waited > 0:
             x.p.msg("{} interval(s) waited...\n".format(str(intervals_waited)))
         time.sleep(interval_time)
@@ -66,4 +74,7 @@ def main(x, conf, args):
             ent_d.pop(entry)
         intervals_waited += 1
 
+    # non-verbose output
+    if not x.verbose:
+        sys.stdout.write("\n")
     return True
