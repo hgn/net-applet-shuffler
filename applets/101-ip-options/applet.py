@@ -18,6 +18,9 @@ Hints:
 
 
 def print_usage(x):
+    x.p.msg("\n 101-ip-options:\n", False)
+    x.p.msg(" applet for setting ip options: tcp windows, tcp quickack\n",
+            False)
     x.p.msg("\n usage:\n", False)
     x.p.msg(" - exec 101-ip-options [host] [initcwnd:[number]] "
             "[initrwnd:[number]] [quickack:[on|off]]\n", False)
