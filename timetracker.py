@@ -207,7 +207,7 @@ class TimeTracker:
         start to now. Both together create a point of interest (poi) and are
         stored in the FILE_NAME under the campaign sha1. The strings "length"
         and "campaign_name" are reserved and will be overwritten.
-        The created poi will also be returned as string.
+        The created poi is also returned as string.
         """
         elapsed_time_hms = self._elapsed_time_hms()
         self.POI_DICT[name_string] = elapsed_time_hms
