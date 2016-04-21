@@ -55,6 +55,7 @@ def main(x, conf, args):
         # non-verbose output
         if not x.verbose:
             sys.stdout.write(".")
+            sys.stdout.flush()
         if intervals_waited > 0:
             x.p.msg("{} interval(s) waited...\n".format(str(intervals_waited)))
         time.sleep(interval_time)
