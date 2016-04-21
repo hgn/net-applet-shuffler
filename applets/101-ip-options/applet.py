@@ -23,8 +23,10 @@ def print_usage(x):
             "[initrwnd:[number]] [quickack:[on|off]]\n", False)
     x.p.msg("\n check success:\n", False)
     x.p.msg(" - ip r s\n", False)
-    x.p.msg("\nexample:\n", False)
-    x.p.msg(" - exec-applet 101-ip-options beta initcwnd:12 quickack:on\n\n",
+    x.p.msg("\n examples:\n", False)
+    x.p.msg(" - exec-applet 101-ip-options alpha initcwnd:12 initrwnd:12 "
+            "quickack:on\n", False)
+    x.p.msg(" - exec-applet 101-ip-options beta quickack:on initcwnd:12\n\n",
             False)
 
 
