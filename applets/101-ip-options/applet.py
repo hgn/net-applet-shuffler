@@ -24,7 +24,7 @@ def print_usage(x):
     x.p.msg("\n check success:\n", False)
     x.p.msg(" - ip r s\n", False)
     x.p.msg("\nexample:\n", False)
-    x.p.msg(" - exec-applet 101-ip-options beta initcwnd:12 quickack:on\n",
+    x.p.msg(" - exec-applet 101-ip-options beta initcwnd:12 quickack:on\n\n",
             False)
 
 
