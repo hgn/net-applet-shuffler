@@ -120,6 +120,8 @@ class Ssh:
 
 class Exchange:
 
+    verbose = False
+
     def __init__(self):
         self.ssh = Ssh()
 
@@ -305,6 +307,7 @@ class AppletExecuter:
             return False
         self.import_applet_module()
         xchange = Exchange()
+        xchange.verbose = self.verbose
         xchange.p = self.p
         # the status is used later for campaigns:
         # if the status is false the campaign must be
@@ -411,6 +414,7 @@ class CampaignExecuter:
         self.import_campaign_module()
         # ssh class and ping
         xchange = Exchange()
+        xchange.verbose = self.verbose
         # printer (p.msg)
         xchange.p = self.p
         # applet name and args, creates AppletExecuter() and calls its run
