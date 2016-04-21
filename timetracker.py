@@ -201,12 +201,17 @@ class TimeTracker:
 
         :param name_string: string
 
+        :return string
+
         This method takes a name_string and measures the time from campaign
         start to now. Both together create a point of interest (poi) and are
         stored in the FILE_NAME under the campaign sha1. The strings "length"
         and "campaign_name" are reserved and will be overwritten.
+        The created poi will also be returned as string.
         """
-        self.POI_DICT[name_string] = self._elapsed_time_hms()
+        elapsed_time_hms = self._elapsed_time_hms()
+        self.POI_DICT[name_string] = elapsed_time_hms
+        return name_string + " : " + elapsed_time_hms
 
     def update_campaign_runtime(self):
         """Update the campaign runtime estimate.
