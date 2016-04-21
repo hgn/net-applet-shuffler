@@ -547,19 +547,17 @@ def python_version_check():
     if python_version_major < required_major:
         sys.stderr.write(" python version used: {}.{}\n"
                          .format(python_version_major, python_version_minor))
-        sys.stderr.write(" python version required: {}.{}\n"
+        sys.stderr.write(" python version required: >={}.{}\n"
                          .format(required_major, required_minor))
-        sys.stderr.write(" please try again with the required version or "
-                         "higher\n")
+        sys.stderr.write(" please try again with the required version\n")
         sys.exit(0)
     elif python_version_major >= required_major and python_version_minor < \
             required_minor:
         sys.stderr.write(" python version used: {}.{}\n"
                          .format(python_version_major, python_version_minor))
-        sys.stderr.write(" python version required: {}.{}\n"
+        sys.stderr.write(" python version required: >={}.{}\n"
                          .format(required_major, required_minor))
-        sys.stderr.write(" please try again with the required version or "
-                         "higher\n")
+        sys.stderr.write(" please try again with the required version\n")
         sys.exit(0)
 
 
