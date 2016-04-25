@@ -18,6 +18,7 @@ Hints:
 - if ip options are missing, they probably should be added here
 - [time] can be in sec and ms e.g. (1s, 200ms, 0.5ms -> 1ms)
 - restoration is covered by 009-network or by setting the device down
+- min_rto adjustments do not affect ongoing open connections
 """
 
 
