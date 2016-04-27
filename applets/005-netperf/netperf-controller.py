@@ -184,6 +184,7 @@ class NetperfController:
         # try 10 times, since due to network congestion tries might be
         # here, traffic flows from source to destination (program runner is
         # source)
+        # note: there is not really a way to transfer x amount of bytes
         # netperf -H [dest_ip],[ipv4] -L [source_ip],[ipv4] -p [
         # netserver_control_port] -l [flow_length: bytes(<0) or seconds(>0)] -s
         # [seconds_to_wait_before_test] -- -P [port_source],[port_dest] -T [
