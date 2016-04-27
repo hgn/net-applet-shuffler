@@ -1,5 +1,6 @@
 
 import os
+import time
 
 from threading import Thread
 
@@ -84,5 +85,6 @@ def main(x, conf, args):
     contr_thread = Thread(target=controller_thread, args=(x, arg_d, ))
     contr_thread.daemon = True
     contr_thread.start()
-
+    time.sleep(1)
+    
     return True
