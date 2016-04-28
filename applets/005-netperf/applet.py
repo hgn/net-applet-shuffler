@@ -6,6 +6,8 @@ from threading import Thread
 
 LOCAL_NET_PATH = os.path.dirname(os.path.realpath(__file__))
 REMOTE_NET_PATH = "/tmp/net-applet-shuffler"
+# fix for exec-applet
+CONTROLLER_STARTED = False
 
 
 def controller_thread(x, arg_d):
@@ -46,6 +48,8 @@ def controller_thread(x, arg_d):
                "python3.5 {}/{} {}".format(REMOTE_NET_PATH,
                                            "netperf-controller.py",
                                            arguments_string))
+    global CONTROLLER_STARTED
+    CONTROLLER_STARTED = True
 
 
 def main(x, conf, args):
@@ -85,6 +89,7 @@ def main(x, conf, args):
     contr_thread = Thread(target=controller_thread, args=(x, arg_d, ))
     contr_thread.daemon = True
     contr_thread.start()
-    time.sleep(1)
+    while not CONTROLLER_STARTED:
+        time.sleep(1)
     
     return True
