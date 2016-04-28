@@ -16,6 +16,7 @@ Alternatively, the public methods from above return the pure time at list
 position [1].
 """
 
+import datetime
 import hashlib
 import json
 import os
@@ -98,12 +99,15 @@ class TimeTracker:
             campaign_entry = trackfile_json[self.CAMPAIGN_SHA1][0]
             if campaign_entry["length"]:
                 for entry in campaign_entry:
-                    # preserve all previous entries except for length and
-                    # campaign name, and override if newer information is
-                    # available
-                    if entry != "length" and entry != "campaign_name":
+                    # preserve all previous entries except for length,
+                    # campaign name and execution date, and override if newer
+                    # information is available
+                    if entry != "length" and entry != "campaign_name" \
+                            and entry != "execution_date":
                         self.POI_DICT[entry] = campaign_entry[entry]
                 self.POI_DICT["length"] = time_hms
+                self.POI_DICT["execution_date"] = datetime.datetime.today()\
+                    .strftime("%y-%m-%d %H:%M:%S")
                 self.POI_DICT["campaign_name"] = self.CAMPAIGN_NAME
                 trackfile_json.update({self.CAMPAIGN_SHA1: [self.POI_DICT]})
                 trackfile_updated = True
@@ -113,6 +117,8 @@ class TimeTracker:
         # case 2: trackfile is empty or no length is set
         if not trackfile_updated:
             self.POI_DICT["length"] = time_hms
+            self.POI_DICT["execution_date"] = datetime.datetime.today()\
+                .strftime("%y-%m-%d %H:%M:%S")
             self.POI_DICT["campaign_name"] = self.CAMPAIGN_NAME
             trackfile_json.update({self.CAMPAIGN_SHA1: [self.POI_DICT]})
         self._save_track_file_as_json(trackfile_json)
