@@ -152,10 +152,10 @@ class NetperfController:
                 # while the following file exists, there is a ongoing transfer
                 if starting:
                     self.execute("touch /tmp/net-applet-shuffler/running_{}"
-                              .format(self.arg_d["applet_id"]))
+                                 .format(self.arg_d["applet_id"]))
                 if not starting:
                     self.execute("rm /tmp/net-applet-shuffler/running_{}"
-                              .format(self.arg_d["applet_id"]))
+                                 .format(self.arg_d["applet_id"]))
                 return True
             except subprocess.SubprocessError:
                 pass
@@ -179,28 +179,29 @@ class NetperfController:
         # return false if netserver could not be started
         if not netserver_started:
             sys.exit(2)
-        # start netperf as blocking process (note, this is an independent
+        # - start netperf as blocking process (note, this is an independent
         # thread)
-        # try 10 times, since due to network congestion tries might be
-        # here, traffic flows from source to destination (program runner is
+        # - try 10 times, since due to network congestion tries might be lost
+        # - here, traffic flows from source to destination (program runner is
         # source)
-        # note: there is not really a way to transfer x amount of bytes
-        # netperf -H [dest_ip],[ipv4] -L [source_ip],[ipv4] -p [
+        # - note: there is not really a way to transfer x amount of bytes
+        # - netperf -H [dest_ip],[ipv4] -L [source_ip],[ipv4] -p [
         # netserver_control_port] -l [flow_length: bytes(<0) or seconds(>0)] -s
         # [seconds_to_wait_before_test] -- -P [port_source],[port_dest] -T [
-        # protocol] -4
+        # protocol] -4 -m [packet_send_size: bytes] 1500
         amount_tries = 0
         netperf_start_failed = True
         while amount_tries < 10:
             print(" - trying to start netperf")
             netperf_cmd = "netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {}"\
-                          ",{} -T TCP -4".format(self.arg_d["ip_dest_data"],
-                                                 self.arg_d["ip_source_data"],
-                                                 self.arg_d["netserver_port"],
-                                                 self.arg_d["test_length"],
-                                                 self.arg_d["flow_offset"],
-                                                 self.arg_d["port_source"],
-                                                 self.arg_d["port_dest"])
+                          ",{} -T TCP -4 -m 1500"\
+                          .format(self.arg_d["ip_dest_data"],
+                                  self.arg_d["ip_source_data"],
+                                  self.arg_d["netserver_port"],
+                                  self.arg_d["test_length"],
+                                  self.arg_d["flow_offset"],
+                                  self.arg_d["port_source"],
+                                  self.arg_d["port_dest"])
             _, _, exit_code = self.execute(netperf_cmd)
             if exit_code == 0:
                 netperf_start_failed = False
@@ -211,13 +212,13 @@ class NetperfController:
             print("error: netperf performance test could not be executed\n"
                   "failed params:\n")
             print("netperf -H {},4 -L {},4 -p {} -l {} -s {} -- -P {},{} -T "
-                  "TCP -4\n".format(self.arg_d["ip_dest_data"],
-                                    self.arg_d["ip_source_data"],
-                                    self.arg_d["netserver_port"],
-                                    self.arg_d["test_length"],
-                                    self.arg_d["flow_offset"],
-                                    self.arg_d["port_source"],
-                                    self.arg_d["port_dest"]))
+                  "TCP -4 -m 1500\n".format(self.arg_d["ip_dest_data"],
+                                            self.arg_d["ip_source_data"],
+                                            self.arg_d["netserver_port"],
+                                            self.arg_d["test_length"],
+                                            self.arg_d["flow_offset"],
+                                            self.arg_d["port_source"],
+                                            self.arg_d["port_dest"]))
             sys.exit(3)
 
         print(" - netperf ended")
