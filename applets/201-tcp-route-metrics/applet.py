@@ -1,4 +1,4 @@
-# usage: exec 102-metrics-save [host] route-metrics-save:[enabled|disabled]
+# usage: exec 201-tcp-route-metrics [host] route-metrics-save:[enabled|disabled]
 # Check success:
 #  sysctl /net/ipv4/tcp_no_metrics_save
 

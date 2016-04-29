@@ -1,6 +1,6 @@
 """Applet for setting tcp sysctl window memory values
 Usage:
-exec 106-tcp-window-mem [host]
+exec 205-tcp-window-mem [host]
                         [rmem_max:[byte]]
                         [rmem_default:[byte]]
                         [wmem_max:[byte]]
@@ -17,9 +17,9 @@ Check Success:
 sysctl [/net/core/[option]|/net/ipv4/[option]]
 
 Examples:
-- exec-applet 106-tcp-window-mem alpha window_scaling:on rmem_max:12582912
+- exec-applet 205-tcp-window-mem alpha window_scaling:on rmem_max:12582912
  rmem_default:12582912
-- exec-applet 106-tcp-window-mem beta window_scaling:on wmem_max:12582912
+- exec-applet 205-tcp-window-mem beta window_scaling:on wmem_max:12582912
  wmem_default:12582912 tcp_rmem_min:12582912 tcp_rmem_default:12582912
  tcp_rmem_max:12582912
 
@@ -30,10 +30,10 @@ Hints:
 
 
 def print_usage(x):
-    x.p.msg("\n 106-tcp-window-mem:\n", False)
+    x.p.msg("\n 205-tcp-window-mem:\n", False)
     x.p.msg(" applet for setting tcp window memory values\n", False)
     x.p.msg("\n usage:\n", False)
-    x.p.msg(" - exec 106-tcp-window-mem [host] "
+    x.p.msg(" - exec 205-tcp-window-mem [host] "
             "[rmem_max:[byte]] "
             "[rmem_default:[byte]] "
             "[wmem_max:[byte]] "
@@ -48,9 +48,9 @@ def print_usage(x):
     x.p.msg("\n check success:\n", False)
     x.p.msg(" - sysctl [/net/core/[option]|/net/ipv4/[option]]\n", False)
     x.p.msg("\n examples;\n", False)
-    x.p.msg(" - exec-applet 106-tcp-window-mem alpha window_scaling:on "
+    x.p.msg(" - exec-applet 205-tcp-window-mem alpha window_scaling:on "
             "rmem_max:12582912 rmem_default:12582912\n", False)
-    x.p.msg(" - exec-applet 106-tcp-window-mem beta window_scaling:on "
+    x.p.msg(" - exec-applet 205-tcp-window-mem beta window_scaling:on "
             "wmem_max:12582912 wmem_default:12582912 tcp_rmem_min:12582912 "
             "tcp_rmem_default:12582912 tcp_rmem_max:12582912\n", False)
     x.p.msg("\n hints:\n", False)
