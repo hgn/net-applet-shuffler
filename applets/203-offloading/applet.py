@@ -5,7 +5,7 @@
 #
 # Examples:
 #  - sudo ethtool -K enp4s0 tso off ufo off gso off gro off lro off
-#  - exec-applet 105-offloading alpha offloading:off
+#  - exec-applet 203-offloading alpha offloading:off
 #
 # Hints:
 #  - "Cannot change [...]" messages probably mean that the value can not be
@@ -15,11 +15,11 @@
 
 def print_usage(x):
     x.p.msg("\n usage:\n", False)
-    x.p.msg(" - exec 105-offloading [host] offloading:\"[on|off]\"\n", False)
+    x.p.msg(" - exec 203-offloading [host] offloading:\"[on|off]\"\n", False)
     x.p.msg("\n check success:\n", False)
     x.p.msg(" - ethtool -k [interface]\n", False)
     x.p.msg("\nexample:\n", False)
-    x.p.msg(" - exec-applet 105-offloading alpha offloading:on\n", False)
+    x.p.msg(" - exec-applet 203-offloading alpha offloading:on\n", False)
 
 
 def set_offloading(x, conf, dic):

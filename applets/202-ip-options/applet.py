@@ -1,7 +1,7 @@
 """Applet for setting ip options: tcp windows, tcp quickack
 
 Usage:
-exec 101-ip-options [host] [initcwnd:[number]] [initrwnd:[number]]
+exec 202-ip-options [host] [initcwnd:[number]] [initrwnd:[number]]
  [quickack:[on|off]] [min-rto:[time]]
 
 Check Success:
@@ -9,10 +9,10 @@ ip r s
 ss -i
 
 Examples:
-- exec-applet 101-ip-options alpha initcwnd:12 quickack:on
-- exec-applet 101-ip-options beta initrwnd:4
-- exec-applet 101-ip-options beta initcwnd:20 initrwnd:20 quickack:on
-- exec-applet 101-ip-options alpha min-rto:50ms
+- exec-applet 202-ip-options alpha initcwnd:12 quickack:on
+- exec-applet 202-ip-options beta initrwnd:4
+- exec-applet 202-ip-options beta initcwnd:20 initrwnd:20 quickack:on
+- exec-applet 202-ip-options alpha min-rto:50ms
 
 Hints:
 - [time] can be in sec and ms e.g. (1s, 200ms, 0.5ms -> 1ms)
@@ -23,21 +23,21 @@ Hints:
 
 
 def print_usage(x):
-    x.p.msg("\n 101-ip-options:\n", False)
+    x.p.msg("\n 202-ip-options:\n", False)
     x.p.msg(" applet for setting ip options: tcp windows, tcp quickack, min "
             "rto\n", False)
     x.p.msg("\n usage:\n", False)
-    x.p.msg(" - exec 101-ip-options [host] [initcwnd:[number]] "
+    x.p.msg(" - exec 202-ip-options [host] [initcwnd:[number]] "
             "[initrwnd:[number]] [quickack:[on|off]] [min-rto:[time]]\n",
             False)
     x.p.msg("\n check success:\n", False)
     x.p.msg(" - ip r s\n", False)
     x.p.msg(" - ss -i\n", False)
     x.p.msg("\n examples:\n", False)
-    x.p.msg(" - exec-applet 101-ip-options alpha initcwnd:12 initrwnd:12 "
+    x.p.msg(" - exec-applet 202-ip-options alpha initcwnd:12 initrwnd:12 "
             "quickack:on\n", False)
-    x.p.msg(" - exec-applet 101-ip-options alpha min-rto:50ms\n", False)
-    x.p.msg(" - exec-applet 101-ip-options beta quickack:on initcwnd:12\n\n",
+    x.p.msg(" - exec-applet 202-ip-options alpha min-rto:50ms\n", False)
+    x.p.msg(" - exec-applet 202-ip-options beta quickack:on initcwnd:12\n\n",
             False)
     x.p.msg("\n hints:\n", False)
     x.p.msg(" - [time] can be in sec and milli-sec e.g. (1s, 200ms, 0.5ms -> "
