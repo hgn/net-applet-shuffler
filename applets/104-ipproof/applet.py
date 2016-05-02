@@ -147,9 +147,9 @@ def main(x, conf, args):
         dic["applet_id"] = args[0].split(":")[1]
         args.remove("id:" + dic["applet_id"])
         dic["ipproof_client_path"] = args[0].split(":")[1]
-        args.remove("ipproof_client:" + dic["ipproof_client_path"])
+        args.remove("ipproof-client:" + dic["ipproof_client_path"])
         dic["ipproof_server_path"] = args[0].split(":")[1]
-        args.remove("ipproof_server:" + dic["ipproof_server_path"])
+        args.remove("ipproof-server:" + dic["ipproof_server_path"])
         for argument in args:
             key = argument.split(":")[0]
             value = argument.split(":")[1]
