@@ -47,7 +47,7 @@ def print_usage(x):
             "[tcp_wmem_max:[byte]]\n", False)
     x.p.msg("\n check success:\n", False)
     x.p.msg(" - sysctl [/net/core/[option]|/net/ipv4/[option]]\n", False)
-    x.p.msg("\n examples;\n", False)
+    x.p.msg("\n examples:\n", False)
     x.p.msg(" - exec-applet 205-tcp-window-mem alpha window_scaling:on "
             "rmem_max:12582912 rmem_default:12582912\n", False)
     x.p.msg(" - exec-applet 205-tcp-window-mem beta window_scaling:on "
