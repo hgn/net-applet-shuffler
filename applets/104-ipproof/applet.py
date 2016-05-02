@@ -17,7 +17,8 @@ REMOTE_PATH = "/tmp/net-applet-shuffler"
 def print_usage(x):
     x.p.msg("\n 104-ipproof:\n", False)
     x.p.msg(" applet for establishing a connection and transferring data from "
-            "a source to a destination\n", False)
+            "a source to a destination, unfortunately only the target port "
+            "can be specified, not the source port\n", False)
     x.p.msg("\n usage:\n", False)
     x.p.msg(" - exec 104-ipproof [host] "
             "sink:[host] "
