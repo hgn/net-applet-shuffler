@@ -196,6 +196,7 @@ class IpproofController:
                 ipproof_start_failed = False
                 break
             amount_tries += 1
+            time.sleep(1)
         if ipproof_start_failed:
             print("error: ipproof performance test could not be executed\n"
                   "failed params:")
