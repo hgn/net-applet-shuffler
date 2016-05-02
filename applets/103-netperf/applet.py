@@ -60,9 +60,9 @@ def controller_thread(x, arg_d):
 def main(x, conf, args):
 
     if not len(args) == 8:
-        x.p.err("wrong usage. use: [name] sink:[name] id:[id] source_port:"
-                "[port] sink_port:[port] length:[bytes|seconds] "
-                "flow_offset:[seconds] netserver:[port]\n")
+        x.p.err("wrong usage. use: [name] sink:[name] id:[id] source-port:"
+                "[port] sink-port:[port] length:[bytes|seconds] "
+                "flow-offset:[seconds] netserver:[port]\n")
         return False
     # arguments dictionary
     arg_d = dict()

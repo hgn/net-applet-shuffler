@@ -1,27 +1,27 @@
 """Applet for setting tcp sysctl window memory values
 Usage:
 exec 205-tcp-window-mem [host]
-                        [rmem_max:[byte]]
-                        [rmem_default:[byte]]
-                        [wmem_max:[byte]]
-                        [wmem_default:[byte]]
-                        [window_scaling:[on|off]]
-                        [tcp_rmem_min:[byte]]
-                        [tcp_rmem_default:[byte]]
-                        [tcp_rmem_max:[byte]]
-                        [tcp_wmem_min:[byte]]
-                        [tcp_wmem_default:[byte]]
-                        [tcp_wmem_max:[byte]]
+                        [rmem-max:[byte]]
+                        [rmem-default:[byte]]
+                        [wmem-max:[byte]]
+                        [wmem-default:[byte]]
+                        [window-scaling:[on|off]]
+                        [tcp-rmem-min:[byte]]
+                        [tcp-rmem-default:[byte]]
+                        [tcp-rmem-max:[byte]]
+                        [tcp-wmem-min:[byte]]
+                        [tcp-wmem-default:[byte]]
+                        [tcp-wmem-max:[byte]]
 
 Check Success:
 sysctl [/net/core/[option]|/net/ipv4/[option]]
 
 Examples:
-- exec-applet 205-tcp-window-mem alpha window_scaling:on rmem_max:12582912
- rmem_default:12582912
-- exec-applet 205-tcp-window-mem beta window_scaling:on wmem_max:12582912
- wmem_default:12582912 tcp_rmem_min:12582912 tcp_rmem_default:12582912
- tcp_rmem_max:12582912
+- exec-applet 205-tcp-window-mem alpha window-scaling:on rmem-max:12582912
+ rmem-default:12582912
+- exec-applet 205-tcp-window-mem beta window_scaling:on wmem-max:12582912
+ wmem-default:12582912 tcp-rmem-min:12582912 tcp-rmem-default:12582912
+ tcp-rmem-max:12582912
 
 Hints:
 - restoration is covered by restoring sysctls, e.g. 003-restore-sysctls or a
@@ -34,25 +34,25 @@ def print_usage(x):
     x.p.msg(" applet for setting tcp window memory values\n", False)
     x.p.msg("\n usage:\n", False)
     x.p.msg(" - exec 205-tcp-window-mem [host] "
-            "[rmem_max:[byte]] "
-            "[rmem_default:[byte]] "
-            "[wmem_max:[byte]] "
-            "[wmem_default:[byte]] "
-            "[window_scaling:[on|off]] "
-            "[tcp_rmem_min:[byte]] "
-            "[tcp_rmem_default:[byte]] "
-            "[tcp_rmem_max:[byte]] "
-            "[tcp_wmem_min:[byte]] "
-            "[tcp_wmem_default:[byte]] "
-            "[tcp_wmem_max:[byte]]\n", False)
+            "[rmem-max:[byte]] "
+            "[rmem-default:[byte]] "
+            "[wmem-max:[byte]] "
+            "[wmem-default:[byte]] "
+            "[window-scaling:[on|off]] "
+            "[tcp-rmem-min:[byte]] "
+            "[tcp-rmem-default:[byte]] "
+            "[tcp-rmem-max:[byte]] "
+            "[tcp-wmem-min:[byte]] "
+            "[tcp-wmem-default:[byte]] "
+            "[tcp-wmem-max:[byte]]\n", False)
     x.p.msg("\n check success:\n", False)
     x.p.msg(" - sysctl [/net/core/[option]|/net/ipv4/[option]]\n", False)
     x.p.msg("\n examples:\n", False)
-    x.p.msg(" - exec-applet 205-tcp-window-mem alpha window_scaling:on "
-            "rmem_max:12582912 rmem_default:12582912\n", False)
-    x.p.msg(" - exec-applet 205-tcp-window-mem beta window_scaling:on "
-            "wmem_max:12582912 wmem_default:12582912 tcp_rmem_min:12582912 "
-            "tcp_rmem_default:12582912 tcp_rmem_max:12582912\n", False)
+    x.p.msg(" - exec-applet 205-tcp-window-mem alpha window-scaling:on "
+            "rmem-max:12582912 rmem-default:12582912\n", False)
+    x.p.msg(" - exec-applet 205-tcp-window-mem beta window-scaling:on "
+            "wmem-max:12582912 wmem-default:12582912 tcp-rmem-min:12582912 "
+            "tcp-rmem-default:12582912 tcp-rmem-max:12582912\n", False)
     x.p.msg("\n hints:\n", False)
     x.p.msg(" - restoration is covered by restoring sysctls, e.g. "
             "003-restore-sysctls or a reboot\n\n", False)
@@ -61,17 +61,17 @@ def print_usage(x):
 def print_wrong_usage(x):
     x.p.err("error: wrong usage\n")
     x.p.err("use: [host] "
-            "[rmem_max:[byte]] "
-            "[rmem_default:[byte]] "
-            "[wmem_max:[byte]] "
-            "[wmem_default:[byte]] "
-            "[window_scaling:[on|off]] "
-            "[tcp_rmem_min:[byte]] "
-            "[tcp_rmem_default:[byte]] "
-            "[tcp_rmem_max:[byte]] "
-            "[tcp_wmem_min:[byte]] "
-            "[tcp_wmem_default:[byte]] "
-            "[tcp_wmem_max:[byte]]\n")
+            "[rmem-max:[byte]] "
+            "[rmem-default:[byte]] "
+            "[wmem-max:[byte]] "
+            "[wmem-default:[byte]] "
+            "[window-scaling:[on|off]] "
+            "[tcp-rmem-min:[byte]] "
+            "[tcp-rmem-default:[byte]] "
+            "[tcp-rmem-max:[byte]] "
+            "[tcp-wmem-min:[byte]] "
+            "[tcp-wmem-default:[byte]] "
+            "[tcp-wmem-max:[byte]]\n")
 
 
 def construct_tcp_mem_string(x, dic, tcp_mem_str, new_value_dict):
@@ -150,15 +150,15 @@ def main(x, conf, args):
         for argument in args:
             key = argument.split(":")[0]
             value = argument.split(":")[1]
-            if key == "rmem_max":
+            if key == "rmem-max":
                 options["/net/core/rmem_max"] = value
-            elif key == "rmem_default":
+            elif key == "rmem-default":
                 options["/net/core/rmem_default"] = value
-            elif key == "wmem_max":
+            elif key == "wmem-max":
                 options["/net/core/wmem_max"] = value
-            elif key == "wmem_default":
+            elif key == "wmem-default":
                 options["/net/core/wmem_default"] = value
-            elif key == "window_scaling":
+            elif key == "window-scaling":
                 if value == "on":
                     options["/net/ipv4/tcp_window_scaling"] = 1
                 elif value == "off":
@@ -166,17 +166,17 @@ def main(x, conf, args):
                 else:
                     print_wrong_usage(x)
                     return False
-            elif key == "tcp_rmem_min":
+            elif key == "tcp-rmem-min":
                 tcp_rmem["0"] = value
-            elif key == "tcp_rmem_default":
+            elif key == "tcp-rmem-default":
                 tcp_rmem["1"] = value
-            elif key == "tcp_rmem_max":
+            elif key == "tcp-rmem-max":
                 tcp_rmem["2"] = value
-            elif key == "tcp_wmem_min":
+            elif key == "tcp-wmem-min":
                 tcp_wmem["0"] = value
-            elif key == "tcp_wmem_default":
+            elif key == "tcp-wmem-default":
                 tcp_wmem["1"] = value
-            elif key == "tcp_wmem_max":
+            elif key == "tcp-wmem-max":
                 tcp_wmem["2"] = value
             else:
                 print_wrong_usage(x)
