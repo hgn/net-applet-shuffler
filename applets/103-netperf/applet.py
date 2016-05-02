@@ -1,3 +1,8 @@
+"""Applet for using netperf for a connection.
+
+Unfortunately it is not possible to transfer a fixed amount of data via
+netperf.
+"""
 
 import os
 import time
