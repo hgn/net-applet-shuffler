@@ -1,4 +1,4 @@
-# usage: exec 102-metrics-save [host] route-metrics-save:[enabled|disabled]
+# usage: exec 201-tcp-route-metrics [host] route-metrics-save:[enabled|disabled]
 # Check success:
 #  sysctl /net/ipv4/tcp_no_metrics_save
 
@@ -26,8 +26,8 @@ def set_metric_save(x, user, ip, route_metric):
 
 def main(x, conf, args):
     if not len(args) == 2:
-        x.p.err("wrong usage. use: [host] route-metrics-save:[enabled|disabled]"
-                "\n")
+        x.p.err("wrong usage. use: [host] "
+                "route-metrics-save:[enabled|disabled]\n")
         return False
     # arguments dictionary
     dic = dict()

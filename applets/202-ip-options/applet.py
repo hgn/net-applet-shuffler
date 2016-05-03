@@ -1,42 +1,54 @@
 """Applet for setting ip options: tcp windows, tcp quickack
 
 Usage:
-exec 101-ip-options [host] [initcwnd:[number]] [initrwnd:[number]]
- [quickack:[on|off]]
+exec 202-ip-options [host] [initcwnd:[number]] [initrwnd:[number]]
+ [quickack:[on|off]] [min-rto:[time]]
 
 Check Success:
 ip r s
+ss -i
 
 Examples:
-- exec-applet 101-ip-options alpha initcwnd:12 quickack:on
-- exec-applet 101-ip-options beta initrwnd:4
-- exec-applet 101-ip-options beta initcwnd:20 initrwnd:20 quickack:on
+- exec-applet 202-ip-options alpha initcwnd:12 quickack:on
+- exec-applet 202-ip-options beta initrwnd:4
+- exec-applet 202-ip-options beta initcwnd:20 initrwnd:20 quickack:on
+- exec-applet 202-ip-options alpha min-rto:50ms
 
 Hints:
+- [time] can be in sec and ms e.g. (1s, 200ms, 0.5ms -> 1ms)
+- min-rto adjustments do not affect ongoing open connections
 - if ip options are missing, they probably should be added here
+- restoration is covered by 009-network or by setting the device down
 """
 
 
 def print_usage(x):
-    x.p.msg("\n 101-ip-options:\n", False)
-    x.p.msg(" applet for setting ip options: tcp windows, tcp quickack\n",
-            False)
+    x.p.msg("\n 202-ip-options:\n", False)
+    x.p.msg(" applet for setting ip options: tcp windows, tcp quickack, min "
+            "rto\n", False)
     x.p.msg("\n usage:\n", False)
-    x.p.msg(" - exec 101-ip-options [host] [initcwnd:[number]] "
-            "[initrwnd:[number]] [quickack:[on|off]]\n", False)
+    x.p.msg(" - exec 202-ip-options [host] [initcwnd:[number]] "
+            "[initrwnd:[number]] [quickack:[on|off]] [min-rto:[time]]\n",
+            False)
     x.p.msg("\n check success:\n", False)
     x.p.msg(" - ip r s\n", False)
+    x.p.msg(" - ss -i\n", False)
     x.p.msg("\n examples:\n", False)
-    x.p.msg(" - exec-applet 101-ip-options alpha initcwnd:12 initrwnd:12 "
+    x.p.msg(" - exec-applet 202-ip-options alpha initcwnd:12 initrwnd:12 "
             "quickack:on\n", False)
-    x.p.msg(" - exec-applet 101-ip-options beta quickack:on initcwnd:12\n\n",
+    x.p.msg(" - exec-applet 202-ip-options alpha min-rto:50ms\n", False)
+    x.p.msg(" - exec-applet 202-ip-options beta quickack:on initcwnd:12\n\n",
             False)
+    x.p.msg("\n hints:\n", False)
+    x.p.msg(" - [time] can be in sec and milli-sec e.g. (1s, 200ms, 0.5ms -> "
+            "1ms)"
+            "\n\n", False)
 
 
 def print_wrong_usage(x):
     x.p.err("error: wrong usage\n")
     x.p.err("use: [host] [initcwnd:[number]] [initrwnd:[number]] "
-            "[quickack:[on|off]]\n")
+            "[quickack:[on|off]] [min-rto:[time]]\n")
 
 
 def set_ip_options(x, dic, options):
@@ -69,6 +81,12 @@ def main(x, conf, args):
                 options += " initcwnd {}".format(argument.split(":")[1])
             elif argument.split(":")[0] == "initrwnd":
                 options += " initrwnd {}".format(argument.split(":")[1])
+            elif argument.split(":")[0] == "min-rto":
+                value = argument.split(":")[1]
+                if not value.endswith("ms") and not value.endswith("s"):
+                    print_wrong_usage(x)
+                    return False
+                options += " rto_min {}".format(value)
             elif argument.split(":")[0] == "quickack":
                 if argument.split(":")[1] == "on":
                     options += " quickack 1"

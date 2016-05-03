@@ -50,16 +50,19 @@ def main(x, conf, args):
     # 1. directory cleanup of /tmp/net-applet-shuffler/
     if not clean_directory(x, host_name, host_user, host_ip):
         return False
-    # 2. netserver cleanup
-    if not clean_service(x, host_name, host_user, host_ip, "netserver"):
-        return False
-    # 3. tcpdump cleanup
+    # 2. tcpdump cleanup
     if not clean_service(x, host_name, host_user, host_ip, "tcpdump"):
+        return False
+    # 3. netserver cleanup
+    if not clean_service(x, host_name, host_user, host_ip, "netserver"):
         return False
     # 4. netperf cleanup
     if not clean_service(x, host_name, host_user, host_ip, "netperf"):
         return False
-    # 5. qdiscs cleanup
+    # 5. ipproof cleanup
+    if not clean_service(x, host_name, host_user, host_ip, "ipproof"):
+        return False
+    # 6. qdiscs cleanup
     clean_qdiscs(x, conf, host_name, host_user, host_ip)
 
     return True

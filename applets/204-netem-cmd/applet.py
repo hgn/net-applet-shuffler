@@ -12,7 +12,7 @@ from time import strftime
 
 def print_usage(x):
     x.p.msg("\n usage:\n", False)
-    x.p.msg(" - exec 104-netem-cmd [host] control:\"[full|partial]\"\n", False)
+    x.p.msg(" - exec 204-netem-cmd [host] control:\"[full|partial]\"\n", False)
     x.p.msg(" - [host] control:full netem:\"[command]\"\n", False)
     x.p.msg(" - [host] control:partial change:[add|del|change|replace] "
             "to-network:[name] command:\"[command]\"\n", False)

@@ -1,10 +1,18 @@
+"""Applet for using netperf for a connection.
+
+Unfortunately it is not possible to transfer a fixed amount of data via
+netperf.
+"""
 
 import os
+import time
 
 from threading import Thread
 
 LOCAL_NET_PATH = os.path.dirname(os.path.realpath(__file__))
 REMOTE_NET_PATH = "/tmp/net-applet-shuffler"
+# fix for exec-applet
+CONTROLLER_STARTED = False
 
 
 def controller_thread(x, arg_d):
@@ -45,14 +53,16 @@ def controller_thread(x, arg_d):
                "python3.5 {}/{} {}".format(REMOTE_NET_PATH,
                                            "netperf-controller.py",
                                            arguments_string))
+    global CONTROLLER_STARTED
+    CONTROLLER_STARTED = True
 
 
 def main(x, conf, args):
 
     if not len(args) == 8:
-        x.p.err("wrong usage. use: [name] sink:[name] id:[id] source_port:"
-                "[port] sink_port:[port] length:[bytes|seconds] "
-                "flow_offset:[seconds] netserver:[port]\n")
+        x.p.err("wrong usage. use: [name] sink:[name] id:[id] source-port:"
+                "[port] sink-port:[port] length:[bytes|seconds] "
+                "flow-offset:[seconds] netserver:[port]\n")
         return False
     # arguments dictionary
     arg_d = dict()
@@ -84,5 +94,7 @@ def main(x, conf, args):
     contr_thread = Thread(target=controller_thread, args=(x, arg_d, ))
     contr_thread.daemon = True
     contr_thread.start()
+    while not CONTROLLER_STARTED:
+        time.sleep(1)
 
     return True
