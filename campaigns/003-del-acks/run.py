@@ -28,21 +28,18 @@ def main(x):
 
     x.exec('005-network setup:dumbbell alpha beta')
 
-    x.exec('202-ip-options alpha initcwnd:1')
-    x.exec('202-ip-options beta initcwnd:1')
+    x.exec('204-netem-cmd koppa control:partial change:add to-network:red command:"rate 160kbit limit 50"')
+    x.exec('204-netem-cmd koppa control:partial change:add to-network:blue command:"rate 160kbit limit 50"')
 
-    x.exec('204-netem-cmd koppa control:partial change:add to-network:red command:"rate 160kbit limit 10"')
-    x.exec('204-netem-cmd koppa control:partial change:add to-network:blue command:"rate 160kbit limit 10"')
+    x.exec('101-tcpdump alpha id:10 mode:start filter:"tcp and port 30000"')
+    x.exec('101-tcpdump beta id:11 mode:start filter:"tcp and port 30000"')
 
-    x.exec('101-tcpdump alpha id:10 mode:start filter:"tcp and dst port 30000"')
-    x.exec('101-tcpdump beta id:11 mode:start filter:"tcp and dst port 30000"')
-
-    x.exec('104-ipproof alpha sink:beta id:12 ipproof-client:/opt/ipproof/unix/ipproof-client ipproof-server:/opt/ipproof/unix/ipproof-server transfer-size:1048576')
+    x.exec('104-ipproof alpha sink:beta id:12 ipproof-client:/opt/ipproof/unix/ipproof-client ipproof-server:/opt/ipproof/unix/ipproof-server server-port:30000 transfer-size:1048576')
 
     x.exec('102-wait-for-id-completion interval_time:5 alpha:12')
 
-    x.exec('101-tcpdump alpha id:10 mode:stop local-file-name:"./campaigns/0003-del-acks/dumps/1_alpha.pcap"')
-    x.exec('101-tcpdump beta id:11 mode:stop local-file-name:"./campaigns/0003-del-acks/dumps/1_beta.pcap"')
+    x.exec('101-tcpdump alpha id:10 mode:stop local-file-name:"./campaigns/003-del-acks/dumps/1_alpha.pcap"')
+    x.exec('101-tcpdump beta id:11 mode:stop local-file-name:"./campaigns/003-del-acks/dumps/1_beta.pcap"')
 
     x.exec('004-kill alpha')
     x.exec('004-kill beta')
@@ -50,20 +47,20 @@ def main(x):
 
     x.exec('005-network setup:dumbbell alpha beta')
 
-    x.exec('202-ip-options alpha initcwnd:1 quickack:on')
-    x.exec('202-ip-options beta initcwnd:1 quickack:on')
+    x.exec('202-ip-options alpha quickack:on min-rto:1ms')
+    x.exec('202-ip-options beta quickack:on min-rto:1ms')
 
-    x.exec('204-netem-cmd koppa control:partial change:add to-network:red command:"rate 160kbit limit 10"')
-    x.exec('204-netem-cmd koppa control:partial change:add to-network:blue command:"rate 160kbit limit 10"')
+    x.exec('204-netem-cmd koppa control:partial change:add to-network:red command:"rate 160kbit limit 50"')
+    x.exec('204-netem-cmd koppa control:partial change:add to-network:blue command:"rate 160kbit limit 50"')
 
-    x.exec('101-tcpdump alpha id:20 mode:start filter:"tcp and dst port 30000"')
-    x.exec('101-tcpdump beta id:21 mode:start filter:"tcp and dst port 30000"')
+    x.exec('101-tcpdump alpha id:20 mode:start filter:"tcp and port 30000"')
+    x.exec('101-tcpdump beta id:21 mode:start filter:"tcp and port 30000"')
 
-    x.exec('104-ipproof alpha sink:beta id:22 ipproof-client:/opt/ipproof/unix/ipproof-client ipproof-server:/opt/ipproof/unix/ipproof-server transfer-size:1048576')
+    x.exec('104-ipproof alpha sink:beta id:22 ipproof-client:/opt/ipproof/unix/ipproof-client ipproof-server:/opt/ipproof/unix/ipproof-server server-port:30000 transfer-size:1048576')
 
     x.exec('102-wait-for-id-completion interval_time:5 alpha:22')
 
-    x.exec('101-tcpdump alpha id:20 mode:stop local-file-name:"./campaigns/0003-del-acks/dumps/2_alpha.pcap"')
-    x.exec('101-tcpdump beta id:21 mode:stop local-file-name:"./campaigns/0003-del-acks/dumps/2_beta.pcap"')
+    x.exec('101-tcpdump alpha id:20 mode:stop local-file-name:"./campaigns/003-del-acks/dumps/2_alpha.pcap"')
+    x.exec('101-tcpdump beta id:21 mode:stop local-file-name:"./campaigns/003-del-acks/dumps/2_beta.pcap"')
 
     print(tt.update_campaign_runtime()[0])
