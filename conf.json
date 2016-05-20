@@ -70,13 +70,13 @@
 				"interfaces": [
 					{
 						"ip-address": "10.0.0.205",
-						"name": "enp3s2",
+						"name": "enp0s25",
 						"network-name": "red",
 						"type": "data"
 					},
 					{
 						"ip-address": "10.0.1.205",
-						"name": "enp0s25",
+						"name": "enp3s2",
 						"network-name": "blue",
 						"type": "data"
 					},
