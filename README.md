@@ -148,7 +148,9 @@ sudo ip link set dev enp4s0 up
 sudo ip link set dev enp5s5 up
 sleep 1
 sudo ip r add default via 10.0.0.205
-sudo sysctl -w /net/ipv4/ip_forward="1"
+sleep 1
+sudo arp -s 10.0.0.205 00:25:64:94:89:85
+sudo arp -s 10.0.0.2 90:e2:ba:02:20:f2
 echo "Configuring network parameters done!"
 [/startup.sh]
 sudo chmod ugo+x /etc/init.d/startup.sh
@@ -173,6 +175,10 @@ sudo ip link set dev enp0s25 up
 sudo ip link set dev enp3s0 up
 sudo ip link set dev enp3s2 up
 sudo sysctl -w /net/ipv4/ip_forward="1"
+sleep 1
+sudo arp -s 10.0.0.1 00:1d:09:14:76:06
+sudo arp -s 10.0.0.2 90:e2:ba:02:20:f2
+sudo arp -s 10.0.1.1 00:25:64:94:8e:15
 echo "Configuring network parameters done!"
 [/startup.sh]
 ...
@@ -188,13 +194,39 @@ sudo ip link set dev enp0s25 down
 sudo ip link set dev enp3s2 down
 sleep 1
 sudo ip a add 10.0.1.1/24 dev enp0s25
-sudo ip a add 10.1.1.1/16 dev enp3s22
+sudo ip a add 10.1.1.1/16 dev enp3s2
 sleep 1
 sudo ip link set dev enp0s25 up
 sudo ip link set dev enp3s2 up
 sleep 1
 sudo ip r add default via 10.0.1.205
-sudo sysctl -w /net/ipv4/ip_forward="1"
+sleep 1
+sudo arp -s 10.0.1.205 00:1b:21:3d:aa:43
+echo "Configuring network parameters done!"
+[/startup.sh]
+...
+
+
+[on gamma]
+...
+[startup.sh]
+#!/bin/bash
+sleep 15
+sudo ip link set dev rename3 down
+sudo ip link set dev eno1 down
+sudo ip link set dev enp2s0f1 down
+sudo ip link set dev enp5s0 down
+sleep 1
+sudo ip a add 10.0.0.2/24 dev eno1
+sudo ip a add 10.1.0.2/16 dev enp5s0
+sleep 1
+sudo ip link set dev eno1 up
+sudo ip link set dev enp5s0 up
+sleep 1
+sudo ip r add default via 10.0.0.205
+sleep 1
+sudo arp -s 10.0.0.1 00:1d:09:14:76:06
+sudo arp -s 10.0.0.205 00:25:64:94:89:85
 echo "Configuring network parameters done!"
 [/startup.sh]
 ...
