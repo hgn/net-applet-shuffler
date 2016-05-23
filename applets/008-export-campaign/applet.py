@@ -2,7 +2,7 @@
 import os
 
 
-def print_usage(x):
+def show_help(x):
     x.p.msg("\n 008-export-campaign:\n", False)
     x.p.msg(" applet for exporting the campaign as file to a folder\n", False)
     x.p.msg("\n usage:\n", False)
@@ -14,6 +14,13 @@ def print_usage(x):
     x.p.msg(" - exec 008-export-campaign: alpha campaign_name:\"001-test\" "
             "path:\"/home/alpha/bin/net-applet-shuffler/campaigns/test/"
             "campaign.save\"", False)
+
+
+def print_wrong_usage(x):
+    x.p.err("error: wrong usage\n")
+    x.p.err("use: [host] "
+            "campaign_name:\"[string]\" "
+            "path:\"[file_descriptor]\"\n")
 
 
 def save_campaign_file(x, dic):
@@ -31,6 +38,7 @@ def save_campaign_file(x, dic):
     campaign_file = open(os.path.join(dic["file_path"], dic["file_name"]), "w")
     campaign_file.write(campaign_string)
     campaign_file.close()
+    return True
 
 
 def create_file_path(x, file_descriptor, absolute, dic):
@@ -71,21 +79,31 @@ def create_file_path(x, file_descriptor, absolute, dic):
 
 def main(x, conf, args):
     if "?" in args:
-        print_usage(x)
+        show_help(x)
         return False
     # arguments dictionary
     dic = dict()
     is_file_path_absolute = True
+    file_descriptor = "/tmp/campaign.save"
     try:
         dic["host_name"] = args[0]
-        dic["campaign_name"] = args[1].split(":").strip("\"")
-        file_descriptor = args[2].split(":")[1].strip("\"")
-        if file_descriptor[0] == "/":
-            is_file_path_absolute = True
-        else:
-            is_file_path_absolute = False
+        args.remove(dic["host_name"])
+        for argument in args:
+            key = argument.split(":")[0]
+            value = argument.split(":")[1]
+            if key == "campaign_name":
+                dic["campaign_name"] = value.strip("\"")
+            elif key == "path":
+                if value.strip("\"")[0] == "/":
+                    is_file_path_absolute = True
+                else:
+                    is_file_path_absolute = False
+                file_descriptor = value
+            else:
+                print_wrong_usage(x)
+                return False
     except IndexError:
-        x.p.err("error: wrong usage\n")
+        print_wrong_usage(x)
         return False
 
     if not create_file_path(x, file_descriptor, is_file_path_absolute, dic):
