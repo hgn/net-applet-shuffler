@@ -73,9 +73,7 @@ def create_file_path(x, file_descriptor, absolute, dic):
         return False
 
     dic["file_path"] = file_path
-    print(file_path)
     dic["file_name"] = file_name
-    print(file_name)
 
     return True
 
