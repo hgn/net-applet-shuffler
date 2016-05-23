@@ -167,8 +167,8 @@ def tcpdump_stop(x, arg_d):
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
                "kill {}".format(pid_tcpdump))
     x.ssh.exec(arg_d["host_ip_control"], arg_d["host_user"],
-               "rm /tmp/net-applet-shuffler/tcpdump_{"
-               "}".format(arg_d["applet_id"]))
+               "rm /tmp/net-applet-shuffler/tcpdump_{}"
+               .format(arg_d["applet_id"]))
 
     x.p.msg("fetching dumpfile from {}\n".format(arg_d["host_name"]))
     if not transfer_dumpfile(x, arg_d):

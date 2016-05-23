@@ -3,7 +3,7 @@
 
 			"alpha": {
 				"description": "Data Sender (often local PC)",
-				"user":        "tcp1",
+				"user":        "alpha",
 				"interfaces": [
 					{
 						"default-route": "10.0.0.205",
@@ -21,6 +21,27 @@
 					}
 				]
 			},
+
+            "gamma": {
+                "description": "Server",
+                "user": "gamma",
+                "interfaces": [
+                  {
+                      "default-route": "10.0.0.205",
+                      "ip-address": "10.0.0.2",
+                      "name": "eno1",
+                      "network-name": "red",
+                      "type": "data"
+                  },
+                  {
+                      "default-route": "10.0.0.205",
+                      "ip-address": "10.1.0.2",
+                      "name": "enp5s0",
+                      "network-name": "control",
+                      "type": "control"
+                  }
+                ]
+            },
 
 			"beta": {
 				"description": "Data Sink (often remote PC)",
@@ -49,13 +70,13 @@
 				"interfaces": [
 					{
 						"ip-address": "10.0.0.205",
-						"name": "enp3s2",
+						"name": "enp0s25",
 						"network-name": "red",
 						"type": "data"
 					},
 					{
 						"ip-address": "10.0.1.205",
-						"name": "enp0s25",
+						"name": "enp3s2",
 						"network-name": "blue",
 						"type": "data"
 					},
