@@ -28,6 +28,7 @@ def save_campaign_file(x, dic):
     campaign_file_path = os.path.join(os.path.dirname(__file__), "./../../",
                                       "campaigns", dic["campaign_name"],
                                       "run.py")
+    print(campaign_file_path)
     campaign_file = open(campaign_file_path, "r")
     campaign_string = campaign_file.read()
     campaign_file.close()
@@ -72,7 +73,9 @@ def create_file_path(x, file_descriptor, absolute, dic):
         return False
 
     dic["file_path"] = file_path
+    print(file_path)
     dic["file_name"] = file_name
+    print(file_name)
 
     return True
 
@@ -98,7 +101,7 @@ def main(x, conf, args):
                     is_file_path_absolute = True
                 else:
                     is_file_path_absolute = False
-                file_descriptor = value
+                file_descriptor = value.strip("\"")
             else:
                 print_wrong_usage(x)
                 return False
