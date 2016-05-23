@@ -42,31 +42,20 @@ def save_campaign_file(x, dic):
     return True
 
 
-def create_file_path(x, file_descriptor, absolute, dic):
+def create_file_path(x, dic, file_descriptor):
     file_path = str()
     file_name = str()
     # note: the current file path is two levels below nas
-    # path and file name shuffling magic
-    if not absolute:
+    # relative file path logic
+    if not os.path.isabs(file_descriptor):
         current_file_dir = os.path.dirname(__file__)
         # nas file path + dir and filename to dst file
         file_path_full = os.path.join(current_file_dir + "/../../",
                                       file_descriptor)
-        file_path_split = file_path_full.split("/")
-        file_name = file_path_split[len(file_path_split) - 1]
-        file_path_split.pop(len(file_path_split) - 1)
-        file_path = "/".join(file_path_split)
+        file_path, file_name = os.path.split(file_path_full)
     # absolute file path logic
-    elif absolute:
-        file_path_split = file_descriptor.split("/")
-        file_name = file_path_split[len(file_path_split) - 1]
-        try:
-            file_path_split.pop(len(file_path_split) - 1)
-            file_path = "/".join(file_path_split)
-        except IndexError:
-            # this means the top directory is used
-            # will throw a permission denied anyways
-            file_path = "/"
+    elif os.path.isabs(file_descriptor):
+        file_path, file_name = os.path.split(file_descriptor)
 
     if not (file_path or file_name):
         x.p.err("error: file path and/or name is/are empty\n")
@@ -83,22 +72,17 @@ def main(x, conf, args):
         show_help(x)
         return False
     # arguments dictionary
-    dic = dict()
-    is_file_path_absolute = True
+    info = dict()
     file_descriptor = "/tmp/campaign.save"
     try:
-        dic["host_name"] = args[0]
-        args.remove(dic["host_name"])
+        info["host_name"] = args[0]
+        args.remove(info["host_name"])
         for argument in args:
             key = argument.split(":")[0]
             value = argument.split(":")[1]
             if key == "campaign_name":
-                dic["campaign_name"] = value.strip("\"")
+                info["campaign_name"] = value.strip("\"")
             elif key == "path":
-                if value.strip("\"")[0] == "/":
-                    is_file_path_absolute = True
-                else:
-                    is_file_path_absolute = False
                 file_descriptor = value.strip("\"")
             else:
                 print_wrong_usage(x)
@@ -107,12 +91,12 @@ def main(x, conf, args):
         print_wrong_usage(x)
         return False
 
-    if not create_file_path(x, file_descriptor, is_file_path_absolute, dic):
+    if not create_file_path(x, info, file_descriptor):
         return False
-    dic["host_ip_control"] = conf.get_control_ip(dic["host_name"])
-    dic["host_user"] = conf.get_user(dic["host_name"])
+    info["host_ip_control"] = conf.get_control_ip(info["host_name"])
+    info["host_user"] = conf.get_user(info["host_name"])
 
-    if not save_campaign_file(x, dic):
+    if not save_campaign_file(x, info):
         return False
 
     return True
