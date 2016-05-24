@@ -23,26 +23,27 @@ def print_wrong_usage(x):
             "path:\"[file_descriptor]\"\n")
 
 
-def save_campaign_file(x, dic):
+def save_campaign_file(x, info):
     # read campaign path file
     campaign_file_path = os.path.join(os.path.dirname(__file__), "./../../",
-                                      "campaigns", dic["campaign_name"],
+                                      "campaigns", info["campaign_name"],
                                       "run.py")
-    print(campaign_file_path)
     campaign_file = open(campaign_file_path, "r")
     campaign_string = campaign_file.read()
     campaign_file.close()
     # make sure target path exists
-    x.ssh.exec(dic["host_ip_control"], dic["host_user"],
-               "mkdir -p {}".format(dic["file_path"]))
+    x.ssh.exec(info["host_ip_control"], info["host_user"],
+               "mkdir -p {}".format(info["file_path"]))
+    x.ssh.exec(info["host_ip_control"], info["host_user"], "chown -R {} {}"
+               .format(info["host_user"], info["file_path"]))
     # save campaign file
-    campaign_file = open(os.path.join(dic["file_path"], dic["file_name"]), "w")
+    campaign_file = open(os.path.join(info["file_path"], info["file_name"]), "w")
     campaign_file.write(campaign_string)
     campaign_file.close()
     return True
 
 
-def create_file_path(x, dic, file_descriptor):
+def create_file_path(x, info, file_descriptor):
     file_path = str()
     file_name = str()
     # note: the current file path is two levels below nas
@@ -61,8 +62,8 @@ def create_file_path(x, dic, file_descriptor):
         x.p.err("error: file path and/or name is/are empty\n")
         return False
 
-    dic["file_path"] = file_path
-    dic["file_name"] = file_name
+    info["file_path"] = file_path
+    info["file_name"] = file_name
 
     return True
 
