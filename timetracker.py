@@ -237,3 +237,19 @@ class TimeTracker:
         self._set_campaign_runtime(elapsed_time_hms)
         return "Campaign runtime: {}".format(elapsed_time_hms), \
                elapsed_time_hms
+
+    @ staticmethod
+    def get_current_datetime():
+        """Get the current datetime.
+
+        get_current_datetime() -> list[string, string]
+
+        :return list[string, string]
+
+        Public method used to retrieve the current datetime. Useful for
+        printing out at the end of a campaign. Returns the current datetime
+        sentence string at position [0], returns the current datetime string at
+        position [1].
+        """
+        return "System datetime: {}".format(time.strftime("%c")), \
+               str(time.strftime("%c"))
