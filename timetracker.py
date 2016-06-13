@@ -130,13 +130,16 @@ class TimeTracker:
                                        + int(hms_list[2])
 
     @ staticmethod
-    def _sec_to_hms(int_sec):
-        return time.strftime("%H:%M:%S", time.gmtime(int(int_sec)))
+    def _sec_to_dhms(int_sec):
+        days, seconds = divmod(int_sec, (24 * 60 * 60))
+        hms_string = time.strftime("%H:%M:%S", time.gmtime(int(seconds)))
+        days = "%02d" % days
+        return "{}:{}".format(days, hms_string)
 
     def _elapsed_time_hms(self):
         time_now = int(round(time.time()))
         time_elapsed = time_now - self.CAMPAIGN_START_TIME
-        return self._sec_to_hms(time_elapsed)
+        return self._sec_to_dhms(time_elapsed)
 
     def get_campaign_runtime(self):
         """Public method used to get the campaign runtime.
@@ -181,7 +184,7 @@ class TimeTracker:
         remaining_runtime = expected_runtime_seconds - elapsed_time_seconds
         if remaining_runtime < 0:
             return "Estimated remaining campaign runtime: unavailable", "-1"
-        remaining_runtime_hms = self._sec_to_hms(remaining_runtime)
+        remaining_runtime_hms = self._sec_to_dhms(remaining_runtime)
         return "Estimated remaining campaign runtime: {}"\
                .format(remaining_runtime_hms), \
                remaining_runtime_hms
