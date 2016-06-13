@@ -127,7 +127,7 @@ class TimeTracker:
     def _dhms_to_int(dhms_string):
         dhms_list = dhms_string.split(":")
         return int(dhms_list[0]) * 86400 + int(dhms_list[1]) * 3600 + \
-               int(dhms_list[2]) * 60 + int(dhms_list[3])
+            int(dhms_list[2]) * 60 + int(dhms_list[3])
 
     @ staticmethod
     def _sec_to_dhms(int_sec):
