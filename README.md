@@ -67,8 +67,8 @@ Use RSA key pair and distributed public key for remote login (make sure this
 is done for every machine which needs to connect to another):
 [on alpha]
 ssh-keygen
-[ssh-copy-id beta@10.0.1.1]
-ssh-copy-id user@[ip]
+ssh-copy-id [user]@[ip]
+[E.g.: ssh-copy-id beta@10.0.1.1]
 ```
 
 

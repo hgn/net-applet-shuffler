@@ -1,4 +1,10 @@
 
+import time
+
+
+AMOUNT_TRIES = 3
+
+
 def main(x, conf, args):
     if not len(args) > 0:
         x.p.err("no hostname argument given, like \"alpha\" "
@@ -7,7 +13,10 @@ def main(x, conf, args):
 
     hostname = args[0]
     ip = conf.get_data_ip(hostname)
-    ok = x.ping(ip)
-    if not ok:
-        return False
-    return True
+    for _ in range(0, AMOUNT_TRIES):
+        ok = x.ping(ip)
+        if ok:
+            return True
+        else:
+            time.sleep(1)
+    return False

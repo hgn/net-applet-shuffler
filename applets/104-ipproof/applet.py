@@ -135,7 +135,8 @@ def main(x, conf, args):
     dic = dict()
     # default values
     dic["ipproof_port"] = "13337"
-    dic["transfer_size"] = "30000"
+    # this results in one packet
+    dic["transfer_size"] = "1448"
     dic["iterations"] = "1"
     dic["ack_size"] = "0"
     dic["inter_send_interval"] = "0"
